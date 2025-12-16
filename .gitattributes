@@ -1,0 +1,47 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# Source code
+*.dart text
+*.yaml text
+*.json text
+*.xml text
+*.gradle text
+*.properties text
+*.md text
+
+# Documentation
+*.txt text
+LICENSE text
+README text
+
+# Graphics
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.svg text
+
+# Archives
+*.zip binary
+*.tar binary
+*.gz binary
+*.rar binary
+
+# Fonts
+*.ttf binary
+*.otf binary
+
+# Video
+*.mp4 binary
+*.mov binary
+
+# Audio  
+*.mp3 binary
+*.wav binary
+
+# Flutter/Dart specific
+*.g.dart linguist-generated=true
+*.freezed.dart linguist-generated=true
+pubspec.lock linguist-generated=true

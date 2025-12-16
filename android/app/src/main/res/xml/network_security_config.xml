@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- VIT domains (vtop, etc.) -->
+    <domain-config>
+        <domain includeSubdomains="true">vit.ac.in</domain>
+        <trust-anchors>
+            <certificates src="@raw/vtop_cert" />
+            <certificates src="@raw/sectigo_ca_chain" />
+            <certificates src="system" />
+        </trust-anchors>
+    </domain-config>
+    <!-- EventHub domain -->
+    <domain-config>
+        <domain includeSubdomains="true">eventhubcc.vit.ac.in</domain>
+        <trust-anchors>
+            <certificates src="@raw/eventhub_cert" />
+            <certificates src="@raw/sectigo_ca_chain" />
+            <certificates src="system" />
+        </trust-anchors>
+    </domain-config>
+</network-security-config>

@@ -1,0 +1,169 @@
+import 'package:flutter/material.dart';
+import 'friend_class_slot.dart';
+
+/// Represents a friend's timetable data
+/// Contains student info and all their class slots
+class Friend {
+  final String id; // Unique identifier (reg number or generated)
+  final String name;
+  final String regNumber;
+  final List<FriendClassSlot> classSlots;
+  final Color color; // Theme color for this friend
+  final DateTime addedAt;
+
+  const Friend({
+    required this.id,
+    required this.name,
+    required this.regNumber,
+    required this.classSlots,
+    required this.color,
+    required this.addedAt,
+  });
+
+  /// Get class slot for a specific cell (day + timeSlot)
+  FriendClassSlot? getSlotForCell(String day, String timeSlot) {
+    try {
+      return classSlots.firstWhere(
+        (slot) => slot.day == day && slot.timeSlot == timeSlot,
+      );
+    } catch (e) {
+      return null; // No class at this time
+    }
+  }
+
+  /// Check if friend has class at specific time
+  bool hasClassAt(String day, String timeSlot) {
+    return getSlotForCell(day, timeSlot) != null;
+  }
+
+  /// Get all classes for a specific day
+  List<FriendClassSlot> getClassesForDay(String day) {
+    return classSlots.where((slot) => slot.day == day).toList();
+  }
+
+  /// Create Friend from JSON
+  factory Friend.fromJson(Map<String, dynamic> json) {
+    return Friend(
+      id: json['id'] as String? ?? '',
+      name: json['name'] as String? ?? '',
+      regNumber: json['regNumber'] as String? ?? '',
+      classSlots:
+          (json['classSlots'] as List<dynamic>?)
+              ?.map((e) => FriendClassSlot.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
+      color: Color(json['color'] as int? ?? 0xFF6366F1),
+      addedAt: DateTime.parse(
+        json['addedAt'] as String? ?? DateTime.now().toIso8601String(),
+      ),
+    );
+  }
+
+  /// Convert Friend to JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'regNumber': regNumber,
+      'classSlots': classSlots.map((e) => e.toJson()).toList(),
+      'color': color.value,
+      'addedAt': addedAt.toIso8601String(),
+    };
+  }
+
+  /// Create compact QR-friendly string
+  /// Format: name|regNumber|slot1||slot2||slot3...
+  String toQRString() {
+    final slotsString = classSlots.map((s) => s.toCompactString()).join('||');
+    return '$name|$regNumber|$slotsString';
+  }
+
+  /// Parse from QR string
+  factory Friend.fromQRString(String qrData, {Color? color}) {
+    try {
+      final parts = qrData.split('|');
+      if (parts.length < 2) {
+        throw FormatException('Invalid QR data format');
+      }
+
+      final name = parts[0];
+      final regNumber = parts[1];
+      final slotsData = parts.length > 2 ? parts.sublist(2).join('|') : '';
+
+      final classSlots = <FriendClassSlot>[];
+      if (slotsData.isNotEmpty) {
+        final slotStrings = slotsData.split('||');
+        for (var slotStr in slotStrings) {
+          if (slotStr.isNotEmpty) {
+            try {
+              classSlots.add(FriendClassSlot.fromCompactString(slotStr));
+            } catch (e) {
+              // Skip invalid slots
+            }
+          }
+        }
+      }
+
+      return Friend(
+        id: regNumber,
+        name: name,
+        regNumber: regNumber,
+        classSlots: classSlots,
+        color: color ?? _generateColorFromString(regNumber),
+        addedAt: DateTime.now(),
+      );
+    } catch (e) {
+      throw FormatException('Failed to parse QR data: $e');
+    }
+  }
+
+  /// Generate a consistent color from string (for unique friend colors)
+  static Color _generateColorFromString(String str) {
+    final colors = [
+      const Color(0xFFEC4899), // Pink
+      const Color(0xFF10B981), // Green
+      const Color(0xFFA855F7), // Purple
+      const Color(0xFFF59E0B), // Orange
+      const Color(0xFF3B82F6), // Blue
+      const Color(0xFFEF4444), // Red
+      const Color(0xFF14B8A6), // Teal
+      const Color(0xFF8B5CF6), // Violet
+    ];
+
+    final hash = str.hashCode.abs();
+    return colors[hash % colors.length];
+  }
+
+  /// Create a copy with updated fields
+  Friend copyWith({
+    String? id,
+    String? name,
+    String? regNumber,
+    List<FriendClassSlot>? classSlots,
+    Color? color,
+    DateTime? addedAt,
+  }) {
+    return Friend(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      regNumber: regNumber ?? this.regNumber,
+      classSlots: classSlots ?? this.classSlots,
+      color: color ?? this.color,
+      addedAt: addedAt ?? this.addedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return 'Friend{name: $name, regNumber: $regNumber, slots: ${classSlots.length}}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is Friend && other.id == id && other.regNumber == regNumber;
+  }
+
+  @override
+  int get hashCode => id.hashCode ^ regNumber.hashCode;
+}

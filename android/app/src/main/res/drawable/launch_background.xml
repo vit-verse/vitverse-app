@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Startup splash screen with AMOLED black background and centered logo -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- AMOLED Black background -->
+    <item android:drawable="@color/amoled_black" />
+    
+    <!-- Centered VIT Connect transparent logo -->
+    <item>
+        <bitmap
+            android:gravity="center"
+            android:src="@drawable/vit_connect_logo"
+            android:tileMode="disabled" />
+    </item>
+</layer-list>
