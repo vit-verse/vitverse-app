@@ -7,8 +7,7 @@ class AboutConstants {
   // APP INFO
   static const String appName = 'VIT Verse';
   static String get appVersion => AppVersion.version;
-  static const String appTagline =
-      '🌻';
+  static const String appTagline = '🌻';
 
   // DISCLAIMER
   static const String disclaimerTitle = 'Disclaimer';
@@ -48,10 +47,9 @@ class AboutConstants {
   static const String collaborationProject = 'Unmessify';
   static const String collaborationDescription =
       'Developed by Kanishka Chakraborty & Teesha Saxena';
-  static const String collaborationWebsite =
-      'https://kaffeine.tech/unmessify'; 
+  static const String collaborationWebsite = 'https://kaffeine.tech/unmessify';
   static const String collaborationGithub =
-      'https://github.com/Kanishka-Developer/unmessify'; 
+      'https://github.com/Kanishka-Developer/unmessify';
 
   // CONTRIBUTORS & CREDITS
   static const String contributorsTitle = 'CONTRIBUTORS & CREDITS';
@@ -64,30 +62,29 @@ class AboutConstants {
   ];
 
   // LINKS
-  static const String githubRepo =
-      'https://github.com/vit-verse';
+  static const String githubRepo = 'https://github.com/vit-verse';
   static const String whatsappGroup =
-      'https://chat.whatsapp.com/G1CNYLaMgYu6ePIzT2csWM'; 
+      'https://chat.whatsapp.com/G1CNYLaMgYu6ePIzT2csWM';
   // static const String vitVerseOrg = 'https://github.com/vit-verse';
   static const String appWebsite = 'https://vitverse.divyanshupatel.com';
   static const String feedbackFormUrl =
       'https://docs.google.com/forms/d/e/1FAIpQLSe_qJctOUUB5h9u7kCzAOjJy_1IyGbhdlJATHGOkyjcGPmjUA/viewform?usp=dialog';
 
   // GITHUB REPOSITORY INFO
-  static const String githubRepoOwner = 'divyanshupatel17';
-  static const String githubRepoName = 'vit-connect';
+  static const String githubRepoOwner = 'vit-verse';
+  static const String githubRepoName = 'vitverse-app';
 
   // LEGAL DOCUMENTS (GitHub URLs)
   static const String privacyPolicyGithub =
-      'https://github.com/divyanshupatel17/vit-connect/blob/main/docs/PRIVACY_POLICY.md';
+      'https://github.com/vit-verse/vitverse-app/blob/main/PRIVACY_POLICY.md';
   static const String termsOfServiceGithub =
-      'https://github.com/divyanshupatel17/vit-connect/blob/main/docs/TERMS_OF_SERVICE.md';
+      'https://github.com/vit-verse/vitverse-app/blob/main/TERMS_OF_SERVICE.md';
 
   // LEGAL DOCUMENTS (Direct Raw URLs for fetching)
   static const String privacyPolicyRawUrl =
-      'https://raw.githubusercontent.com/divyanshupatel17/vit-connect/main/docs/PRIVACY_POLICY.md';
+      'https://raw.githubusercontent.com/vit-verse/vitverse-app/main/PRIVACY_POLICY.md';
   static const String termsOfServiceRawUrl =
-      'https://raw.githubusercontent.com/divyanshupatel17/vit-connect/main/docs/TERMS_OF_SERVICE.md';
+      'https://raw.githubusercontent.com/vit-verse/vitverse-app/main/TERMS_OF_SERVICE.md';
 
   // SHARE TEXT
   static const String shareAppText = '''

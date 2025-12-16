@@ -6,15 +6,9 @@ import 'about_constants.dart';
 /// App Header Card with Logo, Version, and Action Buttons
 class AppHeaderCard extends StatelessWidget {
   final AppTheme theme;
-  final VoidCallback onCheckUpdate;
   final VoidCallback onShare;
 
-  const AppHeaderCard({
-    super.key,
-    required this.theme,
-    required this.onCheckUpdate,
-    required this.onShare,
-  });
+  const AppHeaderCard({super.key, required this.theme, required this.onShare});
 
   @override
   Widget build(BuildContext context) {
@@ -67,26 +61,12 @@ class AppHeaderCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 20),
-          Row(
-            children: [
-              Expanded(
-                child: _ActionButton(
-                  theme: theme,
-                  icon: Icons.refresh,
-                  label: AboutConstants.checkUpdateLabel,
-                  onTap: onCheckUpdate,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _ActionButton(
-                  theme: theme,
-                  icon: Icons.share,
-                  label: AboutConstants.shareAppLabel,
-                  onTap: onShare,
-                ),
-              ),
-            ],
+          // Share App Button
+          _ActionButton(
+            theme: theme,
+            icon: Icons.share,
+            label: AboutConstants.shareAppLabel,
+            onTap: onShare,
           ),
         ],
       ),

@@ -8,6 +8,8 @@ import '../../core/theme/theme_provider.dart';
 import '../../core/theme/theme_constants.dart';
 import '../../core/theme/app_card_styles.dart';
 import '../../core/utils/snackbar_utils.dart';
+import '../../core/services/version_checker_service.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'theme_settings/presentation/theme_settings_page.dart';
 import 'theme_settings/presentation/color_customization_page.dart';
 import 'widget_customization/presentation/widget_customization_page.dart';
@@ -24,6 +26,9 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+  VersionCheckResult? _versionCheckResult;
+  bool _isCheckingUpdate = false;
+
   @override
   void initState() {
     super.initState();
@@ -31,6 +36,60 @@ class _ProfilePageState extends State<ProfilePage> {
       screenName: 'ProfilePage',
       screenClass: 'ProfilePage',
     );
+    // Automatically check for updates when page loads
+    _checkForUpdates();
+  }
+
+  Future<void> _checkForUpdates() async {
+    if (_isCheckingUpdate) return;
+
+    setState(() {
+      _isCheckingUpdate = true;
+    });
+
+    try {
+      final result = await VersionCheckerService.checkForUpdate();
+      if (mounted) {
+        setState(() {
+          _versionCheckResult = result;
+          _isCheckingUpdate = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isCheckingUpdate = false;
+        });
+      }
+    }
+  }
+
+  void _handleUpdateAction() {
+    if (_versionCheckResult?.isUpdateAvailable ?? false) {
+      _openDownloadPage();
+    } else {
+      // Already updated - show message
+      SnackbarUtils.success(context, 'You\'re using the latest version!');
+    }
+  }
+
+  Future<void> _openDownloadPage() async {
+    const downloadUrl = 'https://vitverse.divyanshupatel.com';
+    try {
+      final uri = Uri.parse(downloadUrl);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+        AnalyticsService.instance.logEvent(name: 'update_download_opened');
+      } else {
+        if (mounted) {
+          SnackbarUtils.error(context, 'Could not open download page');
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        SnackbarUtils.error(context, 'Error opening download page');
+      }
+    }
   }
 
   @override
@@ -185,6 +244,11 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
 
             const SizedBox(height: ThemeConstants.spacingMd),
+
+            // Update Checker - Compact
+            _buildCompactUpdateChecker(themeProvider),
+
+            const SizedBox(height: ThemeConstants.spacingMd),
             _buildSimpleListTile(
               context,
               icon: Icons.logout,
@@ -299,6 +363,57 @@ class _ProfilePageState extends State<ProfilePage> {
           borderRadius: BorderRadius.circular(ThemeConstants.radiusMd),
         ),
       ),
+    );
+  }
+
+  Widget _buildCompactUpdateChecker(ThemeProvider themeProvider) {
+    // Determine status
+    String title;
+    String? subtitle;
+    IconData icon;
+    Color? iconColor;
+
+    if (_isCheckingUpdate) {
+      title = 'Checking for updates...';
+      icon = Icons.refresh;
+      iconColor = themeProvider.currentTheme.primary;
+    } else if (_versionCheckResult == null) {
+      title = 'Check for Updates';
+      subtitle = 'Tap to check';
+      icon = Icons.system_update;
+    } else if (_versionCheckResult!.isUpdateAvailable) {
+      title = 'Update Available';
+      subtitle = 'v${_versionCheckResult!.latestVersion} is ready';
+      icon = Icons.arrow_circle_up;
+      iconColor = Colors.green;
+    } else if (_versionCheckResult!.isUpToDate) {
+      title = 'Up to Date';
+      subtitle = 'v${_versionCheckResult!.currentVersion}';
+      icon = Icons.check_circle;
+      iconColor = Colors.green;
+    } else {
+      title = 'Check for Updates';
+      subtitle = 'Tap to retry';
+      icon = Icons.refresh;
+      iconColor = Colors.orange;
+    }
+
+    return _buildSimpleListTile(
+      context,
+      icon: icon,
+      title: title,
+      subtitle: subtitle,
+      titleColor: iconColor,
+      onTap:
+          _isCheckingUpdate
+              ? () {}
+              : () {
+                if (_versionCheckResult?.isUpdateAvailable ?? false) {
+                  _handleUpdateAction();
+                } else {
+                  _checkForUpdates();
+                }
+              },
     );
   }
 }

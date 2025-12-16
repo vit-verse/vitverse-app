@@ -46,11 +46,6 @@ class _AboutPageState extends State<AboutPage> {
     Share.share(AboutConstants.shareAppText);
   }
 
-  void _checkForUpdates() {
-    AnalyticsService.instance.logEvent(name: 'check_updates_clicked');
-    SnackbarUtils.info(context, 'Feature coming soon!');
-  }
-
   void _openPrivacyPolicy() {
     AnalyticsService.instance.logEvent(name: 'privacy_policy_opened');
     Navigator.push(
@@ -95,11 +90,7 @@ class _AboutPageState extends State<AboutPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // App Header with Version
-            AppHeaderCard(
-              theme: theme,
-              onCheckUpdate: _checkForUpdates,
-              onShare: _shareApp,
-            ),
+            AppHeaderCard(theme: theme, onShare: _shareApp),
             const SizedBox(height: 16),
 
             // Visit Website
