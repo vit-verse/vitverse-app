@@ -232,7 +232,7 @@ class _AboutPageState extends State<AboutPage> {
                     label: AboutConstants.requestFeatureLabel,
                     onTap:
                         () => _launchUrl(
-                          '${AboutConstants.githubRepo}/issues/new?template=feature_request.md',
+                          'https://github.com/vit-verse/vitverse-app/issues/new',
                           'request_feature_clicked',
                         ),
                   ),
@@ -245,7 +245,7 @@ class _AboutPageState extends State<AboutPage> {
                     label: AboutConstants.reportBugLabel,
                     onTap:
                         () => _launchUrl(
-                          '${AboutConstants.githubRepo}/issues/new?template=bug_report.md',
+                          'https://github.com/vit-verse/vitverse-app/issues/new',
                           'report_bug_clicked',
                         ),
                   ),

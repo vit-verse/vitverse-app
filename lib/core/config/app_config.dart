@@ -4,10 +4,10 @@ import 'env_config.dart';
 
 /// Application configuration for development and production
 class AppConfig {
-  static const bool enableDetailedLogs = true;
-  static const bool enablePerformanceMode = false;
-  static const bool enableDatabaseDebug = true;
-  static const bool enableNetworkLogs = true;
+  static const bool enableDetailedLogs = false;
+  static const bool enablePerformanceMode = true;
+  static const bool enableDatabaseDebug = false;
+  static const bool enableNetworkLogs = false;
 
   static String get supabaseUrl => EnvConfig.supabaseUrl;
   static String get supabaseAnonKey => EnvConfig.supabaseAnonKey;

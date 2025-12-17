@@ -97,22 +97,21 @@ class _StackedSnackbarManagerState extends State<StackedSnackbarManager>
     final viewInsets = mediaQuery.viewInsets.bottom;
     final bottomPadding = mediaQuery.padding.bottom;
 
-    // Check if we're on the main screen with bottom navigation
-    // by checking if this is the first route or if route history is minimal
-    final modalRoute = ModalRoute.of(context);
-    final navigator = Navigator.maybeOf(context);
-
-    // Assume bottom nav is present if:
-    // 1. This is the first route (main screen), OR
-    // 2. There's only one route in the stack (we're at main screen)
+    // Check if we're on a screen with bottom navigation
+    // Look for a Scaffold with bottomNavigationBar in the widget tree
     bool hasBottomNav = false;
-    if (navigator != null) {
-      // Check if we can pop - if we can't, we're at the root (main screen)
-      hasBottomNav = !navigator.canPop();
-    } else if (modalRoute != null) {
-      // Fallback: check if this is the first route
-      hasBottomNav = modalRoute.isFirst;
-    }
+    
+    // Try to find a Scaffold ancestor with bottomNavigationBar
+    context.visitAncestorElements((element) {
+      if (element.widget is Scaffold) {
+        final scaffold = element.widget as Scaffold;
+        if (scaffold.bottomNavigationBar != null) {
+          hasBottomNav = true;
+          return false; // Stop searching
+        }
+      }
+      return true; // Continue searching
+    });
 
     // Calculate bottom offset:
     // - If keyboard is open: position above keyboard
