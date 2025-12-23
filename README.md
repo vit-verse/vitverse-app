@@ -134,7 +134,7 @@ assets/
 - **Firebase Analytics**: Anonymous usage statistics only
 - **Community Features**: Voluntary participation with visible identity
 
-For complete details, see [Privacy Policy](PRIVACY_POLICY.md) and [Security Policy](SECURITY.md).
+For complete details, see [Privacy Policy](PRIVACY_POLICY.md) .
 
 ---
 
