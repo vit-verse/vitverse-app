@@ -80,9 +80,17 @@ class _CabShareHomePageState extends State<CabShareHomePage> {
       return Scaffold(
         backgroundColor: theme.background,
         appBar: AppBar(
-          title: const Text('Cab Share'),
-          backgroundColor: theme.primary,
-          foregroundColor: Colors.white,
+          title: Text(
+            'Cab Share',
+            style: TextStyle(
+              color: theme.text,
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          backgroundColor: theme.surface,
+          elevation: 0,
+          iconTheme: IconThemeData(color: theme.text),
         ),
         body: _buildSupabaseNotConfiguredUI(theme),
       );
@@ -633,49 +641,15 @@ class _CabShareHomePageState extends State<CabShareHomePage> {
                 color: theme.primary,
               ),
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 24),
             Text(
-              'Service Unavailable',
+              'Configuration Incomplete',
               style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
                 color: theme.text,
               ),
               textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Cab Share service is currently unavailable. The server configuration is missing or incomplete.',
-              style: TextStyle(
-                fontSize: 16,
-                color: theme.text.withValues(alpha: 0.7),
-                height: 1.5,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: theme.surface,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: theme.primary.withValues(alpha: 0.2)),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.info_outline, color: theme.primary, size: 24),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      'This feature requires backend services to be configured by the app administrator.',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: theme.text.withValues(alpha: 0.8),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
             ),
           ],
         ),

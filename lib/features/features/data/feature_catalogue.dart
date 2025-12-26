@@ -135,6 +135,16 @@ class FeatureCatalogue {
       category: FeatureCategory.academics,
     ),
     Feature(
+      id: 'vitconnect:pyq',
+      key: 'pyq',
+      title: 'PYQs',
+      description: 'Previous Year Question Papers',
+      icon: Icons.description_outlined,
+      route: '/features/vitconnect/pyq',
+      source: FeatureSource.vitconnect,
+      category: FeatureCategory.academics,
+    ),
+    Feature(
       id: 'vitconnect:cab_share',
       key: 'cab_share',
       title: 'Cab Share',

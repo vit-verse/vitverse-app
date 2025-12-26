@@ -23,6 +23,7 @@ import '../vitconnect_services/quick_links/lazy_quick_links_page.dart';
 import '../vitconnect_services/mess_menu/lazy_mess_menu_page.dart';
 import '../vitconnect_services/laundry/lazy_laundry_page.dart';
 import '../vitconnect_services/friends_schedule/lazy_friends_schedule_page.dart';
+import '../vitconnect_services/pyq/lazy_pyq_page.dart';
 
 /// Feature Routes - Centralized route configuration
 class FeatureRoutes {
@@ -68,6 +69,7 @@ class FeatureRoutes {
       '/features/vitconnect/laundry': (context) => const LazyLaundryPage(),
       '/features/vitconnect/friends_schedule':
           (context) => const LazyFriendsSchedulePage(),
+      '/features/vitconnect/pyq': (context) => const LazyPyqPage(),
     };
   }
 }

@@ -4,15 +4,16 @@ import 'env_config.dart';
 
 /// Application configuration for development and production
 class AppConfig {
-  static const bool enableDetailedLogs = false;
-  static const bool enablePerformanceMode = true;
-  static const bool enableDatabaseDebug = false;
-  static const bool enableNetworkLogs = false;
+  static const bool enableDetailedLogs = true;
+  static const bool enablePerformanceMode = false;
+  static const bool enableDatabaseDebug = true;
+  static const bool enableNetworkLogs = true;
 
   static String get supabaseUrl => EnvConfig.supabaseUrl;
   static String get supabaseAnonKey => EnvConfig.supabaseAnonKey;
   static String get githubVitconnectToken => EnvConfig.githubVitconnectToken;
   static String get facultyRatingScriptUrl => EnvConfig.facultyRatingScriptUrl;
+  static String get pyqSecretHeader => EnvConfig.pyqSecretHeader;
 
   // Environment detection
   static bool get isDevelopment => kDebugMode;

@@ -48,10 +48,17 @@ class AppCardStyles {
   }
 
   /// Compact card decoration (like in Academic Performance)
+  ///
+  /// ⚠️ IMPORTANT: Always provide customBackgroundColor parameter!
+  /// Use theme.surface for consistent theming across the app.
+  /// Example: AppCardStyles.compactCardDecoration(
+  ///   isDark: theme.isDark,
+  ///   customBackgroundColor: theme.surface,
+  /// )
   static BoxDecoration compactCardDecoration({
     bool isDark = false,
     Color? customBorderColor,
-    Color? customBackgroundColor,
+    required Color? customBackgroundColor,
   }) {
     return cardDecoration(
       isDark: isDark,
