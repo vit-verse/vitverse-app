@@ -11,24 +11,19 @@ class EnvConfig {
 
   static const String githubVitconnectToken = String.fromEnvironment(
     'GITHUB_VITCONNECT_TOKEN',
-    defaultValue: '',
-  );
-
-  static const String facultyRatingScriptUrl = String.fromEnvironment(
-    'FACULTY_RATING_SCRIPT_URL',
-    defaultValue: '',
+    defaultValue:
+        '',
   );
 
   static const String pyqSecretHeader = String.fromEnvironment(
     'PYQ_SECRET_HEADER',
-    defaultValue: 'vitverse-pyq-divyanshu',
+    defaultValue: '',
   );
 
   static bool get isConfigured {
     return supabaseUrl.isNotEmpty &&
         supabaseAnonKey.isNotEmpty &&
         githubVitconnectToken.isNotEmpty &&
-        facultyRatingScriptUrl.isNotEmpty &&
         pyqSecretHeader.isNotEmpty;
   }
 
@@ -37,8 +32,6 @@ class EnvConfig {
     if (supabaseUrl.isEmpty) missing.add('SUPABASE_URL');
     if (supabaseAnonKey.isEmpty) missing.add('SUPABASE_ANON_KEY');
     if (githubVitconnectToken.isEmpty) missing.add('GITHUB_VITCONNECT_TOKEN');
-    if (facultyRatingScriptUrl.isEmpty)
-      missing.add('FACULTY_RATING_SCRIPT_URL');
     if (pyqSecretHeader.isEmpty) missing.add('PYQ_SECRET_HEADER');
     return missing;
   }

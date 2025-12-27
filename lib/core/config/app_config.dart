@@ -12,7 +12,6 @@ class AppConfig {
   static String get supabaseUrl => EnvConfig.supabaseUrl;
   static String get supabaseAnonKey => EnvConfig.supabaseAnonKey;
   static String get githubVitconnectToken => EnvConfig.githubVitconnectToken;
-  static String get facultyRatingScriptUrl => EnvConfig.facultyRatingScriptUrl;
   static String get pyqSecretHeader => EnvConfig.pyqSecretHeader;
 
   // Environment detection

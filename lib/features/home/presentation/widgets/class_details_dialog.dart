@@ -5,8 +5,8 @@ import '../../../../core/theme/color_utils.dart';
 import '../../../../core/utils/snackbar_utils.dart';
 import '../../../../core/utils/logger.dart';
 import '../../../features/vtop_services/attendance_analytics/presentation/detailed_attendance_page.dart';
-import '../../../features/vitconnect_services/faculty_rating/services/faculty_rating_api_service.dart';
-import '../../../features/vitconnect_services/faculty_rating/models/rating_model.dart';
+import '../../../features/vitconnect_services/faculty_rating/data/faculty_rating_repository.dart';
+import '../../../features/vitconnect_services/faculty_rating/models/faculty_rating_aggregate.dart';
 
 /// Modern bottom sheet dialog showing detailed class information
 class ClassDetailsDialog extends StatefulWidget {
@@ -26,14 +26,41 @@ class ClassDetailsDialog extends StatefulWidget {
 }
 
 class _ClassDetailsDialogState extends State<ClassDetailsDialog> {
-  bool showRatingSection = false;
-  final Map<String, double> ratings = {
-    'teaching': 5.0,
-    'attendance_flex': 5.0,
-    'supportiveness': 5.0,
-    'marks': 5.0,
-  };
-  bool isSubmitting = false;
+  final _ratingRepository = FacultyRatingRepository();
+  FacultyRatingAggregate? _facultyRating;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchFacultyRating();
+  }
+
+  Future<void> _fetchFacultyRating() async {
+    final facultyErpId =
+        widget.classData['course']?['faculty_erp_id']?.toString() ?? '';
+    final facultyName =
+        widget.classData['course']?['faculty']?.toString() ?? '';
+
+    if (facultyErpId.isEmpty && facultyName.isEmpty) return;
+
+    // Generate ID (use ERP ID or hash of name)
+    final facultyId =
+        facultyErpId.isNotEmpty
+            ? facultyErpId
+            : facultyName.hashCode.abs().toString();
+
+    try {
+      await _ratingRepository.initialize();
+      final ratings = await _ratingRepository.getRatings([facultyId]);
+      if (ratings.isNotEmpty && mounted) {
+        setState(() {
+          _facultyRating = ratings.first;
+        });
+      }
+    } catch (e) {
+      Logger.e('ClassDetailsDialog', 'Error fetching rating', e);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -398,30 +425,34 @@ class _ClassDetailsDialogState extends State<ClassDetailsDialog> {
                   ),
                   const SizedBox(height: 12),
 
-                  // Rate Faculty Button - Full Width
+                  // Submit Rating Button - Full Width
                   SizedBox(
                     width: double.infinity,
-                    child: OutlinedButton(
-                      onPressed: () {
-                        setState(() {
-                          showRatingSection = !showRatingSection;
-                        });
-                      },
-                      style: OutlinedButton.styleFrom(
+                    child: ElevatedButton.icon(
+                      onPressed:
+                          () => _submitRating(
+                            context,
+                            faculty,
+                            facultyErpId.isNotEmpty
+                                ? facultyErpId
+                                : faculty.hashCode.abs().toString(),
+                            courseCode,
+                          ),
+                      style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 14),
-                        side: BorderSide(color: theme.primary, width: 1.5),
+                        backgroundColor: theme.primary,
+                        foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
+                        elevation: 0,
                       ),
-                      child: Text(
-                        showRatingSection
-                            ? 'Close Faculty Rating'
-                            : 'Submit Rating for this Faculty',
+                      icon: const Icon(Icons.star_rounded, size: 18),
+                      label: Text(
+                        'Submit Rating',
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
-                          color: theme.primary,
                         ),
                       ),
                     ),
@@ -430,264 +461,10 @@ class _ClassDetailsDialogState extends State<ClassDetailsDialog> {
               ),
             ),
 
-            // Rating Section (Expandable)
-            if (showRatingSection) ...[
-              const SizedBox(height: 16),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: _buildRatingSection(
-                  context,
-                  theme,
-                  faculty,
-                  facultyErpId,
-                  courseCode,
-                ),
-              ),
-            ],
             const SizedBox(height: 24),
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildRatingSection(
-    BuildContext context,
-    theme,
-    String facultyName,
-    String facultyErpId,
-    String courseCode,
-  ) {
-    final overallRating =
-        ratings.values.reduce((a, b) => a + b) / ratings.length;
-
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: theme.surface,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: theme.primary.withOpacity(0.3), width: 1.5),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Rating Header
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: theme.primary.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(Icons.star_rounded, size: 20, color: theme.primary),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Rate this Faculty',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: theme.text,
-                      ),
-                    ),
-                    Text(
-                      'Help others make informed decisions',
-                      style: TextStyle(fontSize: 11, color: theme.muted),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-
-          // Rating Sliders
-          _buildCompactRatingSlider(
-            context,
-            theme,
-            Icons.school_rounded,
-            'Teaching',
-            ratings['teaching']!,
-            (value) => setState(() => ratings['teaching'] = value),
-          ),
-          const SizedBox(height: 10),
-          _buildCompactRatingSlider(
-            context,
-            theme,
-            Icons.event_available_rounded,
-            'Attendance',
-            ratings['attendance_flex']!,
-            (value) => setState(() => ratings['attendance_flex'] = value),
-          ),
-          const SizedBox(height: 10),
-          _buildCompactRatingSlider(
-            context,
-            theme,
-            Icons.support_agent_rounded,
-            'Support',
-            ratings['supportiveness']!,
-            (value) => setState(() => ratings['supportiveness'] = value),
-          ),
-          const SizedBox(height: 10),
-          _buildCompactRatingSlider(
-            context,
-            theme,
-            Icons.grade_rounded,
-            'Grading',
-            ratings['marks']!,
-            (value) => setState(() => ratings['marks'] = value),
-          ),
-          const SizedBox(height: 16),
-
-          // Overall Rating
-          Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  theme.primary.withOpacity(0.1),
-                  theme.primary.withOpacity(0.05),
-                ],
-              ),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Overall Rating',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: theme.text,
-                  ),
-                ),
-                Text(
-                  '${overallRating.toStringAsFixed(1)}/10',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: theme.primary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-
-          // Submit Button
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed:
-                  isSubmitting
-                      ? null
-                      : () => _submitRating(
-                        context,
-                        facultyName,
-                        facultyErpId,
-                        courseCode,
-                      ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: theme.primary,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                elevation: 0,
-                disabledBackgroundColor: theme.muted.withOpacity(0.3),
-              ),
-              child:
-                  isSubmitting
-                      ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            Colors.white,
-                          ),
-                        ),
-                      )
-                      : const Text(
-                        'Submit Rating',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCompactRatingSlider(
-    BuildContext context,
-    theme,
-    IconData icon,
-    String label,
-    double value,
-    ValueChanged<double> onChanged,
-  ) {
-    return Column(
-      children: [
-        Row(
-          children: [
-            Icon(icon, size: 16, color: theme.primary),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                label,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: theme.text,
-                ),
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-              decoration: BoxDecoration(
-                color: theme.primary.withOpacity(0.15),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                '${value.toInt()}',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: theme.primary,
-                ),
-              ),
-            ),
-          ],
-        ),
-        SliderTheme(
-          data: SliderTheme.of(context).copyWith(
-            activeTrackColor: theme.primary,
-            inactiveTrackColor: theme.muted.withOpacity(0.2),
-            thumbColor: theme.primary,
-            overlayColor: theme.primary.withOpacity(0.2),
-            trackHeight: 4,
-            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
-          ),
-          child: Slider(
-            value: value,
-            min: 1,
-            max: 10,
-            divisions: 9,
-            onChanged: onChanged,
-          ),
-        ),
-      ],
     );
   }
 
@@ -745,62 +522,26 @@ class _ClassDetailsDialogState extends State<ClassDetailsDialog> {
     String courseCode,
   ) async {
     try {
-      setState(() {
-        isSubmitting = true;
-      });
-
-      Logger.i('ClassDetailsDialog', 'Submitting rating for: $facultyName');
-
-      final ratingSubmission = RatingSubmission(
-        facultyId: facultyErpId,
-        facultyName: facultyName,
-        teaching: ratings['teaching']!,
-        attendanceFlex: ratings['attendance_flex']!,
-        supportiveness: ratings['supportiveness']!,
-        marks: ratings['marks']!,
+      Logger.i(
+        'ClassDetailsDialog',
+        'Opening Faculty Rating page for $facultyName',
       );
 
-      if (!ratingSubmission.isValid()) {
-        throw Exception('Invalid ratings: All must be between 0 and 10');
-      }
+      // Close dialog first
+      if (mounted) {
+        Navigator.pop(context);
 
-      final response = await FacultyRatingApiService.submitRating(
-        ratingSubmission,
-      );
-
-      if (response.success) {
-        Logger.i('ClassDetailsDialog', 'Rating submitted successfully');
-
-        if (mounted) {
-          Navigator.pop(context);
-          SnackbarUtils.success(
-            context,
-            'Rating submitted! Thank you for your feedback.',
-          );
-        }
-      } else {
-        throw Exception(response.message);
+        // Navigate to rating page with faculty ID
+        Navigator.pushNamed(
+          context,
+          '/features/vitconnect/faculty_rating',
+          arguments: facultyErpId,
+        );
       }
     } catch (e) {
-      Logger.e('ClassDetailsDialog', 'Failed to submit rating', e);
-
+      Logger.e('ClassDetailsDialog', 'Failed to open rating page', e);
       if (mounted) {
-        setState(() {
-          isSubmitting = false;
-        });
-
-        String errorMessage = 'Failed to submit rating. Please try again.';
-
-        if (e.toString().contains('network') ||
-            e.toString().contains('connection')) {
-          errorMessage = 'Network error. Check your connection.';
-        } else if (e.toString().contains('timeout')) {
-          errorMessage = 'Request timed out. Try again.';
-        } else if (e.toString().contains('Invalid ratings')) {
-          errorMessage = 'Invalid ratings. Check and try again.';
-        }
-
-        SnackbarUtils.error(context, errorMessage);
+        SnackbarUtils.error(context, 'Failed to open rating page');
       }
     }
   }

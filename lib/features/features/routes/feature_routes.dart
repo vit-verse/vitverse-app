@@ -15,7 +15,7 @@ import '../vtop_services/all_faculties/lazy_all_faculties_page.dart';
 import '../vtop_services/fee_management/lazy_fee_management_page.dart';
 
 // VIT Connect Services Pages - Lazy Loading Wrappers
-import '../vitconnect_services/faculty_rating/presentation/lazy_faculty_rating_page.dart';
+import '../vitconnect_services/faculty_rating/lazy_faculty_rating_page.dart';
 import '../vitconnect_services/cab_share/lazy_cab_share_page.dart';
 import '../vitconnect_services/eventhub/lazy_eventhub_page.dart';
 import '../vitconnect_services/lost_and_found/lazy_lost_and_found_page.dart';
