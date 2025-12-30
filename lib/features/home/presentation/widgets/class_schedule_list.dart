@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/theme/theme_provider.dart';
-import '../../../../core/utils/logger.dart';
 import '../../../../core/widgets/themed_lottie_widget.dart';
+import '../../../profile/widget_customization/data/calendar_home_service.dart';
 import '../../logic/home_logic.dart';
 import 'class_card.dart';
 
-/// Widget displaying the list of classes for a specific day
 class ClassScheduleList extends StatefulWidget {
   final int dayIndex;
   final HomeLogic homeLogic;
@@ -26,6 +25,7 @@ class ClassScheduleList extends StatefulWidget {
 
 class _ClassScheduleListState extends State<ClassScheduleList> {
   Set<int> _holidayDays = {};
+  final _calendarService = CalendarHomeService.instance;
 
   @override
   void initState() {
@@ -46,6 +46,17 @@ class _ClassScheduleListState extends State<ClassScheduleList> {
     } catch (e) {
       // Silent error handling
     }
+  }
+  
+  bool _isHoliday(int dayIndex) {
+    if (_holidayDays.contains(dayIndex)) {
+      return true;
+    }
+    
+    final today = DateTime.now().weekday - 1;
+    final targetDate = DateTime.now().add(Duration(days: dayIndex - today));
+    
+    return _calendarService.isHolidayDate(targetDate);
   }
 
   Widget _buildEmptyState(
@@ -110,7 +121,7 @@ class _ClassScheduleListState extends State<ClassScheduleList> {
   Widget build(BuildContext context) {
     return Consumer<ThemeProvider>(
       builder: (context, themeProvider, child) {
-        final isHoliday = _holidayDays.contains(widget.dayIndex);
+        final isHoliday = _isHoliday(widget.dayIndex);
 
         if (isHoliday) {
           return _buildEmptyState(

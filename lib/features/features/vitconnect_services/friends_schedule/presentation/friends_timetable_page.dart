@@ -279,7 +279,7 @@ class _FriendsSchedulePageState extends State<FriendsSchedulePage> {
               borderRadius: BorderRadius.circular(16),
             ),
             title: Text(
-              'Choose color for ${friend.name.split(' ')[0]}',
+              'Choose color for ${friend.nickname}',
               style: TextStyle(color: theme.text, fontSize: 16),
             ),
             content: SizedBox(
@@ -435,7 +435,7 @@ class _FriendsSchedulePageState extends State<FriendsSchedulePage> {
                             ),
                             child: Center(
                               child: Text(
-                                friend.name[0].toUpperCase(),
+                                friend.nickname[0].toUpperCase(),
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: screenWidth < 360 ? 8 : 10,
@@ -446,7 +446,7 @@ class _FriendsSchedulePageState extends State<FriendsSchedulePage> {
                           ),
                           SizedBox(width: screenWidth < 360 ? 6 : 8),
                           Text(
-                            friend.name.split(' ')[0],
+                            friend.nickname,
                             style: TextStyle(
                               fontSize: screenWidth < 360 ? 11 : 12,
                               color: friend.color,
@@ -762,7 +762,7 @@ class _FriendsSchedulePageState extends State<FriendsSchedulePage> {
                 ),
                 child: Center(
                   child: Text(
-                    friend.name.isNotEmpty ? friend.name[0].toUpperCase() : '?',
+                    friend.nickname.isNotEmpty ? friend.nickname[0].toUpperCase() : '?',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: screenWidth < 360 ? 14 : 16,
@@ -777,7 +777,7 @@ class _FriendsSchedulePageState extends State<FriendsSchedulePage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      friend.name,
+                      friend.nickname,
                       style: TextStyle(
                         fontSize: screenWidth < 360 ? 14 : 16,
                         fontWeight: FontWeight.bold,
@@ -949,7 +949,7 @@ class _FriendsSchedulePageState extends State<FriendsSchedulePage> {
                                     ),
                                     child: Center(
                                       child: Text(
-                                        friend.name[0].toUpperCase(),
+                                        friend.nickname[0].toUpperCase(),
                                         style: TextStyle(
                                           color: Colors.white,
                                           fontSize: screenWidth < 360 ? 9 : 10,
@@ -961,7 +961,7 @@ class _FriendsSchedulePageState extends State<FriendsSchedulePage> {
                                   SizedBox(width: screenWidth < 360 ? 6 : 8),
                                   Expanded(
                                     child: Text(
-                                      friend.name,
+                                      friend.nickname,
                                       style: TextStyle(
                                         fontSize: screenWidth < 360 ? 12 : 14,
                                         color: theme.text,
@@ -1042,7 +1042,7 @@ class _FriendsSchedulePageState extends State<FriendsSchedulePage> {
                                           ),
                                           child: Center(
                                             child: Text(
-                                              friend.name[0].toUpperCase(),
+                                              friend.nickname[0].toUpperCase(),
                                               style: TextStyle(
                                                 color: Colors.white,
                                                 fontSize:
@@ -1057,7 +1057,7 @@ class _FriendsSchedulePageState extends State<FriendsSchedulePage> {
                                         ),
                                         Expanded(
                                           child: Text(
-                                            friend.name,
+                                            friend.nickname,
                                             style: TextStyle(
                                               fontSize:
                                                   screenWidth < 360 ? 11 : 12,
