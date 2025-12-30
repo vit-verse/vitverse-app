@@ -132,7 +132,7 @@ class _StaffPageState extends State<StaffPage> {
             Icon(
               Icons.error_outline_rounded,
               size: 64,
-              color: themeProvider.currentTheme.muted.withOpacity(0.5),
+              color: themeProvider.currentTheme.muted.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 16),
             Text(

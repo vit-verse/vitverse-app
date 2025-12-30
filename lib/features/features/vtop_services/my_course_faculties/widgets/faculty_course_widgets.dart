@@ -22,10 +22,10 @@ class FacultyStatisticsCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Theme.of(
           context,
-        ).colorScheme.surfaceContainerHighest.withOpacity(0.3),
+        ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
         ),
       ),
       child: Row(
@@ -89,7 +89,7 @@ class FacultyStatisticsCard extends StatelessWidget {
     return Container(
       height: 40,
       width: 1,
-      color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+      color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
     );
   }
 }
@@ -122,7 +122,7 @@ class FacultyExpansionCard extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(
@@ -141,13 +141,13 @@ class FacultyExpansionCard extends StatelessWidget {
               children: [
                 _buildBadge(
                   '${faculty.totalCourses} ${faculty.totalCourses == 1 ? 'Course' : 'Courses'}',
-                  Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                  Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
                   Theme.of(context).colorScheme.primary,
                 ),
                 const SizedBox(width: 6),
                 _buildBadge(
                   '${faculty.totalCredits % 1 == 0 ? faculty.totalCredits.toInt() : faculty.totalCredits.toStringAsFixed(1)} Credits',
-                  const Color(0xFF10B981).withOpacity(0.1),
+                  const Color(0xFF10B981).withValues(alpha: 0.1),
                   const Color(0xFF10B981),
                 ),
               ],
@@ -194,7 +194,7 @@ class CourseInfoTile extends StatelessWidget {
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
         ),
       ),
       child: Column(
@@ -206,7 +206,7 @@ class CourseInfoTile extends StatelessWidget {
                 width: 28,
                 height: 28,
                 decoration: BoxDecoration(
-                  color: _getCourseTypeColor(course.type).withOpacity(0.1),
+                  color: _getCourseTypeColor(course.type).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Icon(
@@ -296,7 +296,7 @@ class CourseInfoTile extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(4),
       ),
       child: Row(

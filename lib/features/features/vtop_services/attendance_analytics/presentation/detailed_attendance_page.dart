@@ -190,7 +190,7 @@ class _DetailedAttendancePageState extends State<DetailedAttendancePage> {
               color: themeProvider.currentTheme.surface,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: themeProvider.currentTheme.muted.withOpacity(0.1),
+                color: themeProvider.currentTheme.muted.withValues(alpha: 0.1),
                 width: 1,
               ),
             ),
@@ -218,7 +218,7 @@ class _DetailedAttendancePageState extends State<DetailedAttendancePage> {
                     Container(
                       height: 40,
                       width: 1,
-                      color: themeProvider.currentTheme.muted.withOpacity(0.2),
+                      color: themeProvider.currentTheme.muted.withValues(alpha: 0.2),
                     ),
                     _buildSummaryItem(
                       themeProvider,
@@ -229,7 +229,7 @@ class _DetailedAttendancePageState extends State<DetailedAttendancePage> {
                     Container(
                       height: 40,
                       width: 1,
-                      color: themeProvider.currentTheme.muted.withOpacity(0.2),
+                      color: themeProvider.currentTheme.muted.withValues(alpha: 0.2),
                     ),
                     _buildSummaryItem(
                       themeProvider,
@@ -385,7 +385,7 @@ class _DetailedAttendancePageState extends State<DetailedAttendancePage> {
         color: theme.currentTheme.surface,
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
-          color: theme.currentTheme.muted.withOpacity(0.1),
+          color: theme.currentTheme.muted.withValues(alpha: 0.1),
           width: 1,
         ),
       ),
@@ -395,7 +395,7 @@ class _DetailedAttendancePageState extends State<DetailedAttendancePage> {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: statusColor.withOpacity(0.15),
+              color: statusColor.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(statusIcon, color: statusColor, size: 24),
@@ -426,7 +426,7 @@ class _DetailedAttendancePageState extends State<DetailedAttendancePage> {
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
-                        color: theme.currentTheme.primary.withOpacity(0.15),
+                        color: theme.currentTheme.primary.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
@@ -484,7 +484,7 @@ class _DetailedAttendancePageState extends State<DetailedAttendancePage> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: statusColor.withOpacity(0.15),
+              color: statusColor.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(6),
             ),
             child: Text(

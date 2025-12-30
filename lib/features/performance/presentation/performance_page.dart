@@ -94,10 +94,10 @@ class _PerformancePageState extends State<PerformancePage> {
       child: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: themeProvider.currentTheme.surface.withOpacity(0.5),
+          color: themeProvider.currentTheme.surface.withValues(alpha: 0.5),
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: themeProvider.currentTheme.muted.withOpacity(0.2),
+            color: themeProvider.currentTheme.muted.withValues(alpha: 0.2),
           ),
         ),
         child: Icon(icon, size: 20, color: themeProvider.currentTheme.text),

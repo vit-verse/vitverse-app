@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/theme/theme_provider.dart';
-import '../../../../core/loading/skeleton_widgets.dart';
 import '../../../../core/utils/logger.dart';
 import '../../../../core/widgets/themed_lottie_widget.dart';
 import '../../logic/home_logic.dart';
@@ -10,8 +9,6 @@ import 'class_card.dart';
 
 /// Widget displaying the list of classes for a specific day
 class ClassScheduleList extends StatefulWidget {
-  static const String _tag = 'ClassScheduleList';
-
   final int dayIndex;
   final HomeLogic homeLogic;
   final bool isDataLoading;
@@ -28,7 +25,6 @@ class ClassScheduleList extends StatefulWidget {
 }
 
 class _ClassScheduleListState extends State<ClassScheduleList> {
-  static const String _tag = 'ClassScheduleList';
   Set<int> _holidayDays = {};
 
   @override
@@ -48,9 +44,9 @@ class _ClassScheduleListState extends State<ClassScheduleList> {
         });
       }
 
-      Logger.d(_tag, 'Loaded holidays: $_holidayDays');
+      Logger.d('ClassScheduleList', 'Loaded holidays: $_holidayDays');
     } catch (e) {
-      Logger.e(_tag, 'Failed to load holidays', e);
+      // Silent error handling
     }
   }
 
@@ -81,7 +77,7 @@ class _ClassScheduleListState extends State<ClassScheduleList> {
             margin: const EdgeInsets.symmetric(horizontal: 16),
             padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
             decoration: BoxDecoration(
-              color: themeProvider.currentTheme.background.withOpacity(0.8),
+              color: themeProvider.currentTheme.background.withValues(alpha: 0.8),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Column(
@@ -122,21 +118,21 @@ class _ClassScheduleListState extends State<ClassScheduleList> {
   Widget build(BuildContext context) {
     return Consumer<ThemeProvider>(
       builder: (context, themeProvider, child) {
-        // Show skeleton loading while data is loading
-        if (widget.isDataLoading) {
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: List.generate(
-                3,
-                (index) => Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: SkeletonWidgets.classCard(themeProvider),
-                ),
-              ),
-            ),
-          );
-        }
+        // Skip skeleton loading - directly show content
+        // if (widget.isDataLoading) {
+        //   return SingleChildScrollView(
+        //     padding: const EdgeInsets.all(16),
+        //     child: Column(
+        //       children: List.generate(
+        //         3,
+        //         (index) => Padding(
+        //           padding: const EdgeInsets.only(bottom: 12),
+        //           child: SkeletonWidgets.classCard(themeProvider),
+        //         ),
+        //       ),
+        //     ),
+        //   );
+        // }
 
         // Check if this day is marked as holiday
         final isHoliday = _holidayDays.contains(widget.dayIndex);
@@ -150,34 +146,43 @@ class _ClassScheduleListState extends State<ClassScheduleList> {
           );
         }
 
-        // Get classes for the day
-        final dayClasses = widget.homeLogic.getClassesForDay(widget.dayIndex);
+        // Get combined classes for the day (user + friends)
+        return FutureBuilder<List<Map<String, dynamic>>>(
+          future: widget.homeLogic.getCombinedClassesForDay(widget.dayIndex),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              // Show minimal loading indicator
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(32),
+                  child: CircularProgressIndicator(
+                    color: themeProvider.currentTheme.primary,
+                  ),
+                ),
+              );
+            }
 
-        // Sort classes by start time
-        dayClasses.sort((a, b) {
-          final timeA = a['start_time']?.toString() ?? '';
-          final timeB = b['start_time']?.toString() ?? '';
-          return timeA.compareTo(timeB);
-        });
+            final dayClasses = snapshot.data ?? [];
 
-        if (dayClasses.isEmpty) {
-          return _buildEmptyState(
-            themeProvider,
-            'No classes scheduled',
-            'Enjoy your free day!',
-          );
-        }
+            if (dayClasses.isEmpty) {
+              return _buildEmptyState(
+                themeProvider,
+                'No classes scheduled',
+                'Enjoy your free day!',
+              );
+            }
 
-        // Return scrollable ListView to show all classes
-        return ListView.builder(
-          padding: const EdgeInsets.all(16),
-          itemCount: dayClasses.length,
-          itemBuilder: (context, index) {
-            final classData = dayClasses[index];
-            return ClassCard(
-              classData: classData,
-              dayIndex: widget.dayIndex,
-              homeLogic: widget.homeLogic,
+            return ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: dayClasses.length,
+              itemBuilder: (context, index) {
+                final classData = dayClasses[index];
+                return ClassCard(
+                  classData: classData,
+                  dayIndex: widget.dayIndex,
+                  homeLogic: widget.homeLogic,
+                );
+              },
             );
           },
         );

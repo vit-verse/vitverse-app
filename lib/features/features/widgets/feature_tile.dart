@@ -33,18 +33,18 @@ class FeatureTile extends StatelessWidget {
       child: InkWell(
         onTap: () => TapDebouncer.throttle(() => _navigateToFeature(context)),
         borderRadius: BorderRadius.circular(16),
-        splashColor: theme.primary.withOpacity(0.1),
-        highlightColor: theme.primary.withOpacity(0.05),
+        splashColor: theme.primary.withValues(alpha: 0.1),
+        highlightColor: theme.primary.withValues(alpha: 0.05),
         child: Container(
           padding: const EdgeInsets.all(16),
           margin: const EdgeInsets.only(bottom: 12),
           decoration: BoxDecoration(
             color: theme.surface,
-            border: Border.all(color: theme.muted.withOpacity(0.2)),
+            border: Border.all(color: theme.muted.withValues(alpha: 0.2)),
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: Colors.black.withValues(alpha: 0.1),
                 blurRadius: 4,
                 offset: const Offset(0, 2),
               ),
@@ -105,17 +105,17 @@ class FeatureTile extends StatelessWidget {
       child: InkWell(
         onTap: () => TapDebouncer.throttle(() => _navigateToFeature(context)),
         borderRadius: BorderRadius.circular(16),
-        splashColor: theme.primary.withOpacity(0.1),
-        highlightColor: theme.primary.withOpacity(0.05),
+        splashColor: theme.primary.withValues(alpha: 0.1),
+        highlightColor: theme.primary.withValues(alpha: 0.05),
         child: Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: theme.surface,
-            border: Border.all(color: theme.muted.withOpacity(0.2)),
+            border: Border.all(color: theme.muted.withValues(alpha: 0.2)),
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: Colors.black.withValues(alpha: 0.1),
                 blurRadius: 4,
                 offset: const Offset(0, 2),
               ),
@@ -196,7 +196,7 @@ class FeatureTile extends StatelessWidget {
           // Use theme-based gradient
           gradientColors = [
             themeProvider.currentTheme.primary,
-            themeProvider.currentTheme.primary.withOpacity(0.7),
+            themeProvider.currentTheme.primary.withValues(alpha: 0.7),
           ];
         } else {
           // Use default feature-specific colors

@@ -151,7 +151,7 @@ class _ExaminationSchedulePageState extends State<ExaminationSchedulePage> {
             Icon(
               Icons.error_outline_rounded,
               size: 64,
-              color: themeProvider.currentTheme.primary.withOpacity(0.5),
+              color: themeProvider.currentTheme.primary.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 16),
             Text(

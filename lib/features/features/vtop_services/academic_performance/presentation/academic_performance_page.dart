@@ -496,10 +496,10 @@ class _AddCoursesPageState extends State<_AddCoursesPage> {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: theme.primary.withOpacity(0.1),
+                        color: theme.primary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color: theme.primary.withOpacity(0.3),
+                          color: theme.primary.withValues(alpha: 0.3),
                         ),
                       ),
                       child: Row(
@@ -649,7 +649,7 @@ class _AddCoursesPageState extends State<_AddCoursesPage> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: theme.primary.withOpacity(0.1),
+                  color: theme.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
@@ -716,7 +716,7 @@ class _AddCoursesPageState extends State<_AddCoursesPage> {
       decoration: BoxDecoration(
         color: theme.surface,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: theme.primary.withOpacity(0.3), width: 1.5),
+        border: Border.all(color: theme.primary.withValues(alpha: 0.3), width: 1.5),
       ),
       child: Row(
         children: [
@@ -741,7 +741,7 @@ class _AddCoursesPageState extends State<_AddCoursesPage> {
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
-                        color: theme.primary.withOpacity(0.1),
+                        color: theme.primary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(3),
                       ),
                       child: Text(

@@ -121,7 +121,7 @@ class _FeeManagementPageState extends State<FeeManagementPage> {
             Icon(
               Icons.error_outline_rounded,
               size: 64,
-              color: theme.muted.withOpacity(0.5),
+              color: theme.muted.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 16),
             Text(

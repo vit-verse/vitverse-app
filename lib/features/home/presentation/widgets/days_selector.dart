@@ -159,7 +159,7 @@ class _DaysSelectorState extends State<DaysSelector> {
                             color:
                                 isHolidayOrMarked
                                     ? themeProvider.currentTheme.primary
-                                        .withOpacity(0.6)
+                                        .withValues(alpha: 0.6)
                                     : isSelected
                                     ? themeProvider.currentTheme.primary
                                     : themeProvider.currentTheme.text,
@@ -208,7 +208,7 @@ class _DaysSelectorState extends State<DaysSelector> {
                                         ? themeProvider.currentTheme.primary
                                         : isHolidayOrMarked
                                         ? themeProvider.currentTheme.primary
-                                            .withOpacity(0.6)
+                                            .withValues(alpha: 0.6)
                                         : themeProvider.currentTheme.primary,
                                 shape: BoxShape.circle,
                               ),

@@ -37,7 +37,7 @@ class ExamCard extends StatelessWidget {
         isDark: themeProvider.currentTheme.isDark,
         customBackgroundColor:
             isCompleted
-                ? themeProvider.currentTheme.surface.withOpacity(0.5)
+                ? themeProvider.currentTheme.surface.withValues(alpha: 0.5)
                 : themeProvider.currentTheme.surface,
       ),
       child: Opacity(
@@ -78,7 +78,7 @@ class ExamCard extends StatelessWidget {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: _getStatusColor(status).withOpacity(0.15),
+                      color: _getStatusColor(status).withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
@@ -128,7 +128,7 @@ class ExamCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(6),
                             border: Border.all(
                               color: themeProvider.currentTheme.muted
-                                  .withOpacity(0.3),
+                                  .withValues(alpha: 0.3),
                               width: 0.5,
                             ),
                           ),
@@ -293,7 +293,7 @@ class ExamCountdownBanner extends StatelessWidget {
         gradient: LinearGradient(
           colors: [
             themeProvider.currentTheme.primary,
-            themeProvider.currentTheme.primary.withOpacity(0.8),
+            themeProvider.currentTheme.primary.withValues(alpha: 0.8),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -301,7 +301,7 @@ class ExamCountdownBanner extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: themeProvider.currentTheme.primary.withOpacity(0.3),
+            color: themeProvider.currentTheme.primary.withValues(alpha: 0.3),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -315,7 +315,7 @@ class ExamCountdownBanner extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(
@@ -551,7 +551,7 @@ class EmptyExamState extends StatelessWidget {
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: themeProvider.currentTheme.text.withOpacity(0.05),
+                    color: themeProvider.currentTheme.text.withValues(alpha: 0.05),
                     blurRadius: 20,
                     offset: const Offset(0, 4),
                   ),
@@ -560,7 +560,7 @@ class EmptyExamState extends StatelessWidget {
               child: Icon(
                 Icons.event_busy_outlined,
                 size: 64,
-                color: themeProvider.currentTheme.primary.withOpacity(0.5),
+                color: themeProvider.currentTheme.primary.withValues(alpha: 0.5),
               ),
             ),
             const SizedBox(height: 24),

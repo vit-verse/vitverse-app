@@ -284,7 +284,7 @@ class _CgpaGpaCalculatorPageState extends State<CgpaGpaCalculatorPage> {
             Icon(
               Icons.error_outline,
               size: 80,
-              color: Colors.red.withOpacity(0.5),
+              color: Colors.red.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 24),
             Text(
@@ -331,7 +331,7 @@ class _CgpaGpaCalculatorPageState extends State<CgpaGpaCalculatorPage> {
             Icon(
               Icons.description_outlined,
               size: 80,
-              color: theme.primary.withOpacity(0.5),
+              color: theme.primary.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 24),
             Text(

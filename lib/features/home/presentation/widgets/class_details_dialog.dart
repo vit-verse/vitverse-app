@@ -101,7 +101,7 @@ class _ClassDetailsDialogState extends State<ClassDetailsDialog> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: theme.muted.withOpacity(0.3),
+                color: theme.muted.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -133,7 +133,7 @@ class _ClassDetailsDialogState extends State<ClassDetailsDialog> {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: theme.primary.withOpacity(0.15),
+                          color: theme.primary.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
@@ -152,7 +152,7 @@ class _ClassDetailsDialogState extends State<ClassDetailsDialog> {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: theme.muted.withOpacity(0.15),
+                          color: theme.muted.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
@@ -189,7 +189,7 @@ class _ClassDetailsDialogState extends State<ClassDetailsDialog> {
                               color: theme.surface,
                               borderRadius: BorderRadius.circular(16),
                               border: Border.all(
-                                color: theme.muted.withOpacity(0.2),
+                                color: theme.muted.withValues(alpha: 0.2),
                                 width: 1,
                               ),
                             ),
@@ -202,7 +202,7 @@ class _ClassDetailsDialogState extends State<ClassDetailsDialog> {
                                     Container(
                                       padding: const EdgeInsets.all(8),
                                       decoration: BoxDecoration(
-                                        color: theme.primary.withOpacity(0.1),
+                                        color: theme.primary.withValues(alpha: 0.1),
                                         borderRadius: BorderRadius.circular(10),
                                       ),
                                       child: Icon(
@@ -231,7 +231,7 @@ class _ClassDetailsDialogState extends State<ClassDetailsDialog> {
                                     Container(
                                       padding: const EdgeInsets.all(8),
                                       decoration: BoxDecoration(
-                                        color: theme.primary.withOpacity(0.1),
+                                        color: theme.primary.withValues(alpha: 0.1),
                                         borderRadius: BorderRadius.circular(10),
                                       ),
                                       child: Icon(
@@ -262,7 +262,7 @@ class _ClassDetailsDialogState extends State<ClassDetailsDialog> {
                                     Container(
                                       padding: const EdgeInsets.all(8),
                                       decoration: BoxDecoration(
-                                        color: theme.primary.withOpacity(0.1),
+                                        color: theme.primary.withValues(alpha: 0.1),
                                         borderRadius: BorderRadius.circular(10),
                                       ),
                                       child: Icon(
@@ -493,7 +493,7 @@ class _ClassDetailsDialogState extends State<ClassDetailsDialog> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: bgColor.withOpacity(0.15),
+        color: bgColor.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Row(

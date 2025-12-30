@@ -73,7 +73,7 @@ class DayDetailsCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12.0),
       padding: const EdgeInsets.all(12.0),
       decoration: BoxDecoration(
-        color: eventColor.withOpacity(0.15), // More visible background
+        color: eventColor.withValues(alpha: 0.15), // More visible background
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: eventColor, width: 1),
       ),
@@ -113,7 +113,7 @@ class DayDetailsCard extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: Theme.of(
                         context,
-                      ).colorScheme.primaryContainer.withOpacity(0.25),
+                      ).colorScheme.primaryContainer.withValues(alpha: 0.25),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
                         color: Theme.of(context).colorScheme.primary,

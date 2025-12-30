@@ -170,7 +170,7 @@ class _OverallAttendanceSummaryCardState
                           context,
                           percentage < 75 ? percentage : 70,
                         ))
-                    .withOpacity(0.15),
+                    .withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
@@ -313,7 +313,7 @@ class _OverallAttendanceSummaryCardState
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
                             color: themeProvider.currentTheme.primary
-                                .withOpacity(0.1),
+                                .withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Row(

@@ -53,7 +53,7 @@ class _FriendsSchedulePageState extends State<FriendsSchedulePage> {
 
   void _startColorAnimation() {
     _animationTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (mounted && _service.selectedFriends.isNotEmpty) {
+      if (mounted && _service.friendsForSchedulePage.isNotEmpty) {
         setState(() {});
       }
     });
@@ -247,12 +247,12 @@ class _FriendsSchedulePageState extends State<FriendsSchedulePage> {
                         _buildFriendsSection(themeProvider),
                         SizedBox(height: screenWidth < 360 ? 12 : 16),
                       ],
-                      if (_service.selectedFriends.isNotEmpty) ...[
+                      if (_service.friendsForSchedulePage.isNotEmpty) ...[
                         _buildOverallSchedulesSection(themeProvider),
                         SizedBox(height: screenWidth < 360 ? 16 : 24),
                       ],
-                      if (_service.selectedFriends.isNotEmpty)
-                        ..._service.selectedFriends.map(
+                      if (_service.friendsForSchedulePage.isNotEmpty)
+                        ..._service.friendsForSchedulePage.map(
                           (friend) => Padding(
                             padding: EdgeInsets.only(
                               bottom: screenWidth < 360 ? 12 : 16,
@@ -314,7 +314,7 @@ class _FriendsSchedulePageState extends State<FriendsSchedulePage> {
                         boxShadow: [
                           if (isSelected)
                             BoxShadow(
-                              color: color.withOpacity(0.6),
+                              color: color.withValues(alpha: 0.6),
                               blurRadius: 8,
                               spreadRadius: 2,
                             ),
@@ -398,7 +398,7 @@ class _FriendsSchedulePageState extends State<FriendsSchedulePage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'FRIENDS (${_service.selectedFriends.length}/${_service.friends.length})',
+            'FRIENDS (${_service.friendsForSchedulePage.length}/${_service.friends.length})',
             style: TextStyle(
               fontSize: screenWidth < 360 ? 11 : 12,
               fontWeight: FontWeight.bold,
@@ -411,7 +411,7 @@ class _FriendsSchedulePageState extends State<FriendsSchedulePage> {
             spacing: 8,
             runSpacing: 8,
             children:
-                _service.selectedFriends.map((friend) {
+                _service.friendsForSchedulePage.map((friend) {
                   return GestureDetector(
                     onLongPress: () => _showColorPicker(friend, theme),
                     child: Container(
@@ -421,7 +421,7 @@ class _FriendsSchedulePageState extends State<FriendsSchedulePage> {
                       ),
                       decoration: AppCardStyles.smallWidgetDecoration(
                         isDark: theme.isDark,
-                        customBackgroundColor: friend.color.withOpacity(0.1),
+                        customBackgroundColor: friend.color.withValues(alpha: 0.1),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -457,7 +457,7 @@ class _FriendsSchedulePageState extends State<FriendsSchedulePage> {
                           Icon(
                             Icons.palette,
                             size: screenWidth < 360 ? 10 : 12,
-                            color: friend.color.withOpacity(0.5),
+                            color: friend.color.withValues(alpha: 0.5),
                           ),
                         ],
                       ),
@@ -479,7 +479,7 @@ class _FriendsSchedulePageState extends State<FriendsSchedulePage> {
       decoration: BoxDecoration(
         color: theme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: theme.border.withOpacity(0.3)),
+        border: Border.all(color: theme.border.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -574,7 +574,7 @@ class _FriendsSchedulePageState extends State<FriendsSchedulePage> {
                                         : hasClass
                                         ? cellColor
                                         : themeProvider.currentTheme.border
-                                            .withOpacity(0.3),
+                                            .withValues(alpha: 0.3),
                                 width:
                                     isSelected
                                         ? 3
@@ -660,12 +660,12 @@ class _FriendsSchedulePageState extends State<FriendsSchedulePage> {
 
                       if (friendColors.isNotEmpty) {
                         if (friendColors.length == 1) {
-                          cellColor = friendColors.first.withOpacity(0.7);
+                          cellColor = friendColors.first.withValues(alpha: 0.7);
                         } else {
                           final colorIndex =
                               (DateTime.now().millisecondsSinceEpoch ~/ 1000) %
                               friendColors.length;
-                          cellColor = friendColors[colorIndex].withOpacity(0.7);
+                          cellColor = friendColors[colorIndex].withValues(alpha: 0.7);
                         }
                       }
 
@@ -692,7 +692,7 @@ class _FriendsSchedulePageState extends State<FriendsSchedulePage> {
                                         : friendColors.isNotEmpty
                                         ? friendColors.first
                                         : themeProvider.currentTheme.border
-                                            .withOpacity(0.3),
+                                            .withValues(alpha: 0.3),
                                 width:
                                     isSelected
                                         ? 3
@@ -746,7 +746,7 @@ class _FriendsSchedulePageState extends State<FriendsSchedulePage> {
       decoration: BoxDecoration(
         color: theme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: friend.color.withOpacity(0.3)),
+        border: Border.all(color: friend.color.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -811,7 +811,7 @@ class _FriendsSchedulePageState extends State<FriendsSchedulePage> {
     final screenWidth = MediaQuery.of(context).size.width;
     final allFriends = [
       if (_ownSchedule != null) _ownSchedule!,
-      ..._service.selectedFriends,
+      ..._service.friendsForSchedulePage,
     ];
 
     final busyFriends = <Friend>[];
@@ -841,7 +841,7 @@ class _FriendsSchedulePageState extends State<FriendsSchedulePage> {
             height: 4,
             margin: const EdgeInsets.symmetric(vertical: 12),
             decoration: BoxDecoration(
-              color: theme.muted.withOpacity(0.3),
+              color: theme.muted.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -1022,10 +1022,10 @@ class _FriendsSchedulePageState extends State<FriendsSchedulePage> {
                                   screenWidth < 360 ? 8 : 12,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: friend.color.withOpacity(0.1),
+                                  color: friend.color.withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(8),
                                   border: Border.all(
-                                    color: friend.color.withOpacity(0.3),
+                                    color: friend.color.withValues(alpha: 0.3),
                                   ),
                                 ),
                                 child: Column(

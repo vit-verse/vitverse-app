@@ -23,7 +23,7 @@ class ControlCard extends StatelessWidget {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(ThemeConstants.radiusMd),
-        side: BorderSide(color: theme.muted.withOpacity(0.2)),
+        side: BorderSide(color: theme.muted.withValues(alpha: 0.2)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(ThemeConstants.spacingMd),
@@ -76,9 +76,9 @@ class ControlCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(ThemeConstants.spacingSm),
       decoration: BoxDecoration(
-        color: theme.primary.withOpacity(0.1),
+        color: theme.primary.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(ThemeConstants.radiusSm),
-        border: Border.all(color: theme.primary.withOpacity(0.3)),
+        border: Border.all(color: theme.primary.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
@@ -156,7 +156,7 @@ class ControlCard extends StatelessWidget {
       style: OutlinedButton.styleFrom(
         foregroundColor: allPresent ? Colors.red : Colors.green,
         side: BorderSide(
-          color: (allPresent ? Colors.red : Colors.green).withOpacity(0.5),
+          color: (allPresent ? Colors.red : Colors.green).withValues(alpha: 0.5),
         ),
         padding: const EdgeInsets.symmetric(
           horizontal: ThemeConstants.spacingXs,
@@ -191,7 +191,7 @@ class ControlCard extends StatelessWidget {
       label: const Text('Integrate Calendar'),
       style: OutlinedButton.styleFrom(
         foregroundColor: theme.primary,
-        side: BorderSide(color: theme.primary.withOpacity(0.5)),
+        side: BorderSide(color: theme.primary.withValues(alpha: 0.5)),
         padding: const EdgeInsets.symmetric(
           horizontal: ThemeConstants.spacingXs,
           vertical: ThemeConstants.spacingXs,

@@ -37,8 +37,8 @@ class AppCardStyles {
                 BoxShadow(
                   color:
                       isDark
-                          ? Colors.black.withOpacity(0.3)
-                          : Colors.black.withOpacity(0.04),
+                          ? Colors.black.withValues(alpha: 0.3)
+                          : Colors.black.withValues(alpha: 0.04),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -167,8 +167,8 @@ class AppCardStyles {
         BoxShadow(
           color:
               isDark
-                  ? Colors.black.withOpacity(0.3)
-                  : Colors.black.withOpacity(0.04),
+                  ? Colors.black.withValues(alpha: 0.3)
+                  : Colors.black.withValues(alpha: 0.04),
           blurRadius: 8,
           offset: const Offset(0, 2),
         ),

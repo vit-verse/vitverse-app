@@ -151,7 +151,7 @@ class _RateFacultyPageState extends State<RateFacultyPage> {
                 color: theme.surface,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: theme.primary.withOpacity(0.15),
+                  color: theme.primary.withValues(alpha: 0.15),
                   width: 1,
                 ),
               ),
@@ -184,7 +184,7 @@ class _RateFacultyPageState extends State<RateFacultyPage> {
                                     vertical: 3,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: theme.primary.withOpacity(0.1),
+                                    color: theme.primary.withValues(alpha: 0.1),
                                     borderRadius: BorderRadius.circular(6),
                                   ),
                                   child: Text(
@@ -204,7 +204,7 @@ class _RateFacultyPageState extends State<RateFacultyPage> {
 
                   // Existing Ratings Display
                   if (faculty.hasRatings) ...[
-                    Divider(height: 1, color: theme.muted.withOpacity(0.2)),
+                    Divider(height: 1, color: theme.muted.withValues(alpha: 0.2)),
                     Padding(
                       padding: const EdgeInsets.all(16),
                       child: Column(
@@ -283,10 +283,10 @@ class _RateFacultyPageState extends State<RateFacultyPage> {
               margin: const EdgeInsets.symmetric(horizontal: 16),
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: theme.primary.withOpacity(0.05),
+                color: theme.primary.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: theme.primary.withOpacity(0.15),
+                  color: theme.primary.withValues(alpha: 0.15),
                   width: 1,
                 ),
               ),
@@ -295,7 +295,7 @@ class _RateFacultyPageState extends State<RateFacultyPage> {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: theme.primary.withOpacity(0.1),
+                      color: theme.primary.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
@@ -337,10 +337,10 @@ class _RateFacultyPageState extends State<RateFacultyPage> {
               margin: const EdgeInsets.symmetric(horizontal: 16),
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: theme.primary.withOpacity(0.04),
+                color: theme.primary.withValues(alpha: 0.04),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: theme.primary.withOpacity(0.2),
+                  color: theme.primary.withValues(alpha: 0.2),
                   width: 1,
                 ),
               ),
@@ -393,10 +393,10 @@ class _RateFacultyPageState extends State<RateFacultyPage> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: _getRatingColor(_overallRating).withOpacity(0.1),
+                      color: _getRatingColor(_overallRating).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
-                        color: _getRatingColor(_overallRating).withOpacity(0.3),
+                        color: _getRatingColor(_overallRating).withValues(alpha: 0.3),
                         width: 1,
                       ),
                     ),
@@ -473,9 +473,9 @@ class _RateFacultyPageState extends State<RateFacultyPage> {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.3), width: 1),
+        border: Border.all(color: color.withValues(alpha: 0.3), width: 1),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,

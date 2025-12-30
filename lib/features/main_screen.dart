@@ -117,7 +117,7 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
         color: themeProvider.currentTheme.surface,
         boxShadow: [
           BoxShadow(
-            color: themeProvider.currentTheme.text.withOpacity(0.05),
+            color: themeProvider.currentTheme.text.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, -2),
           ),

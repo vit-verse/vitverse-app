@@ -27,7 +27,7 @@ class SkeletonWidgets {
 
   static Widget classCard(ThemeProvider themeProvider) {
     return Shimmer.fromColors(
-      baseColor: themeProvider.currentTheme.muted.withOpacity(0.3),
+      baseColor: themeProvider.currentTheme.muted.withValues(alpha: 0.3),
       highlightColor: themeProvider.currentTheme.surface,
       child: Container(
         height: 80,
@@ -35,7 +35,7 @@ class SkeletonWidgets {
           color: themeProvider.currentTheme.surface,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: themeProvider.currentTheme.muted.withOpacity(0.2),
+            color: themeProvider.currentTheme.muted.withValues(alpha: 0.2),
             width: 1.5,
           ),
         ),

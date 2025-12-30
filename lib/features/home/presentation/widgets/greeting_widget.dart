@@ -111,7 +111,7 @@ class _GreetingWidgetState extends State<GreetingWidget> {
               height: 11,
               width: 120,
               decoration: BoxDecoration(
-                color: themeProvider.currentTheme.muted.withOpacity(0.2),
+                color: themeProvider.currentTheme.muted.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(4),
               ),
             ),
@@ -120,7 +120,7 @@ class _GreetingWidgetState extends State<GreetingWidget> {
               height: 28,
               width: 180,
               decoration: BoxDecoration(
-                color: themeProvider.currentTheme.muted.withOpacity(0.2),
+                color: themeProvider.currentTheme.muted.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(4),
               ),
             ),
@@ -129,7 +129,7 @@ class _GreetingWidgetState extends State<GreetingWidget> {
               height: 14,
               width: double.infinity,
               decoration: BoxDecoration(
-                color: themeProvider.currentTheme.muted.withOpacity(0.2),
+                color: themeProvider.currentTheme.muted.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(4),
               ),
             ),

@@ -669,7 +669,7 @@ class _SubmitPapersPageState extends State<SubmitPapersPage> {
         customBackgroundColor: themeProvider.currentTheme.error.withOpacity(
           0.1,
         ),
-        customBorderColor: themeProvider.currentTheme.error.withOpacity(0.3),
+        customBorderColor: themeProvider.currentTheme.error.withValues(alpha: 0.3),
       ),
       child: Row(
         children: [

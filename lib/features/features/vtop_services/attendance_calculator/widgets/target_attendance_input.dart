@@ -121,14 +121,14 @@ class _TargetAttendanceInputState extends State<TargetAttendanceInput> {
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(ThemeConstants.radiusMd),
                 borderSide: BorderSide(
-                  color: theme.muted.withOpacity(0.2),
+                  color: theme.muted.withValues(alpha: 0.2),
                   width: 1,
                 ),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(ThemeConstants.radiusMd),
                 borderSide: BorderSide(
-                  color: theme.muted.withOpacity(0.2),
+                  color: theme.muted.withValues(alpha: 0.2),
                   width: 1,
                 ),
               ),

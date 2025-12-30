@@ -234,7 +234,7 @@ class _LostFoundHomePageState extends State<LostFoundHomePage> {
             Icon(
               icon,
               size: 18,
-              color: isSelected ? Colors.white : theme.text.withOpacity(0.6),
+              color: isSelected ? Colors.white : theme.text.withValues(alpha: 0.6),
             ),
             const SizedBox(width: 6),
             Text(
@@ -242,7 +242,7 @@ class _LostFoundHomePageState extends State<LostFoundHomePage> {
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                color: isSelected ? Colors.white : theme.text.withOpacity(0.6),
+                color: isSelected ? Colors.white : theme.text.withValues(alpha: 0.6),
               ),
             ),
           ],
@@ -286,7 +286,7 @@ class _LostFoundHomePageState extends State<LostFoundHomePage> {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: theme.primary.withOpacity(0.1),
+                color: theme.primary.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(

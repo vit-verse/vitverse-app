@@ -181,14 +181,14 @@ class _FeaturesPageState extends State<FeaturesPage> {
                       decoration: BoxDecoration(
                         color: theme.surface,
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: theme.muted.withOpacity(0.2)),
+                        border: Border.all(color: theme.muted.withValues(alpha: 0.2)),
                       ),
                       child: Column(
                         children: [
                           Icon(
                             Icons.push_pin_outlined,
                             size: 48,
-                            color: theme.muted.withOpacity(0.5),
+                            color: theme.muted.withValues(alpha: 0.5),
                           ),
                           const SizedBox(height: 12),
                           Text(
@@ -247,9 +247,9 @@ class _FeaturesPageState extends State<FeaturesPage> {
       child: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: theme.surface.withOpacity(0.5),
+          color: theme.surface.withValues(alpha: 0.5),
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: theme.muted.withOpacity(0.2)),
+          border: Border.all(color: theme.muted.withValues(alpha: 0.2)),
         ),
         child: Icon(icon, size: 20, color: theme.text),
       ),
@@ -271,9 +271,9 @@ class _FeaturesPageState extends State<FeaturesPage> {
       child: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: theme.surface.withOpacity(0.5),
+          color: theme.surface.withValues(alpha: 0.5),
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: theme.muted.withOpacity(0.2)),
+          border: Border.all(color: theme.muted.withValues(alpha: 0.2)),
         ),
         child: Icon(
           anyCollapsed ? Icons.unfold_more : Icons.unfold_less,

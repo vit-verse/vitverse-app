@@ -194,12 +194,12 @@ class AttendanceMatrixLogic {
 
   static Color getCellBackgroundColor(AttendanceStatus status, bool isDark) {
     final baseColor = status.color;
-    return isDark ? baseColor.withOpacity(0.2) : baseColor.withOpacity(0.15);
+    return isDark ? baseColor.withValues(alpha: 0.2) : baseColor.withValues(alpha: 0.15);
   }
 
   static Color getCellTextColor(AttendanceStatus status, bool isDark) {
     if (isDark) {
-      return status.color.withOpacity(0.9);
+      return status.color.withValues(alpha: 0.9);
     } else {
       return Color.lerp(status.color, Colors.black, 0.3)!;
     }

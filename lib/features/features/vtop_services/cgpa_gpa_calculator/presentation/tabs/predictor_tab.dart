@@ -405,9 +405,9 @@ class _PredictorTabState extends State<PredictorTab> {
         return Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: theme.primary.withOpacity(0.1),
+            color: theme.primary.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: theme.primary.withOpacity(0.3)),
+            border: Border.all(color: theme.primary.withValues(alpha: 0.3)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -617,10 +617,10 @@ class _PredictorTabState extends State<PredictorTab> {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: theme.primary.withOpacity(0.1),
+                        color: theme.primary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color: theme.primary.withOpacity(0.3),
+                          color: theme.primary.withValues(alpha: 0.3),
                         ),
                       ),
                       child: Column(

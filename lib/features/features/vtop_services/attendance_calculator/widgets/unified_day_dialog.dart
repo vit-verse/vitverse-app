@@ -181,9 +181,9 @@ class _UnifiedDayDialogState extends State<UnifiedDayDialog> {
     return Container(
       padding: const EdgeInsets.all(ThemeConstants.spacingMd),
       decoration: BoxDecoration(
-        color: theme.primary.withOpacity(0.1),
+        color: theme.primary.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(ThemeConstants.radiusMd),
-        border: Border.all(color: theme.primary.withOpacity(0.3)),
+        border: Border.all(color: theme.primary.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -284,7 +284,7 @@ class _UnifiedDayDialogState extends State<UnifiedDayDialog> {
                           selected ? (weekday['value'] as int) : null;
                     });
                   },
-                  selectedColor: theme.primary.withOpacity(0.2),
+                  selectedColor: theme.primary.withValues(alpha: 0.2),
                   backgroundColor: theme.background,
                   labelStyle: TextStyle(
                     color: isSelected ? theme.primary : theme.text,
@@ -296,7 +296,7 @@ class _UnifiedDayDialogState extends State<UnifiedDayDialog> {
                     color:
                         isSelected
                             ? theme.primary
-                            : theme.muted.withOpacity(0.3),
+                            : theme.muted.withValues(alpha: 0.3),
                     width: isSelected ? 2 : 1,
                   ),
                 );
@@ -381,10 +381,10 @@ class _UnifiedDayDialogState extends State<UnifiedDayDialog> {
           horizontal: ThemeConstants.spacingSm,
         ),
         decoration: BoxDecoration(
-          color: isSelected ? color.withOpacity(0.1) : theme.background,
+          color: isSelected ? color.withValues(alpha: 0.1) : theme.background,
           borderRadius: BorderRadius.circular(ThemeConstants.radiusMd),
           border: Border.all(
-            color: isSelected ? color : theme.muted.withOpacity(0.3),
+            color: isSelected ? color : theme.muted.withValues(alpha: 0.3),
             width: isSelected ? 2 : 1,
           ),
         ),

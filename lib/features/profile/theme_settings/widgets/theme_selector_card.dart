@@ -106,7 +106,7 @@ class ThemeSelectorCard extends StatelessWidget {
                                 child: Container(
                                   height: 6,
                                   decoration: BoxDecoration(
-                                    color: theme.text.withOpacity(0.3),
+                                    color: theme.text.withValues(alpha: 0.3),
                                     borderRadius: BorderRadius.circular(2),
                                   ),
                                 ),
@@ -141,7 +141,7 @@ class ThemeSelectorCard extends StatelessWidget {
                                         child: Container(
                                           height: 4,
                                           decoration: BoxDecoration(
-                                            color: theme.text.withOpacity(0.5),
+                                            color: theme.text.withValues(alpha: 0.5),
                                             borderRadius: BorderRadius.circular(
                                               2,
                                             ),
@@ -157,7 +157,7 @@ class ThemeSelectorCard extends StatelessWidget {
                                           height: 3,
                                           width: 30,
                                           decoration: BoxDecoration(
-                                            color: theme.muted.withOpacity(0.5),
+                                            color: theme.muted.withValues(alpha: 0.5),
                                             borderRadius: BorderRadius.circular(
                                               2,
                                             ),
@@ -262,7 +262,7 @@ class ThemeSelectorCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: theme.surface,
                     shape: BoxShape.circle,
-                    border: Border.all(color: theme.text.withOpacity(0.3)),
+                    border: Border.all(color: theme.text.withValues(alpha: 0.3)),
                   ),
                 ),
                 const SizedBox(width: 3),
@@ -302,7 +302,7 @@ class _ColorDot extends StatelessWidget {
       decoration: BoxDecoration(
         color: color,
         shape: BoxShape.circle,
-        border: Border.all(color: Colors.white.withOpacity(0.2), width: 1),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.2), width: 1),
       ),
     );
   }

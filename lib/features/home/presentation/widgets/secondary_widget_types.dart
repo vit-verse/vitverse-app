@@ -171,7 +171,7 @@ class SecondaryWidgetTypes {
             Icon(
               Icons.free_breakfast_rounded,
               size: 32,
-              color: themeProvider.currentTheme.muted.withOpacity(0.5),
+              color: themeProvider.currentTheme.muted.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 10),
             Text(
@@ -242,7 +242,7 @@ class SecondaryWidgetTypes {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
               decoration: BoxDecoration(
-                color: themeProvider.currentTheme.primary.withOpacity(0.1),
+                color: themeProvider.currentTheme.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
                 child: Text(
@@ -311,7 +311,7 @@ class SecondaryWidgetTypes {
             Icon(
               Icons.check_circle_outline,
               size: 36,
-              color: themeProvider.currentTheme.muted.withOpacity(0.5),
+              color: themeProvider.currentTheme.muted.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 10),
             Text(
@@ -380,7 +380,7 @@ class SecondaryWidgetTypes {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
               decoration: BoxDecoration(
-                color: themeProvider.currentTheme.primary.withOpacity(0.1),
+                color: themeProvider.currentTheme.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Text(
@@ -424,7 +424,7 @@ class SecondaryWidgetTypes {
             Icon(
               Icons.celebration_outlined,
               size: 32,
-              color: themeProvider.currentTheme.muted.withOpacity(0.5),
+              color: themeProvider.currentTheme.muted.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 10),
             Text(
@@ -509,7 +509,7 @@ class SecondaryWidgetTypes {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                 decoration: BoxDecoration(
-                  color: themeProvider.currentTheme.primary.withOpacity(0.1),
+                  color: themeProvider.currentTheme.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(

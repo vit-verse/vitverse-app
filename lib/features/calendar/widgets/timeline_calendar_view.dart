@@ -172,7 +172,7 @@ class TimelineCalendarView extends StatelessWidget {
             height: events.length * 45.0 + 15,
             margin: const EdgeInsets.symmetric(horizontal: 12.0),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
+              color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(1),
             ),
             child: Stack(

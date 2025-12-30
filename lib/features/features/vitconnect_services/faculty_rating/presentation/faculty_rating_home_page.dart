@@ -277,7 +277,7 @@ class _FacultyRatingHomePageState extends State<FacultyRatingHomePage> {
             Icon(
               Icons.cloud_off_outlined,
               size: 80,
-              color: theme.primary.withOpacity(0.5),
+              color: theme.primary.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 24),
             Text(

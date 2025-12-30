@@ -440,7 +440,7 @@ class _ProfileFeatureCard extends StatelessWidget {
       decoration: AppCardStyles.largeCardDecoration(
         isDark: themeProvider.currentTheme.isDark,
         customBackgroundColor: themeProvider.currentTheme.surface,
-        customBorderColor: themeProvider.currentTheme.primary.withOpacity(0.3),
+        customBorderColor: themeProvider.currentTheme.primary.withValues(alpha: 0.3),
       ),
       child: Material(
         color: Colors.transparent,
@@ -455,7 +455,7 @@ class _ProfileFeatureCard extends StatelessWidget {
                   width: 60,
                   height: 60,
                   decoration: BoxDecoration(
-                    color: themeProvider.currentTheme.primary.withOpacity(0.1),
+                    color: themeProvider.currentTheme.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(
                       ThemeConstants.radiusMd,
                     ),

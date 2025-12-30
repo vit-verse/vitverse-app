@@ -36,10 +36,10 @@ class RatingSlider extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               decoration: BoxDecoration(
-                color: _getRatingColor(value).withOpacity(0.15),
+                color: _getRatingColor(value).withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: _getRatingColor(value).withOpacity(0.3),
+                  color: _getRatingColor(value).withValues(alpha: 0.3),
                   width: 1,
                 ),
               ),
@@ -59,7 +59,7 @@ class RatingSlider extends StatelessWidget {
           Text(
             description!,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurface.withOpacity(0.6),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
               fontSize: 12,
             ),
           ),
@@ -68,9 +68,9 @@ class RatingSlider extends StatelessWidget {
         SliderTheme(
           data: SliderTheme.of(context).copyWith(
             activeTrackColor: _getRatingColor(value),
-            inactiveTrackColor: theme.colorScheme.onSurface.withOpacity(0.2),
+            inactiveTrackColor: theme.colorScheme.onSurface.withValues(alpha: 0.2),
             thumbColor: _getRatingColor(value),
-            overlayColor: _getRatingColor(value).withOpacity(0.2),
+            overlayColor: _getRatingColor(value).withValues(alpha: 0.2),
             valueIndicatorColor: _getRatingColor(value),
             trackHeight: 4,
           ),
@@ -89,14 +89,14 @@ class RatingSlider extends StatelessWidget {
             Text(
               '0',
               style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurface.withOpacity(0.5),
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                 fontSize: 11,
               ),
             ),
             Text(
               '10',
               style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurface.withOpacity(0.5),
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                 fontSize: 11,
               ),
             ),

@@ -112,7 +112,7 @@ class _AttendanceCalculatorPageState extends State<AttendanceCalculatorPage> {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(ThemeConstants.radiusMd),
-        side: BorderSide(color: theme.muted.withOpacity(0.2)),
+        side: BorderSide(color: theme.muted.withValues(alpha: 0.2)),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(
@@ -238,7 +238,7 @@ class _AttendanceCalculatorPageState extends State<AttendanceCalculatorPage> {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(ThemeConstants.radiusMd),
-        side: BorderSide(color: theme.muted.withOpacity(0.2)),
+        side: BorderSide(color: theme.muted.withValues(alpha: 0.2)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(ThemeConstants.spacingLg),

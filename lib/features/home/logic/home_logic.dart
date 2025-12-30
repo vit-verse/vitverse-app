@@ -2,12 +2,14 @@ import '../../../core/utils/logger.dart';
 import '../../../core/database/database.dart';
 import '../data/home_data_provider.dart';
 import '../../profile/widget_customization/data/calendar_home_service.dart';
+import '../services/home_friends_integration_service.dart';
 
 class HomeLogic {
   static const String _tag = 'HomeLogic';
 
   final HomeDataProvider _dataProvider = HomeDataProvider();
   final CalendarHomeService _calendarService = CalendarHomeService.instance;
+  final HomeFriendsIntegrationService _friendsIntegration = HomeFriendsIntegrationService();
 
   // Cached data
   Map<String, dynamic> _userData = {};
@@ -17,6 +19,9 @@ class HomeLogic {
   List<Map<String, dynamic>> _coursesData = [];
   List<Map<String, dynamic>> _slotsData = [];
   int _onDutyCount = 0;
+  
+  // Cache for combined classes per day
+  final Map<int, List<Map<String, dynamic>>> _combinedClassesCache = {};
 
   // Getters for cached data
   Map<String, dynamic> get userData => _userData;
@@ -30,6 +35,9 @@ class HomeLogic {
   Future<void> loadAllData() async {
     try {
       Logger.i(_tag, 'Loading all home data...');
+
+      // Clear combined classes cache when reloading data
+      clearCombinedClassesCache();
 
       // Load all data concurrently
       final futures = [
@@ -79,9 +87,7 @@ class HomeLogic {
       }
 
       _onDutyCount = totalOdCount;
-      Logger.d(_tag, 'Loaded OD count: $_onDutyCount');
     } catch (e) {
-      Logger.e(_tag, 'Failed to load OD count', e);
       _onDutyCount = 0;
     }
   }
@@ -95,7 +101,6 @@ class HomeLogic {
     final effectiveDayIndex = _getEffectiveDayIndex(dayIndex);
 
     if (effectiveDayIndex == -1) {
-      Logger.d(_tag, 'Holiday - returning empty class list');
       return [];
     }
 
@@ -133,8 +138,6 @@ class HomeLogic {
           'saturday',
         ][dbDayOfWeek - 1];
 
-    Logger.d(_tag, 'Getting classes for day $dayIndex (DB: $dayColumn)');
-
     for (var timetableEntry in _timetableData) {
       final slotId = timetableEntry[dayColumn];
 
@@ -147,21 +150,11 @@ class HomeLogic {
         Map<String, dynamic>? enhancedCourse;
         if (course != null) {
           enhancedCourse = Map<String, dynamic>.from(course);
-          // Only generate fallback ERP ID if the database field is null or empty (ie NPTEL, STS, and some random subjects)
           final existingErpId = enhancedCourse['faculty_erp_id']?.toString();
           if (existingErpId == null || existingErpId.isEmpty) {
             final generatedId =
                 enhancedCourse['faculty']?.toString().hashCode.toString();
             enhancedCourse['faculty_erp_id'] = generatedId;
-            Logger.d(
-              _tag,
-              'Generated fallback ERP ID for ${enhancedCourse['faculty']}: $generatedId',
-            );
-          } else {
-            Logger.d(
-              _tag,
-              'Using real ERP ID for ${enhancedCourse['faculty']}: $existingErpId',
-            );
           }
         }
 
@@ -175,11 +168,8 @@ class HomeLogic {
       }
     }
 
-    Logger.d(_tag, 'Found ${dayClasses.length} classes for $dayColumn');
-
     // Merge consecutive classes with the same course
     final mergedClasses = _mergeConsecutiveClasses(dayClasses);
-    Logger.d(_tag, 'After merging: ${mergedClasses.length} classes');
 
     return mergedClasses;
   }
@@ -249,6 +239,190 @@ class HomeLogic {
     }
 
     return merged;
+  }
+
+  /// Get combined classes for a specific day (user + friends)
+  Future<List<Map<String, dynamic>>> getCombinedClassesForDay(int dayIndex) async {
+    // Return cached data if available
+    if (_combinedClassesCache.containsKey(dayIndex)) {
+      return _combinedClassesCache[dayIndex]!;
+    }
+    
+    try {
+      // Get user's classes (existing logic)
+      final userClasses = getClassesForDay(dayIndex);
+      
+      // Get friends' classes
+      final friendsClasses = await _getFriendsClassesForDay(dayIndex);
+      
+      // Merge consecutive classes for friends too
+      final mergedFriendsClasses = _mergeConsecutiveFriendClasses(friendsClasses);
+      
+      // Combine and sort by time
+      final allClasses = <Map<String, dynamic>>[];
+      allClasses.addAll(userClasses);
+      allClasses.addAll(mergedFriendsClasses);
+      
+      // Sort by start time
+      allClasses.sort((a, b) {
+        final timeA = a['start_time']?.toString() ?? '';
+        final timeB = b['start_time']?.toString() ?? '';
+        return timeA.compareTo(timeB);
+      });
+      
+      // Cache the result
+      _combinedClassesCache[dayIndex] = allClasses;
+      
+      return allClasses;
+    } catch (e) {
+      // Fallback to user classes only
+      final userClasses = getClassesForDay(dayIndex);
+      _combinedClassesCache[dayIndex] = userClasses;
+      return userClasses;
+    }
+  }
+  
+  /// Clear the combined classes cache (call when data changes)
+  void clearCombinedClassesCache() {
+    _combinedClassesCache.clear();
+  }
+
+  /// Get friends' classes for a specific day
+  Future<List<Map<String, dynamic>>> _getFriendsClassesForDay(int dayIndex) async {
+    try {
+      final friends = await _friendsIntegration.getFriendsForHomePage();
+      final friendsClasses = <Map<String, dynamic>>[];
+      
+      for (final friend in friends) {
+        final dayName = _getDayNameFromIndex(dayIndex);
+        if (dayName == null) continue;
+        
+        final dayClasses = friend.getClassesForDay(dayName);
+        
+        for (final classSlot in dayClasses) {
+          friendsClasses.add({
+            'start_time': _parseTimeSlotStart(classSlot.timeSlot),
+            'end_time': _parseTimeSlotEnd(classSlot.timeSlot),
+            'course': {
+              'code': classSlot.courseCode,
+              'title': classSlot.courseTitle,
+              'venue': classSlot.venue,
+            },
+            'slotName': classSlot.slotId,
+            'slotNames': [classSlot.slotId], // For merging compatibility
+            'isFriendClass': true,
+            'friend': friend,
+            'friendNickname': friend.nickname,
+            'friendColor': friend.color,
+          });
+        }
+      }
+      
+      return friendsClasses;
+    } catch (e) {
+      return [];
+    }
+  }
+
+  /// Merge consecutive friend classes with the same course code and title
+  List<Map<String, dynamic>> _mergeConsecutiveFriendClasses(
+    List<Map<String, dynamic>> classes,
+  ) {
+    if (classes.isEmpty) return classes;
+
+    // Group classes by friend first
+    final Map<String, List<Map<String, dynamic>>> classesByFriend = {};
+    for (var classData in classes) {
+      final friendId = classData['friend']?.id ?? 'unknown';
+      classesByFriend.putIfAbsent(friendId, () => []);
+      classesByFriend[friendId]!.add(classData);
+    }
+
+    final allMergedClasses = <Map<String, dynamic>>[];
+
+    // Merge consecutive classes for each friend separately
+    for (var friendClasses in classesByFriend.values) {
+      // Sort classes by start time first
+      friendClasses.sort((a, b) {
+        final timeA = a['start_time']?.toString() ?? '';
+        final timeB = b['start_time']?.toString() ?? '';
+        return timeA.compareTo(timeB);
+      });
+
+      final merged = <Map<String, dynamic>>[];
+      Map<String, dynamic>? currentClass;
+
+      for (var classData in friendClasses) {
+        if (currentClass == null) {
+          // First class
+          currentClass = Map<String, dynamic>.from(classData);
+          currentClass['slotNames'] = [classData['slotName']];
+          continue;
+        }
+
+        final currentCourse = currentClass['course'] as Map<String, dynamic>?;
+        final nextCourse = classData['course'] as Map<String, dynamic>?;
+
+        // Check if courses match (same code and title)
+        final isSameCourse =
+            currentCourse != null &&
+            nextCourse != null &&
+            currentCourse['code'] == nextCourse['code'] &&
+            currentCourse['title'] == nextCourse['title'];
+
+        // Check if times are consecutive
+        final currentEndTime = currentClass['end_time']?.toString() ?? '';
+        final nextStartTime = classData['start_time']?.toString() ?? '';
+        final isConsecutive = currentEndTime == nextStartTime;
+
+        if (isSameCourse && isConsecutive) {
+          // Merge with current class
+          currentClass['end_time'] = classData['end_time'];
+          (currentClass['slotNames'] as List).add(classData['slotName']);
+        } else {
+          // Not consecutive or different course, save current and start new
+          merged.add(currentClass);
+          currentClass = Map<String, dynamic>.from(classData);
+          currentClass['slotNames'] = [classData['slotName']];
+        }
+      }
+
+      // Add the last class
+      if (currentClass != null) {
+        merged.add(currentClass);
+      }
+
+      allMergedClasses.addAll(merged);
+    }
+
+    return allMergedClasses;
+  }
+
+  /// Convert day index to day name
+  String? _getDayNameFromIndex(int dayIndex) {
+    const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    if (dayIndex >= 0 && dayIndex < dayNames.length) {
+      return dayNames[dayIndex];
+    }
+    return null;
+  }
+
+  /// Parse time slot start time (e.g., "08:00-08:50" -> "08:00")
+  String _parseTimeSlotStart(String timeSlot) {
+    try {
+      return timeSlot.split('-')[0];
+    } catch (e) {
+      return timeSlot;
+    }
+  }
+
+  /// Parse time slot end time (e.g., "08:00-08:50" -> "08:50")
+  String _parseTimeSlotEnd(String timeSlot) {
+    try {
+      return timeSlot.split('-')[1];
+    } catch (e) {
+      return timeSlot;
+    }
   }
 
   /// Get next upcoming exam

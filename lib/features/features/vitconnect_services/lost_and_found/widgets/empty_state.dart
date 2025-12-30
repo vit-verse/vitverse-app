@@ -32,7 +32,7 @@ class LostFoundEmptyState extends StatelessWidget {
                 Text(
                   message,
                   style: theme.textTheme.bodyLarge?.copyWith(
-                    color: theme.textTheme.bodyLarge?.color?.withOpacity(0.7),
+                    color: theme.textTheme.bodyLarge?.color?.withValues(alpha: 0.7),
                   ),
                   textAlign: TextAlign.center,
                 ),

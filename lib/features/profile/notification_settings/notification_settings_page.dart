@@ -239,10 +239,10 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
     return Container(
       padding: const EdgeInsets.all(ThemeConstants.spacingMd),
       decoration: BoxDecoration(
-        color: themeProvider.currentTheme.primary.withOpacity(0.05),
+        color: themeProvider.currentTheme.primary.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(ThemeConstants.radiusLg),
         border: Border.all(
-          color: themeProvider.currentTheme.primary.withOpacity(0.1),
+          color: themeProvider.currentTheme.primary.withValues(alpha: 0.1),
         ),
       ),
       child: Row(
@@ -258,7 +258,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
             child: Text(
               'If any of the above notification channels (Lost & Found, Cab Share) are not subscribed or turned on, please turn them off and turn them back on to reinitialize the subscription.',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: themeProvider.currentTheme.text.withOpacity(0.7),
+                color: themeProvider.currentTheme.text.withValues(alpha: 0.7),
               ),
             ),
           ),
@@ -274,7 +274,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
         color: themeProvider.currentTheme.surface,
         borderRadius: BorderRadius.circular(ThemeConstants.radiusLg),
         border: Border.all(
-          color: themeProvider.currentTheme.muted.withOpacity(0.1),
+          color: themeProvider.currentTheme.muted.withValues(alpha: 0.1),
         ),
       ),
       child: Column(
@@ -435,7 +435,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                           border: Border.all(
                             color: _getNotificationTypeInfo(
                               notification.id,
-                            ).color.withOpacity(0.3),
+                            ).color.withValues(alpha: 0.3),
                           ),
                         ),
                         child: Column(
@@ -451,7 +451,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                                   decoration: BoxDecoration(
                                     color: _getNotificationTypeInfo(
                                       notification.id,
-                                    ).color.withOpacity(0.2),
+                                    ).color.withValues(alpha: 0.2),
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: Text(
@@ -542,7 +542,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       decoration: BoxDecoration(
-        color: themeProvider.currentTheme.muted.withOpacity(0.1),
+        color: themeProvider.currentTheme.muted.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Row(
@@ -628,7 +628,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
           color: themeProvider.currentTheme.surface,
           borderRadius: BorderRadius.circular(ThemeConstants.radiusLg),
           border: Border.all(
-            color: themeProvider.currentTheme.muted.withOpacity(0.1),
+            color: themeProvider.currentTheme.muted.withValues(alpha: 0.1),
           ),
         ),
         child: Row(
@@ -636,7 +636,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: themeProvider.currentTheme.primary.withOpacity(0.1),
+                color: themeProvider.currentTheme.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
@@ -685,7 +685,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
         color: themeProvider.currentTheme.surface,
         borderRadius: BorderRadius.circular(ThemeConstants.radiusLg),
         border: Border.all(
-          color: themeProvider.currentTheme.muted.withOpacity(0.1),
+          color: themeProvider.currentTheme.muted.withValues(alpha: 0.1),
         ),
       ),
       child: Row(
@@ -693,7 +693,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.deepPurple.withOpacity(0.1),
+              color: Colors.deepPurple.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: const Icon(
@@ -769,7 +769,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
         color: themeProvider.currentTheme.surface,
         borderRadius: BorderRadius.circular(ThemeConstants.radiusLg),
         border: Border.all(
-          color: themeProvider.currentTheme.muted.withOpacity(0.1),
+          color: themeProvider.currentTheme.muted.withValues(alpha: 0.1),
         ),
       ),
       child: Row(
@@ -777,7 +777,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.orange.withOpacity(0.1),
+              color: Colors.orange.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: const Icon(
@@ -846,10 +846,10 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
     return Container(
       padding: const EdgeInsets.all(ThemeConstants.spacingMd),
       decoration: BoxDecoration(
-        color: themeProvider.currentTheme.error.withOpacity(0.1),
+        color: themeProvider.currentTheme.error.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(ThemeConstants.radiusLg),
         border: Border.all(
-          color: themeProvider.currentTheme.error.withOpacity(0.3),
+          color: themeProvider.currentTheme.error.withValues(alpha: 0.3),
         ),
       ),
       child: Column(

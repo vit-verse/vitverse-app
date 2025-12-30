@@ -33,9 +33,7 @@ class _AddFriendsPageState extends State<AddFriendsPage> {
     try {
       await _service.loadFriends();
       setState(() => _isLoading = false);
-      Logger.success('AddFriends', 'Data loaded successfully');
     } catch (e) {
-      Logger.e('AddFriends', 'Failed to load data', e);
       setState(() => _isLoading = false);
       if (mounted) {
         SnackbarUtils.error(context, 'Failed to load friends');
@@ -43,14 +41,67 @@ class _AddFriendsPageState extends State<AddFriendsPage> {
     }
   }
 
-  Future<void> _toggleFriendSelection(String friendId) async {
+  Future<void> _toggleFriendsScheduleVisibility(String friendId) async {
     try {
-      await _service.toggleFriendSelection(friendId);
+      await _service.toggleFriendsScheduleVisibility(friendId);
       setState(() {});
     } catch (e) {
-      Logger.e('AddFriends', 'Failed to toggle friend selection', e);
       if (mounted) {
-        SnackbarUtils.error(context, 'Failed to update friend selection');
+        SnackbarUtils.error(context, 'Failed to update Friends Schedule visibility');
+      }
+    }
+  }
+
+  Future<void> _toggleHomePageVisibility(String friendId) async {
+    try {
+      await _service.toggleHomePageVisibility(friendId);
+      setState(() {});
+    } catch (e) {
+      if (mounted) {
+        SnackbarUtils.error(context, 'Failed to update Home Page visibility');
+      }
+    }
+  }
+
+  Future<void> _updateNickname(Friend friend) async {
+    final controller = TextEditingController(text: friend.nickname);
+    
+    final newNickname = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Edit Nickname'),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(
+            labelText: 'Nickname',
+            hintText: 'Enter a nickname for this friend',
+          ),
+          autofocus: true,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, controller.text.trim()),
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+
+    if (newNickname != null && newNickname.isNotEmpty && newNickname != friend.nickname) {
+      try {
+        await _service.updateFriendNickname(friend.id, newNickname);
+        setState(() {});
+        if (mounted) {
+          SnackbarUtils.success(context, 'Nickname updated to "$newNickname"');
+        }
+      } catch (e) {
+        if (mounted) {
+          SnackbarUtils.error(context, 'Failed to update nickname');
+        }
       }
     }
   }
@@ -84,7 +135,6 @@ class _AddFriendsPageState extends State<AddFriendsPage> {
           SnackbarUtils.success(context, '${friend.name} removed');
         }
       } catch (e) {
-        Logger.e('AddFriends', 'Failed to remove friend', e);
         if (mounted) {
           SnackbarUtils.error(context, 'Failed to remove friend');
         }
@@ -99,7 +149,7 @@ class _AddFriendsPageState extends State<AddFriendsPage> {
       decoration: BoxDecoration(
         color: theme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: theme.border.withOpacity(0.3)),
+        border: Border.all(color: theme.border.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -168,9 +218,9 @@ class _AddFriendsPageState extends State<AddFriendsPage> {
           horizontal: screenWidth < 360 ? 8 : 12,
         ),
         decoration: BoxDecoration(
-          color: theme.primary.withOpacity(0.1),
+          color: theme.primary.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: theme.primary.withOpacity(0.3)),
+          border: Border.all(color: theme.primary.withValues(alpha: 0.3)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -195,27 +245,28 @@ class _AddFriendsPageState extends State<AddFriendsPage> {
   }
 
   void _showQRScanner() {
+    final scaffoldContext = context;
     showDialog(
       context: context,
       builder:
-          (context) => QRScannerWidget(
+          (dialogContext) => QRScannerWidget(
             onQRScanned: (qrData) async {
               try {
                 final friend = Friend.fromQRString(qrData);
                 await _service.addFriend(friend);
-                setState(() {});
-                Navigator.pop(context);
                 if (mounted) {
+                  setState(() {});
+                  Navigator.pop(dialogContext);
                   SnackbarUtils.success(
-                    context,
+                    scaffoldContext,
                     '${friend.name} added successfully!',
                   );
                 }
               } catch (e) {
                 Logger.e('AddFriends', 'Failed to add friend from QR', e);
-                Navigator.pop(context);
                 if (mounted) {
-                  SnackbarUtils.error(context, 'Invalid QR code');
+                  Navigator.pop(dialogContext);
+                  SnackbarUtils.error(scaffoldContext, 'Invalid QR code');
                 }
               }
             },
@@ -229,11 +280,13 @@ class _AddFriendsPageState extends State<AddFriendsPage> {
       final XFile? image = await picker.pickImage(source: ImageSource.gallery);
 
       if (image != null) {
+        if (!mounted) return;
+        
         showDialog(
           context: context,
           barrierDismissible: false,
           builder:
-              (context) => const Center(child: CircularProgressIndicator()),
+              (dialogContext) => const Center(child: CircularProgressIndicator()),
         );
 
         try {
@@ -244,7 +297,8 @@ class _AddFriendsPageState extends State<AddFriendsPage> {
           final capture = await controller.analyzeImage(image.path);
           await controller.dispose();
 
-          if (mounted) Navigator.pop(context);
+          if (!mounted) return;
+          Navigator.pop(context);
 
           if (capture != null && capture.barcodes.isNotEmpty) {
             final qrData = capture.barcodes.first.rawValue;
@@ -253,14 +307,13 @@ class _AddFriendsPageState extends State<AddFriendsPage> {
               try {
                 final friend = Friend.fromQRString(qrData);
                 await _service.addFriend(friend);
+                
+                if (!mounted) return;
                 setState(() {});
-
-                if (mounted) {
-                  SnackbarUtils.success(
-                    context,
-                    '${friend.name} added from image!',
-                  );
-                }
+                SnackbarUtils.success(
+                  context,
+                  '${friend.name} added from image!',
+                );
 
                 Logger.success(
                   'AddFriends',
@@ -411,7 +464,7 @@ class _AddFriendsPageState extends State<AddFriendsPage> {
             Icon(
               Icons.people_alt_outlined,
               size: screenWidth < 360 ? 60 : 80,
-              color: theme.primary.withOpacity(0.5),
+              color: theme.primary.withValues(alpha: 0.5),
             ),
             SizedBox(height: screenWidth < 360 ? 20 : 24),
             Text(
@@ -446,72 +499,291 @@ class _AddFriendsPageState extends State<AddFriendsPage> {
       itemCount: _service.friends.length,
       itemBuilder: (context, index) {
         final friend = _service.friends[index];
-        final isSelected = _service.selectedFriends.any(
-          (f) => f.id == friend.id,
-        );
 
         return Container(
-          margin: EdgeInsets.only(bottom: screenWidth < 360 ? 8 : 12),
+          margin: EdgeInsets.only(bottom: screenWidth < 360 ? 12 : 16),
           decoration: BoxDecoration(
             color: theme.surface,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: isSelected ? friend.color.withOpacity(0.5) : theme.border,
-            ),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: theme.border.withValues(alpha: 0.5)),
+            boxShadow: [
+              BoxShadow(
+                color: theme.muted.withValues(alpha: 0.1),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
-          child: ListTile(
-            leading: Container(
-              width: screenWidth < 360 ? 36 : 40,
-              height: screenWidth < 360 ? 36 : 40,
-              decoration: BoxDecoration(
-                color: friend.color,
-                shape: BoxShape.circle,
-              ),
-              child: Center(
-                child: Text(
-                  friend.name.isNotEmpty ? friend.name[0].toUpperCase() : '?',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: screenWidth < 360 ? 14 : 16,
+          child: Padding(
+            padding: EdgeInsets.all(screenWidth < 360 ? 16 : 20),
+            child: Column(
+              children: [
+                // Header Row: Avatar, Name, Delete
+                Row(
+                  children: [
+                    // Avatar
+                    Container(
+                      width: screenWidth < 360 ? 48 : 56,
+                      height: screenWidth < 360 ? 48 : 56,
+                      decoration: BoxDecoration(
+                        color: friend.color,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: friend.color.withValues(alpha: 0.3),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Center(
+                        child: Text(
+                          friend.name.isNotEmpty ? friend.name[0].toUpperCase() : '?',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: screenWidth < 360 ? 18 : 22,
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: screenWidth < 360 ? 16 : 20),
+                    
+                    // Name and Info
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            friend.name,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: screenWidth < 360 ? 16 : 18,
+                              color: theme.text,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            friend.regNumber,
+                            style: TextStyle(
+                              fontSize: screenWidth < 360 ? 13 : 14,
+                              color: theme.muted,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    
+                    // Delete Button
+                    IconButton(
+                      onPressed: () => _removeFriend(friend),
+                      icon: Icon(
+                        Icons.delete_outline,
+                        color: Colors.red.shade400,
+                        size: screenWidth < 360 ? 20 : 24,
+                      ),
+                      style: IconButton.styleFrom(
+                        backgroundColor: Colors.red.shade50,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                
+                SizedBox(height: screenWidth < 360 ? 16 : 20),
+                
+                // Nickname Section
+                GestureDetector(
+                  onTap: () => _updateNickname(friend),
+                  child: Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.all(screenWidth < 360 ? 10 : 12),
+                    decoration: BoxDecoration(
+                      color: friend.color.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: friend.color.withValues(alpha: 0.2),
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.edit_outlined,
+                          color: friend.color,
+                          size: screenWidth < 360 ? 16 : 18,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Nickname: ',
+                          style: TextStyle(
+                            fontSize: screenWidth < 360 ? 12 : 13,
+                            color: theme.muted,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        Expanded(
+                          child: Text(
+                            friend.nickname,
+                            style: TextStyle(
+                              fontSize: screenWidth < 360 ? 13 : 14,
+                              color: friend.color,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        Icon(
+                          Icons.arrow_forward_ios,
+                          color: friend.color.withValues(alpha: 0.6),
+                          size: 12,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ),
-            title: Text(
-              friend.name,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: screenWidth < 360 ? 14 : 15,
-              ),
-            ),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  friend.regNumber,
-                  style: TextStyle(fontSize: screenWidth < 360 ? 12 : 13),
-                ),
-                Text(
-                  '${friend.classSlots.length} classes',
-                  style: TextStyle(
-                    fontSize: screenWidth < 360 ? 11 : 12,
-                    color: theme.muted,
+                
+                SizedBox(height: screenWidth < 360 ? 12 : 16),
+                
+                // Total Classes - Horizontal Bar
+                Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: screenWidth < 360 ? 12 : 14,
+                    vertical: screenWidth < 360 ? 8 : 10,
+                  ),
+                  decoration: BoxDecoration(
+                    color: theme.primary.withValues(alpha: 0.05),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: theme.primary.withValues(alpha: 0.1),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Total Classes: ',
+                        style: TextStyle(
+                          fontSize: screenWidth < 360 ? 10 : 11,
+                          color: theme.muted,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      Text(
+                        '${friend.classSlots.length}',
+                        style: TextStyle(
+                          fontSize: screenWidth < 360 ? 14 : 16,
+                          fontWeight: FontWeight.bold,
+                          color: theme.primary,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Switch(
-                  value: isSelected,
-                  onChanged: (_) => _toggleFriendSelection(friend.id),
-                  activeColor: friend.color,
-                ),
-                IconButton(
-                  icon: const Icon(Icons.delete_outline, color: Colors.red),
-                  onPressed: () => _removeFriend(friend),
+                
+                SizedBox(height: screenWidth < 360 ? 12 : 16),
+                
+                // Toggle Controls (Vertical)
+                Column(
+                  children: [
+                    // Friends Schedule Toggle
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: screenWidth < 360 ? 10 : 12,
+                        vertical: screenWidth < 360 ? 6 : 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: friend.showInFriendsSchedule 
+                            ? friend.color.withValues(alpha: 0.08)
+                            : theme.surface,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: friend.showInFriendsSchedule 
+                              ? friend.color.withValues(alpha: 0.3)
+                              : theme.border.withValues(alpha: 0.5),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              'Show in Friends Schedule',
+                              style: TextStyle(
+                                fontSize: screenWidth < 360 ? 10 : 11,
+                                fontWeight: FontWeight.w600,
+                                color: friend.showInFriendsSchedule 
+                                    ? friend.color 
+                                    : theme.muted,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Transform.scale(
+                            scale: 0.7,
+                            child: Switch(
+                              value: friend.showInFriendsSchedule,
+                              onChanged: (_) => _toggleFriendsScheduleVisibility(friend.id),
+                              activeColor: friend.color,
+                              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    
+                    const SizedBox(height: 8),
+                    
+                    // Home Page Toggle
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: screenWidth < 360 ? 10 : 12,
+                        vertical: screenWidth < 360 ? 6 : 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: friend.showInHomePage 
+                            ? friend.color.withValues(alpha: 0.08)
+                            : theme.surface,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: friend.showInHomePage 
+                              ? friend.color.withValues(alpha: 0.3)
+                              : theme.border.withValues(alpha: 0.5),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              'Show in Home Page',
+                              style: TextStyle(
+                                fontSize: screenWidth < 360 ? 10 : 11,
+                                fontWeight: FontWeight.w600,
+                                color: friend.showInHomePage 
+                                    ? friend.color 
+                                    : theme.muted,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Transform.scale(
+                            scale: 0.7,
+                            child: Switch(
+                              value: friend.showInHomePage,
+                              onChanged: (_) => _toggleHomePageVisibility(friend.id),
+                              activeColor: friend.color,
+                              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

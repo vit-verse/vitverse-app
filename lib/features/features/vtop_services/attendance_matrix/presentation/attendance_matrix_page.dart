@@ -156,7 +156,7 @@ class _AttendanceMatrixPageState extends State<AttendanceMatrixPage> {
               Icon(
                 Icons.grid_off_outlined,
                 size: 64,
-                color: theme.muted.withOpacity(0.5),
+                color: theme.muted.withValues(alpha: 0.5),
               ),
               const SizedBox(height: 24),
               Text(

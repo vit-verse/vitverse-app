@@ -110,7 +110,7 @@ class _PyqHomePageState extends State<PyqHomePage> {
             Icon(
               icon,
               size: 18,
-              color: isSelected ? Colors.white : theme.text.withOpacity(0.6),
+              color: isSelected ? Colors.white : theme.text.withValues(alpha: 0.6),
             ),
             const SizedBox(width: 6),
             Text(
@@ -118,7 +118,7 @@ class _PyqHomePageState extends State<PyqHomePage> {
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                color: isSelected ? Colors.white : theme.text.withOpacity(0.6),
+                color: isSelected ? Colors.white : theme.text.withValues(alpha: 0.6),
               ),
             ),
           ],

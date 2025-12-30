@@ -6,18 +6,24 @@ import 'friend_class_slot.dart';
 class Friend {
   final String id; // Unique identifier (reg number or generated)
   final String name;
+  final String nickname; // Display name for friend
   final String regNumber;
   final List<FriendClassSlot> classSlots;
   final Color color; // Theme color for this friend
   final DateTime addedAt;
+  final bool showInFriendsSchedule; // Show in Friends Schedule page
+  final bool showInHomePage; // Show in Home page
 
   const Friend({
     required this.id,
     required this.name,
+    required this.nickname,
     required this.regNumber,
     required this.classSlots,
     required this.color,
     required this.addedAt,
+    this.showInFriendsSchedule = false,
+    this.showInHomePage = false,
   });
 
   /// Get class slot for a specific cell (day + timeSlot)
@@ -46,6 +52,7 @@ class Friend {
     return Friend(
       id: json['id'] as String? ?? '',
       name: json['name'] as String? ?? '',
+      nickname: json['nickname'] as String? ?? json['name'] as String? ?? '',
       regNumber: json['regNumber'] as String? ?? '',
       classSlots:
           (json['classSlots'] as List<dynamic>?)
@@ -56,6 +63,8 @@ class Friend {
       addedAt: DateTime.parse(
         json['addedAt'] as String? ?? DateTime.now().toIso8601String(),
       ),
+      showInFriendsSchedule: json['showInFriendsSchedule'] as bool? ?? false,
+      showInHomePage: json['showInHomePage'] as bool? ?? false,
     );
   }
 
@@ -64,10 +73,13 @@ class Friend {
     return {
       'id': id,
       'name': name,
+      'nickname': nickname,
       'regNumber': regNumber,
       'classSlots': classSlots.map((e) => e.toJson()).toList(),
       'color': color.value,
       'addedAt': addedAt.toIso8601String(),
+      'showInFriendsSchedule': showInFriendsSchedule,
+      'showInHomePage': showInHomePage,
     };
   }
 
@@ -107,10 +119,13 @@ class Friend {
       return Friend(
         id: regNumber,
         name: name,
+        nickname: name, // Default nickname is the name
         regNumber: regNumber,
         classSlots: classSlots,
         color: color ?? _generateColorFromString(regNumber),
         addedAt: DateTime.now(),
+        showInFriendsSchedule: false, // User will choose
+        showInHomePage: false, // User will choose
       );
     } catch (e) {
       throw FormatException('Failed to parse QR data: $e');
@@ -138,24 +153,30 @@ class Friend {
   Friend copyWith({
     String? id,
     String? name,
+    String? nickname,
     String? regNumber,
     List<FriendClassSlot>? classSlots,
     Color? color,
     DateTime? addedAt,
+    bool? showInFriendsSchedule,
+    bool? showInHomePage,
   }) {
     return Friend(
       id: id ?? this.id,
       name: name ?? this.name,
+      nickname: nickname ?? this.nickname,
       regNumber: regNumber ?? this.regNumber,
       classSlots: classSlots ?? this.classSlots,
       color: color ?? this.color,
       addedAt: addedAt ?? this.addedAt,
+      showInFriendsSchedule: showInFriendsSchedule ?? this.showInFriendsSchedule,
+      showInHomePage: showInHomePage ?? this.showInHomePage,
     );
   }
 
   @override
   String toString() {
-    return 'Friend{name: $name, regNumber: $regNumber, slots: ${classSlots.length}}';
+    return 'Friend{name: $name, nickname: $nickname, regNumber: $regNumber, slots: ${classSlots.length}}';
   }
 
   @override

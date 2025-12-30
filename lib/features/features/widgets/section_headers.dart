@@ -28,7 +28,7 @@ class MainSectionHeader extends StatelessWidget {
           // Use professional theme-based gradient
           headerColors = [
             themeProvider.currentTheme.primary,
-            themeProvider.currentTheme.primary.withOpacity(0.8),
+            themeProvider.currentTheme.primary.withValues(alpha: 0.8),
           ];
         } else {
           // Use default colors
@@ -135,7 +135,7 @@ class SubSectionHeader extends StatelessWidget {
                       vertical: 2,
                     ),
                     decoration: BoxDecoration(
-                      color: theme.muted.withOpacity(0.15),
+                      color: theme.muted.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
@@ -192,7 +192,7 @@ class SimpleSectionHeader extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(
-                color: theme.muted.withOpacity(0.15),
+                color: theme.muted.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(

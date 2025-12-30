@@ -440,7 +440,7 @@ class _EventHubPageState extends State<EventHubPage> {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: theme.currentTheme.primary.withOpacity(0.1),
+                      color: theme.currentTheme.primary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
@@ -481,7 +481,7 @@ class _EventHubPageState extends State<EventHubPage> {
           border: Border.all(color: theme.currentTheme.border),
           boxShadow: [
             BoxShadow(
-              color: theme.currentTheme.text.withOpacity(0.05),
+              color: theme.currentTheme.text.withValues(alpha: 0.05),
               blurRadius: 4,
               offset: const Offset(0, 2),
             ),
@@ -634,7 +634,7 @@ class _EventHubPageState extends State<EventHubPage> {
                         width: 40,
                         height: 4,
                         decoration: BoxDecoration(
-                          color: theme.currentTheme.muted.withOpacity(0.3),
+                          color: theme.currentTheme.muted.withValues(alpha: 0.3),
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),

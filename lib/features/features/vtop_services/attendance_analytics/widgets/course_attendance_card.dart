@@ -195,7 +195,7 @@ class CourseAttendanceCard extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: getBadgeColor(context).withOpacity(0.15),
+                color: getBadgeColor(context).withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Text(

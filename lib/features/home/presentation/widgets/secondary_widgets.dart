@@ -155,7 +155,7 @@ class _SecondaryWidgetsState extends State<SecondaryWidgets>
                               isActive
                                   ? themeProvider.currentTheme.text
                                   : themeProvider.currentTheme.muted
-                                      .withOpacity(0.3),
+                                      .withValues(alpha: 0.3),
                           borderRadius: BorderRadius.circular(3),
                         ),
                       );

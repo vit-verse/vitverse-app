@@ -156,7 +156,7 @@ class ActionCard extends StatelessWidget {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: theme.primary.withOpacity(0.1),
+                color: theme.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Center(
@@ -225,7 +225,7 @@ class InfoCard extends StatelessWidget {
       decoration: AppCardStyles.cardDecoration(
         isDark: theme.isDark,
         customBackgroundColor: theme.surface,
-        customBorderColor: iconColor.withOpacity(0.3),
+        customBorderColor: iconColor.withValues(alpha: 0.3),
       ),
       padding: const EdgeInsets.all(16.0),
       child: Row(
@@ -235,7 +235,7 @@ class InfoCard extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: iconColor.withOpacity(0.1),
+              color: iconColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon, color: iconColor, size: 24),
@@ -410,10 +410,10 @@ class DeveloperCard extends StatelessWidget {
                 width: 56,
                 height: 56,
                 decoration: BoxDecoration(
-                  color: theme.primary.withOpacity(0.15),
+                  color: theme.primary.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: theme.primary.withOpacity(0.3),
+                    color: theme.primary.withValues(alpha: 0.3),
                     width: 2,
                   ),
                 ),
@@ -526,7 +526,7 @@ class CollaborationsCard extends StatelessWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: theme.primary.withOpacity(0.1),
+                  color: theme.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 padding: const EdgeInsets.all(8),
@@ -745,9 +745,9 @@ class _ContributorRow extends StatelessWidget {
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color: theme.primary.withOpacity(0.15),
+            color: theme.primary.withValues(alpha: 0.15),
             shape: BoxShape.circle,
-            border: Border.all(color: theme.primary.withOpacity(0.3), width: 2),
+            border: Border.all(color: theme.primary.withValues(alpha: 0.3), width: 2),
           ),
           padding: const EdgeInsets.all(8),
           child:
@@ -814,7 +814,7 @@ class SmallActionCard extends StatelessWidget {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: theme.primary.withOpacity(0.1),
+                color: theme.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(icon, color: theme.primary, size: 24),

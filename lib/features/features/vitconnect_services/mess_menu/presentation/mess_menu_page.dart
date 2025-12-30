@@ -155,9 +155,9 @@ class _MessMenuPageState extends State<MessMenuPage> {
                 child: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: theme.surface.withOpacity(0.5),
+                    color: theme.surface.withValues(alpha: 0.5),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: theme.muted.withOpacity(0.2)),
+                    border: Border.all(color: theme.muted.withValues(alpha: 0.2)),
                   ),
                   child: Icon(
                     Icons.settings_outlined,
@@ -255,7 +255,7 @@ class _MessMenuPageState extends State<MessMenuPage> {
       decoration: BoxDecoration(
         color: theme.surface,
         border: Border(
-          bottom: BorderSide(color: theme.muted.withOpacity(0.05)),
+          bottom: BorderSide(color: theme.muted.withValues(alpha: 0.05)),
         ),
       ),
       child: Row(
@@ -282,7 +282,7 @@ class _MessMenuPageState extends State<MessMenuPage> {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: theme.surface,
-        border: Border(bottom: BorderSide(color: theme.muted.withOpacity(0.1))),
+        border: Border(bottom: BorderSide(color: theme.muted.withValues(alpha: 0.1))),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -306,7 +306,7 @@ class _MessMenuPageState extends State<MessMenuPage> {
                     isSelected
                         ? theme.primary
                         : isToday
-                        ? theme.primary.withOpacity(0.1)
+                        ? theme.primary.withValues(alpha: 0.1)
                         : Colors.transparent,
                 border: Border.all(
                   color:
@@ -456,7 +456,7 @@ class _MessMenuPageState extends State<MessMenuPage> {
                       gradient: RadialGradient(
                         colors: [
                           gradientColor.withOpacity(theme.isDark ? 0.08 : 0.06),
-                          gradientColor.withOpacity(0.0),
+                          gradientColor.withValues(alpha: 0.0),
                         ],
                         center: Alignment.bottomRight,
                         radius: 1.0,
@@ -559,7 +559,7 @@ class _MessMenuPageState extends State<MessMenuPage> {
             'Last Updated: $formattedDate',
             style: TextStyle(
               fontSize: 11,
-              color: theme.muted.withOpacity(0.7),
+              color: theme.muted.withValues(alpha: 0.7),
               fontStyle: FontStyle.italic,
             ),
           ),
@@ -581,10 +581,10 @@ class _MessMenuPageState extends State<MessMenuPage> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
               decoration: BoxDecoration(
-                color: theme.primary.withOpacity(0.1),
+                color: theme.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: theme.primary.withOpacity(0.3),
+                  color: theme.primary.withValues(alpha: 0.3),
                   width: 1,
                 ),
               ),

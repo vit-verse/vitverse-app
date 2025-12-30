@@ -23,7 +23,7 @@ class FacultyRatingCard extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(
-          color: theme.colorScheme.primary.withOpacity(0.1),
+          color: theme.colorScheme.primary.withValues(alpha: 0.1),
           width: 1,
         ),
       ),
@@ -54,7 +54,7 @@ class FacultyRatingCard extends StatelessWidget {
                         Text(
                           faculty.facultyId,
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurface.withOpacity(0.6),
+                            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                           ),
                         ),
                       ],
@@ -78,7 +78,7 @@ class FacultyRatingCard extends StatelessWidget {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: theme.colorScheme.primary.withOpacity(0.1),
+                          color: theme.colorScheme.primary.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
@@ -128,9 +128,9 @@ class FacultyRatingCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
+        color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.3), width: 1),
+        border: Border.all(color: color.withValues(alpha: 0.3), width: 1),
       ),
       child: Column(
         children: [
@@ -145,7 +145,7 @@ class FacultyRatingCard extends StatelessWidget {
           ),
           Text(
             '/10',
-            style: TextStyle(fontSize: 9, color: color.withOpacity(0.8)),
+            style: TextStyle(fontSize: 9, color: color.withValues(alpha: 0.8)),
           ),
         ],
       ),
@@ -158,10 +158,10 @@ class FacultyRatingCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: theme.colorScheme.onSurface.withOpacity(0.08),
+          color: theme.colorScheme.onSurface.withValues(alpha: 0.08),
         ),
       ),
       child: Column(
@@ -198,13 +198,13 @@ class FacultyRatingCard extends StatelessWidget {
           const SizedBox(height: 6),
           Divider(
             height: 1,
-            color: theme.colorScheme.onSurface.withOpacity(0.08),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.08),
           ),
           const SizedBox(height: 6),
           Text(
             'Based on ${rating.totalRatings} rating${rating.totalRatings == 1 ? '' : 's'}',
             style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurface.withOpacity(0.5),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
               fontSize: 10,
             ),
           ),
@@ -221,7 +221,7 @@ class FacultyRatingCard extends StatelessWidget {
           label,
           style: theme.textTheme.bodySmall?.copyWith(
             fontSize: 10,
-            color: theme.colorScheme.onSurface.withOpacity(0.6),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
           ),
         ),
         const SizedBox(height: 1),

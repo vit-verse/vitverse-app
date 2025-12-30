@@ -21,10 +21,10 @@ class FeeSummaryCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: theme.surface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: theme.muted.withOpacity(0.2), width: 1),
+        border: Border.all(color: theme.muted.withValues(alpha: 0.2), width: 1),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -38,7 +38,7 @@ class FeeSummaryCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: theme.primary.withOpacity(0.1),
+                  color: theme.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
@@ -83,7 +83,7 @@ class FeeSummaryCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 20),
-          Container(height: 1, color: theme.muted.withOpacity(0.2)),
+          Container(height: 1, color: theme.muted.withValues(alpha: 0.2)),
           const SizedBox(height: 20),
           Row(
             children: [
@@ -134,7 +134,7 @@ class FeeSummaryCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: theme.background,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: theme.muted.withOpacity(0.15), width: 1),
+        border: Border.all(color: theme.muted.withValues(alpha: 0.15), width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -188,10 +188,10 @@ class ReceiptCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: theme.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: theme.muted.withOpacity(0.2), width: 1),
+        border: Border.all(color: theme.muted.withValues(alpha: 0.2), width: 1),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -203,7 +203,7 @@ class ReceiptCard extends StatelessWidget {
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: theme.primary.withOpacity(0.1),
+              color: theme.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
@@ -248,7 +248,7 @@ class ReceiptCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF10B981).withOpacity(0.1),
+                  color: const Color(0xFF10B981).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: const Text(
@@ -283,13 +283,13 @@ class EmptyReceiptsState extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: theme.muted.withOpacity(0.1),
+              color: theme.muted.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(
               Icons.receipt_long_rounded,
               size: 64,
-              color: theme.muted.withOpacity(0.5),
+              color: theme.muted.withValues(alpha: 0.5),
             ),
           ),
           const SizedBox(height: 24),

@@ -29,7 +29,7 @@ class LostFoundGridCard extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(
-          color: theme.colorScheme.primary.withOpacity(0.1),
+          color: theme.colorScheme.primary.withValues(alpha: 0.1),
           width: 1,
         ),
       ),
@@ -73,7 +73,7 @@ class LostFoundGridCard extends StatelessWidget {
                     _formatDate(item.createdAt),
                     style: theme.textTheme.bodySmall?.copyWith(
                       fontSize: 9,
-                      color: theme.textTheme.bodySmall?.color?.withOpacity(0.6),
+                      color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.6),
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -87,7 +87,7 @@ class LostFoundGridCard extends StatelessWidget {
               Container(
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  color: Colors.red.withOpacity(0.1),
+                  color: Colors.red.withValues(alpha: 0.1),
                   borderRadius: const BorderRadius.vertical(
                     bottom: Radius.circular(12),
                   ),
@@ -138,7 +138,7 @@ class LostFoundGridCard extends StatelessWidget {
       child: Container(
         height: 120,
         width: double.infinity,
-        color: theme.colorScheme.primary.withOpacity(0.05),
+        color: theme.colorScheme.primary.withValues(alpha: 0.05),
         child:
             hasImage
                 ? CachedNetworkImage(
@@ -179,8 +179,8 @@ class LostFoundGridCard extends StatelessWidget {
       decoration: BoxDecoration(
         color:
             item.isLost
-                ? Colors.orange.withOpacity(0.1)
-                : Colors.green.withOpacity(0.1),
+                ? Colors.orange.withValues(alpha: 0.1)
+                : Colors.green.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: item.isLost ? Colors.orange : Colors.green,

@@ -255,7 +255,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
             width: 1,
             height: 12,
             margin: const EdgeInsets.symmetric(horizontal: 12),
-            color: theme.border.withOpacity(0.3),
+            color: theme.border.withValues(alpha: 0.3),
           ),
           Text('Exams: ', style: TextStyle(color: theme.muted, fontSize: 12)),
           Text(

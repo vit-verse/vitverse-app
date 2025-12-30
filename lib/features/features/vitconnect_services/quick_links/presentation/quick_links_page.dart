@@ -166,7 +166,7 @@ class _QuickLinksPageState extends State<QuickLinksPage> {
             Icon(
               Icons.link_off_rounded,
               size: 80,
-              color: themeProvider.currentTheme.muted.withOpacity(0.5),
+              color: themeProvider.currentTheme.muted.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 24),
             Text(
