@@ -36,10 +36,8 @@ class HomeLogic {
     try {
       Logger.i(_tag, 'Loading all home data...');
 
-      // Clear combined classes cache when reloading data
       clearCombinedClassesCache();
 
-      // Load all data concurrently
       final futures = [
         _dataProvider.getUserData(),
         _dataProvider.getAttendanceData(),
@@ -58,8 +56,9 @@ class HomeLogic {
       _coursesData = results[4] as List<Map<String, dynamic>>;
       _slotsData = results[5] as List<Map<String, dynamic>>;
 
-      // Load OD count
       await _loadOnDutyCount();
+      
+      clearCombinedClassesCache();
 
       Logger.success(_tag, 'All home data loaded successfully');
     } catch (e) {
@@ -243,34 +242,25 @@ class HomeLogic {
 
   /// Get combined classes for a specific day (user + friends)
   Future<List<Map<String, dynamic>>> getCombinedClassesForDay(int dayIndex) async {
-    // Return cached data if available
     if (_combinedClassesCache.containsKey(dayIndex)) {
       return _combinedClassesCache[dayIndex]!;
     }
     
     try {
-      // Get user's classes (existing logic)
       final userClasses = getClassesForDay(dayIndex);
-      
-      // Get friends' classes
       final friendsClasses = await _getFriendsClassesForDay(dayIndex);
-      
-      // Merge consecutive classes for friends too
       final mergedFriendsClasses = _mergeConsecutiveFriendClasses(friendsClasses);
       
-      // Combine and sort by time
       final allClasses = <Map<String, dynamic>>[];
       allClasses.addAll(userClasses);
       allClasses.addAll(mergedFriendsClasses);
       
-      // Sort by start time
       allClasses.sort((a, b) {
         final timeA = a['start_time']?.toString() ?? '';
         final timeB = b['start_time']?.toString() ?? '';
         return timeA.compareTo(timeB);
       });
       
-      // Cache the result
       _combinedClassesCache[dayIndex] = allClasses;
       
       return allClasses;

@@ -43,8 +43,6 @@ class _ClassScheduleListState extends State<ClassScheduleList> {
           _holidayDays = holidayList.map((day) => int.parse(day)).toSet();
         });
       }
-
-      Logger.d('ClassScheduleList', 'Loaded holidays: $_holidayDays');
     } catch (e) {
       // Silent error handling
     }
@@ -58,12 +56,7 @@ class _ClassScheduleListState extends State<ClassScheduleList> {
     return Stack(
       fit: StackFit.expand,
       children: [
-        // Full screen Lottie animation
         const Positioned.fill(
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
           child: ThemedLottieWidget(
             assetPath: 'assets/lottie/SpaceCat.lottie',
             fallbackIcon: Icons.celebration_rounded,
@@ -71,7 +64,6 @@ class _ClassScheduleListState extends State<ClassScheduleList> {
             showContainer: false,
           ),
         ),
-        // Text overlay in the center
         Center(
           child: Container(
             margin: const EdgeInsets.symmetric(horizontal: 16),
@@ -118,26 +110,8 @@ class _ClassScheduleListState extends State<ClassScheduleList> {
   Widget build(BuildContext context) {
     return Consumer<ThemeProvider>(
       builder: (context, themeProvider, child) {
-        // Skip skeleton loading - directly show content
-        // if (widget.isDataLoading) {
-        //   return SingleChildScrollView(
-        //     padding: const EdgeInsets.all(16),
-        //     child: Column(
-        //       children: List.generate(
-        //         3,
-        //         (index) => Padding(
-        //           padding: const EdgeInsets.only(bottom: 12),
-        //           child: SkeletonWidgets.classCard(themeProvider),
-        //         ),
-        //       ),
-        //     ),
-        //   );
-        // }
-
-        // Check if this day is marked as holiday
         final isHoliday = _holidayDays.contains(widget.dayIndex);
 
-        // If it's a holiday, show holiday message with full screen animation
         if (isHoliday) {
           return _buildEmptyState(
             themeProvider,
@@ -146,12 +120,10 @@ class _ClassScheduleListState extends State<ClassScheduleList> {
           );
         }
 
-        // Get combined classes for the day (user + friends)
         return FutureBuilder<List<Map<String, dynamic>>>(
           future: widget.homeLogic.getCombinedClassesForDay(widget.dayIndex),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              // Show minimal loading indicator
               return Center(
                 child: Padding(
                   padding: const EdgeInsets.all(32),

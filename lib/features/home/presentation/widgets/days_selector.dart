@@ -44,8 +44,6 @@ class _DaysSelectorState extends State<DaysSelector> {
           _holidayDays = holidayList.map((day) => int.parse(day)).toSet();
         });
       }
-
-      Logger.d(_tag, 'Loaded holidays: $_holidayDays');
     } catch (e) {
       Logger.e(_tag, 'Failed to load holidays', e);
     }
@@ -58,8 +56,6 @@ class _DaysSelectorState extends State<DaysSelector> {
         'holiday_days',
         _holidayDays.map((day) => day.toString()).toList(),
       );
-
-      Logger.d(_tag, 'Saved holidays: $_holidayDays');
     } catch (e) {
       Logger.e(_tag, 'Failed to save holidays', e);
     }
