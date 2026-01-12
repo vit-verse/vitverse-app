@@ -124,59 +124,60 @@ class FeatureTile extends StatelessWidget {
           ),
           child: Stack(
             children: [
-              // Main content - HORIZONTAL LAYOUT FOR 2-COLUMN
-              if (is2Column)
-                Row(
-                  children: [
-                    // Large gradient icon on left
-                    _buildGradientIcon(44, 14, 26),
-                    const SizedBox(width: 12),
+              // Main content - CENTER ALL CONTENT
+              Center(
+                child:
+                    is2Column
+                        ? Row(
+                          children: [
+                            // Large gradient icon on left
+                            _buildGradientIcon(44, 14, 26),
+                            const SizedBox(width: 12),
 
-                    // Title on right
-                    Expanded(
-                      child: Text(
-                        feature.title,
-                        style: TextStyle(
-                          color: theme.text,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                )
-              else
-                // 3-COLUMN VERTICAL LAYOUT - PERFECTLY CENTERED
-                Padding(
-                  padding: const EdgeInsets.only(top: 8, bottom: 8),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      // Larger icon - perfectly centered
-                      Center(child: _buildGradientIcon(36, 12, 20)),
-                      const SizedBox(height: 8),
+                            // Title on right
+                            Expanded(
+                              child: Text(
+                                feature.title,
+                                style: TextStyle(
+                                  color: theme.text,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        )
+                        : Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Icon
+                            _buildGradientIcon(36, 12, 20),
+                            const SizedBox(height: 8),
 
-                      // Title - centered with proper padding
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4),
-                        child: Text(
-                          feature.title,
-                          style: TextStyle(
-                            color: theme.text,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                          textAlign: TextAlign.center,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
+                            // Title - centered
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 4,
+                              ),
+                              child: Text(
+                                feature.title,
+                                style: TextStyle(
+                                  color: theme.text,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                textAlign: TextAlign.center,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                    ],
-                  ),
-                ),
+              ),
             ],
           ),
         ),

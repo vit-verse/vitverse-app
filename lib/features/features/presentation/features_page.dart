@@ -414,7 +414,7 @@ class _FeaturesPageState extends State<FeaturesPage> {
     final columnCount = viewMode == ViewMode.grid2Column ? 2 : 3;
     final crossAxisSpacing = viewMode == ViewMode.grid2Column ? 12.0 : 8.0;
     final mainAxisSpacing = viewMode == ViewMode.grid2Column ? 12.0 : 8.0;
-    final childAspectRatio = viewMode == ViewMode.grid2Column ? 2.3 : 1.5;
+    final childAspectRatio = viewMode == ViewMode.grid2Column ? 2.3 : 1.0;
 
     return GridView.builder(
       shrinkWrap: true,

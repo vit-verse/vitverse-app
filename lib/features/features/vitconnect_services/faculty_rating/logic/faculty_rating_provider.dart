@@ -159,12 +159,14 @@ class FacultyRatingProvider extends ChangeNotifier {
   /// Submit rating
   Future<bool> submitRating({
     required String studentRegno,
+    required String studentName,
     required String facultyId,
     required String facultyName,
     required double teaching,
     required double attendanceFlex,
     required double supportiveness,
     required double marks,
+    String? review,
     List<CourseInfo> courses = const [],
   }) async {
     try {
@@ -176,12 +178,14 @@ class FacultyRatingProvider extends ChangeNotifier {
 
       await _repository.submitRating(
         studentRegno: studentRegno,
+        studentName: studentName,
         facultyId: facultyId,
         facultyName: facultyName,
         teaching: teaching,
         attendanceFlex: attendanceFlex,
         supportiveness: supportiveness,
         marks: marks,
+        review: review,
         courses: courses,
       );
 

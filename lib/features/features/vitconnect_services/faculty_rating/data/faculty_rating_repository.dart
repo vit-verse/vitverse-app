@@ -88,12 +88,14 @@ class FacultyRatingRepository {
   /// Submit rating (replaces old rating if exists)
   Future<void> submitRating({
     required String studentRegno,
+    required String studentName,
     required String facultyId,
     required String facultyName,
     required double teaching,
     required double attendanceFlex,
     required double supportiveness,
     required double marks,
+    String? review,
     List<CourseInfo> courses = const [],
   }) async {
     try {
@@ -102,12 +104,14 @@ class FacultyRatingRepository {
       final rating = StudentFacultyRating(
         id: const Uuid().v4(),
         studentRegno: studentRegno,
+        studentName: studentName,
         facultyId: facultyId,
         facultyName: facultyName,
         teaching: teaching,
         attendanceFlex: attendanceFlex,
         supportiveness: supportiveness,
         marks: marks,
+        review: review,
         courses: courses,
         submittedAt: DateTime.now(),
       );
@@ -212,6 +216,33 @@ class FacultyRatingRepository {
       return ratings;
     } catch (e, stack) {
       Logger.e(_tag, 'Error fetching all faculty ratings', e, stack);
+      rethrow;
+    }
+  }
+
+  /// Get all reviews for a specific faculty
+  Future<List<StudentFacultyRating>> getFacultyReviews({
+    required String facultyId,
+  }) async {
+    try {
+      Logger.d(_tag, 'Fetching reviews for faculty: $facultyId');
+
+      final response = await _supabase
+          .from('faculty_ratings')
+          .select()
+          .eq('faculty_id', facultyId)
+          .order('submitted_at', ascending: false);
+
+      final reviews =
+          (response as List)
+              .map((e) => StudentFacultyRating.fromMap(e))
+              .toList();
+
+      Logger.success(_tag, 'Fetched ${reviews.length} reviews');
+
+      return reviews;
+    } catch (e, stack) {
+      Logger.e(_tag, 'Error fetching faculty reviews', e, stack);
       rethrow;
     }
   }

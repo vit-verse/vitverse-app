@@ -10,7 +10,6 @@ import '../../../../../core/theme/theme_provider.dart';
 import '../../../../../core/widgets/themed_lottie_widget.dart';
 import '../../../../../core/utils/snackbar_utils.dart';
 import '../../../../../core/utils/logger.dart';
-import '../utils/event_utils.dart';
 
 class EventCard extends StatefulWidget {
   final Event event;
@@ -164,39 +163,78 @@ class _EventCardState extends State<EventCard> {
                   Positioned(
                     top: 8,
                     right: 8,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 3,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.5),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.favorite, size: 10, color: Colors.white70),
-                          const SizedBox(width: 2),
-                          Text(
-                            '${currentEvent.likesCount}',
-                            style: const TextStyle(
-                              fontSize: 9,
-                              color: Colors.white70,
-                            ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 3,
                           ),
-                          const SizedBox(width: 6),
-                          Icon(Icons.comment, size: 10, color: Colors.white70),
-                          const SizedBox(width: 2),
-                          Text(
-                            '${currentEvent.commentsCount}',
-                            style: const TextStyle(
-                              fontSize: 9,
-                              color: Colors.white70,
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: 0.5),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.favorite,
+                                size: 10,
+                                color: Colors.white70,
+                              ),
+                              const SizedBox(width: 2),
+                              Text(
+                                '${currentEvent.likesCount}',
+                                style: const TextStyle(
+                                  fontSize: 9,
+                                  color: Colors.white70,
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Icon(
+                                Icons.comment,
+                                size: 10,
+                                color: Colors.white70,
+                              ),
+                              const SizedBox(width: 2),
+                              Text(
+                                '${currentEvent.commentsCount}',
+                                style: const TextStyle(
+                                  fontSize: 9,
+                                  color: Colors.white70,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        // Today/Tomorrow tag
+                        if (_getEventDayTag() != null) ...[
+                          const SizedBox(height: 4),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color:
+                                  _getEventDayTag() == 'TODAY'
+                                      ? Colors.green.withValues(alpha: 0.8)
+                                      : Colors.blue.withValues(alpha: 0.8),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              _getEventDayTag()!,
+                              style: const TextStyle(
+                                fontSize: 8,
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                         ],
-                      ),
+                      ],
                     ),
                   ),
                   Positioned(
@@ -350,6 +388,24 @@ class _EventCardState extends State<EventCard> {
         ),
       ),
     );
+  }
+
+  String? _getEventDayTag() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final tomorrow = today.add(const Duration(days: 1));
+    final eventDay = DateTime(
+      widget.event.eventDate.year,
+      widget.event.eventDate.month,
+      widget.event.eventDate.day,
+    );
+
+    if (eventDay.isAtSameMomentAs(today)) {
+      return 'TODAY';
+    } else if (eventDay.isAtSameMomentAs(tomorrow)) {
+      return 'TOMORROW';
+    }
+    return null;
   }
 
   Widget _buildPoster() {

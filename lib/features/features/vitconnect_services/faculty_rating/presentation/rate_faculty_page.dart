@@ -32,11 +32,18 @@ class _RateFacultyPageState extends State<RateFacultyPage> {
   double _supportiveness = 5.0;
   double _marks = 5.0;
   bool _isSubmitting = false;
+  final _reviewController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _loadExistingRating();
+  }
+
+  @override
+  void dispose() {
+    _reviewController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadExistingRating() async {
@@ -55,6 +62,7 @@ class _RateFacultyPageState extends State<RateFacultyPage> {
           _attendanceFlex = rating.attendanceFlex;
           _supportiveness = rating.supportiveness;
           _marks = rating.marks;
+          _reviewController.text = rating.review ?? '';
         });
         Logger.d(_tag, 'Loaded existing rating');
       }
@@ -82,12 +90,17 @@ class _RateFacultyPageState extends State<RateFacultyPage> {
 
       final success = await provider.submitRating(
         studentRegno: widget.studentProfile.registerNumber,
+        studentName: widget.studentProfile.name,
         facultyId: widget.facultyId,
         facultyName: faculty.facultyName,
         teaching: _teaching,
         attendanceFlex: _attendanceFlex,
         supportiveness: _supportiveness,
         marks: _marks,
+        review:
+            _reviewController.text.trim().isEmpty
+                ? null
+                : _reviewController.text.trim(),
         courses:
             faculty.courses
                 .map(
@@ -437,6 +450,147 @@ class _RateFacultyPageState extends State<RateFacultyPage> {
                       ],
                     ),
                   ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // Review Comment Section
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: theme.surface,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: theme.primary.withValues(alpha: 0.15),
+                  width: 1,
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.comment_outlined,
+                        size: 16,
+                        color: theme.primary,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Review Comment (Optional)',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: theme.text,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Warning Note
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.orange.shade50,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: Colors.orange.shade200,
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.info_outline,
+                          size: 16,
+                          color: Colors.orange.shade700,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Your name and registration number will be visible to others. Kindly maintain appropriate language.',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Colors.orange.shade900,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Review TextField
+                  TextField(
+                    controller: _reviewController,
+                    enabled: !_isSubmitting,
+                    maxLength: 50,
+                    maxLines: 2,
+                    decoration: InputDecoration(
+                      hintText:
+                          'Share your experience (optional, max 50 characters)',
+                      hintStyle: TextStyle(
+                        fontSize: 13,
+                        color: theme.muted.withValues(alpha: 0.6),
+                      ),
+                      filled: true,
+                      fillColor: theme.background,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide(
+                          color: theme.muted.withValues(alpha: 0.3),
+                        ),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide(
+                          color: theme.muted.withValues(alpha: 0.3),
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide(
+                          color: theme.primary,
+                          width: 1.5,
+                        ),
+                      ),
+                      counterStyle: TextStyle(fontSize: 11, color: theme.muted),
+                      contentPadding: const EdgeInsets.all(12),
+                    ),
+                    style: TextStyle(fontSize: 13, color: theme.text),
+                  ),
+
+                  // Clear button if text exists
+                  if (_reviewController.text.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: TextButton.icon(
+                        onPressed:
+                            _isSubmitting
+                                ? null
+                                : () {
+                                  setState(() {
+                                    _reviewController.clear();
+                                  });
+                                },
+                        icon: Icon(Icons.clear, size: 16, color: theme.error),
+                        label: Text(
+                          'Clear Review',
+                          style: TextStyle(fontSize: 12, color: theme.error),
+                        ),
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),

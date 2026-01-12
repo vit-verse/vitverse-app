@@ -9,7 +9,7 @@ class FeatureProvider with ChangeNotifier {
 
   List<Feature> _pinnedFeatures = [];
   bool _isLoading = true;
-  ViewMode _viewMode = ViewMode.grid2Column; // List, 2-col grid, or 3-col grid
+  ViewMode _viewMode = ViewMode.list; // List, 2-col grid, or 3-col grid
   bool _hasCustomizedPins = false; // Track if user has customized pins
 
   List<Feature> get pinnedFeatures => _pinnedFeatures;

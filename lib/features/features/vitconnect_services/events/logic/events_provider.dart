@@ -75,14 +75,35 @@ class EventsProvider extends ChangeNotifier {
     switch (_sortBy) {
       case 'upcoming':
         filtered.sort((a, b) {
-          final aIsUpcoming = a.eventDate.isAfter(now);
-          final bIsUpcoming = b.eventDate.isAfter(now);
+          final today = DateTime(now.year, now.month, now.day);
+
+          final aDay = DateTime(
+            a.eventDate.year,
+            a.eventDate.month,
+            a.eventDate.day,
+          );
+          final bDay = DateTime(
+            b.eventDate.year,
+            b.eventDate.month,
+            b.eventDate.day,
+          );
+
+          final aIsUpcoming =
+              aDay.isAtSameMomentAs(today) || aDay.isAfter(today);
+          final bIsUpcoming =
+              bDay.isAtSameMomentAs(today) || bDay.isAfter(today);
+
+          // Upcoming events first
           if (aIsUpcoming && !bIsUpcoming) return -1;
           if (!aIsUpcoming && bIsUpcoming) return 1;
+
+          // Both upcoming → nearest date first
           if (aIsUpcoming && bIsUpcoming) {
-            return a.eventDate.compareTo(b.eventDate);
+            return aDay.compareTo(bDay);
           }
-          return b.eventDate.compareTo(a.eventDate);
+
+          // Both past → latest past first
+          return bDay.compareTo(aDay);
         });
         break;
       case 'most_liked':
@@ -93,7 +114,30 @@ class EventsProvider extends ChangeNotifier {
         break;
       case 'date':
       default:
-        filtered.sort((a, b) => b.eventDate.compareTo(a.eventDate));
+        // Sort by date: today first, then future events in chronological order
+        filtered.sort((a, b) {
+          final aDay = DateTime(
+            a.eventDate.year,
+            a.eventDate.month,
+            a.eventDate.day,
+          );
+          final bDay = DateTime(
+            b.eventDate.year,
+            b.eventDate.month,
+            b.eventDate.day,
+          );
+          final todayDay = DateTime(now.year, now.month, now.day);
+
+          final aIsToday = aDay.isAtSameMomentAs(todayDay);
+          final bIsToday = bDay.isAtSameMomentAs(todayDay);
+
+          // Today's events come first
+          if (aIsToday && !bIsToday) return -1;
+          if (!aIsToday && bIsToday) return 1;
+
+          // Otherwise sort chronologically (nearest first)
+          return a.eventDate.compareTo(b.eventDate);
+        });
         break;
     }
 

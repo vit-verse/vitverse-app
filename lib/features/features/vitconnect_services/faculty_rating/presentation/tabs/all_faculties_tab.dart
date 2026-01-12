@@ -4,9 +4,16 @@ import '../../../../../../core/theme/theme_provider.dart';
 import '../../logic/faculty_rating_provider.dart';
 import '../../widgets/compact_faculty_card.dart';
 
-enum SortOption { highestRating, lowestRating, mostRated, leastRated }
+enum SortOrder { highestFirst, lowestFirst }
 
-enum SortAttribute { overall, knowledge, teaching, approachability, grading }
+enum SortAttribute {
+  overall,
+  teaching,
+  attendance,
+  supportiveness,
+  marks,
+  numRatings,
+}
 
 /// Tab for viewing all faculties with ratings
 class AllFacultiesTab extends StatefulWidget {
@@ -22,7 +29,7 @@ class _AllFacultiesTabState extends State<AllFacultiesTab>
   bool get wantKeepAlive => true;
 
   String _searchQuery = '';
-  SortOption _sortOption = SortOption.highestRating;
+  SortOrder _sortOrder = SortOrder.highestFirst;
   SortAttribute _sortAttribute = SortAttribute.overall;
   final TextEditingController _searchController = TextEditingController();
 
@@ -56,49 +63,30 @@ class _AllFacultiesTabState extends State<AllFacultiesTab>
               );
         }).toList();
 
-    // Get rating value based on selected attribute
-    double getRatingValue(dynamic fw) {
+    // Get value based on selected attribute
+    double getValue(dynamic fw) {
       if (fw.ratingData == null) return 0.0;
       switch (_sortAttribute) {
         case SortAttribute.overall:
           return fw.ratingData!.avgOverall;
-        case SortAttribute.knowledge:
-          return fw.ratingData!.avgTeaching;
         case SortAttribute.teaching:
           return fw.ratingData!.avgTeaching;
-        case SortAttribute.approachability:
+        case SortAttribute.attendance:
+          return fw.ratingData!.avgAttendanceFlex;
+        case SortAttribute.supportiveness:
           return fw.ratingData!.avgSupportiveness;
-        case SortAttribute.grading:
+        case SortAttribute.marks:
           return fw.ratingData!.avgMarks;
+        case SortAttribute.numRatings:
+          return (fw.ratingData?.totalRatings ?? 0).toDouble();
       }
     }
 
-    // Sort based on selected option
-    switch (_sortOption) {
-      case SortOption.highestRating:
-        faculties.sort(
-          (a, b) => getRatingValue(b).compareTo(getRatingValue(a)),
-        );
-        break;
-      case SortOption.lowestRating:
-        faculties.sort(
-          (a, b) => getRatingValue(a).compareTo(getRatingValue(b)),
-        );
-        break;
-      case SortOption.mostRated:
-        faculties.sort((a, b) {
-          final aCount = a.ratingData?.totalRatings ?? 0;
-          final bCount = b.ratingData?.totalRatings ?? 0;
-          return bCount.compareTo(aCount);
-        });
-        break;
-      case SortOption.leastRated:
-        faculties.sort((a, b) {
-          final aCount = a.ratingData?.totalRatings ?? 0;
-          final bCount = b.ratingData?.totalRatings ?? 0;
-          return aCount.compareTo(bCount);
-        });
-        break;
+    // Sort based on order and attribute
+    if (_sortOrder == SortOrder.highestFirst) {
+      faculties.sort((a, b) => getValue(b).compareTo(getValue(a)));
+    } else {
+      faculties.sort((a, b) => getValue(a).compareTo(getValue(b)));
     }
 
     return faculties;
@@ -201,10 +189,10 @@ class _AllFacultiesTabState extends State<AllFacultiesTab>
                         ),
                       ),
                       child: Center(
-                        child: DropdownButton<SortOption>(
+                        child: DropdownButton<SortOrder>(
                           isExpanded: true,
                           underline: const SizedBox(),
-                          value: _sortOption,
+                          value: _sortOrder,
                           isDense: true,
                           icon: Icon(
                             Icons.arrow_drop_down,
@@ -213,36 +201,22 @@ class _AllFacultiesTabState extends State<AllFacultiesTab>
                           ),
                           items: const [
                             DropdownMenuItem(
-                              value: SortOption.highestRating,
+                              value: SortOrder.highestFirst,
                               child: Text(
-                                'Highest',
+                                'Highest First',
                                 style: TextStyle(fontSize: 10),
                               ),
                             ),
                             DropdownMenuItem(
-                              value: SortOption.lowestRating,
+                              value: SortOrder.lowestFirst,
                               child: Text(
-                                'Lowest',
-                                style: TextStyle(fontSize: 10),
-                              ),
-                            ),
-                            DropdownMenuItem(
-                              value: SortOption.mostRated,
-                              child: Text(
-                                'Most Rated',
-                                style: TextStyle(fontSize: 10),
-                              ),
-                            ),
-                            DropdownMenuItem(
-                              value: SortOption.leastRated,
-                              child: Text(
-                                'Least Rated',
+                                'Lowest First',
                                 style: TextStyle(fontSize: 10),
                               ),
                             ),
                           ],
                           onChanged:
-                              (value) => setState(() => _sortOption = value!),
+                              (value) => setState(() => _sortOrder = value!),
                           style: TextStyle(fontSize: 10, color: theme.text),
                           dropdownColor: theme.surface,
                         ),
@@ -290,16 +264,30 @@ class _AllFacultiesTabState extends State<AllFacultiesTab>
                               ),
                             ),
                             DropdownMenuItem(
-                              value: SortAttribute.approachability,
+                              value: SortAttribute.attendance,
+                              child: Text(
+                                'Attendance',
+                                style: TextStyle(fontSize: 10),
+                              ),
+                            ),
+                            DropdownMenuItem(
+                              value: SortAttribute.supportiveness,
                               child: Text(
                                 'Support',
                                 style: TextStyle(fontSize: 10),
                               ),
                             ),
                             DropdownMenuItem(
-                              value: SortAttribute.grading,
+                              value: SortAttribute.marks,
                               child: Text(
                                 'Marks',
+                                style: TextStyle(fontSize: 10),
+                              ),
+                            ),
+                            DropdownMenuItem(
+                              value: SortAttribute.numRatings,
+                              child: Text(
+                                'No. of Ratings',
                                 style: TextStyle(fontSize: 10),
                               ),
                             ),

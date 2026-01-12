@@ -14,24 +14,28 @@ class CourseInfo {
 class StudentFacultyRating {
   final String id;
   final String studentRegno;
+  final String studentName;
   final String facultyId;
   final String facultyName;
   final double teaching;
   final double attendanceFlex;
   final double supportiveness;
   final double marks;
+  final String? review;
   final List<CourseInfo> courses;
   final DateTime submittedAt;
 
   StudentFacultyRating({
     required this.id,
     required this.studentRegno,
+    required this.studentName,
     required this.facultyId,
     required this.facultyName,
     required this.teaching,
     required this.attendanceFlex,
     required this.supportiveness,
     required this.marks,
+    this.review,
     this.courses = const [],
     required this.submittedAt,
   });
@@ -54,12 +58,14 @@ class StudentFacultyRating {
     return StudentFacultyRating(
       id: map['id'] as String,
       studentRegno: map['student_regno'] as String,
+      studentName: map['student_name'] as String? ?? 'Unknown',
       facultyId: map['faculty_id'] as String,
       facultyName: map['faculty_name'] as String,
       teaching: (map['teaching'] as num).toDouble(),
       attendanceFlex: (map['attendance_flex'] as num).toDouble(),
       supportiveness: (map['supportiveness'] as num).toDouble(),
       marks: (map['marks'] as num).toDouble(),
+      review: map['review'] as String?,
       courses: coursesList,
       submittedAt: DateTime.parse(map['submitted_at'] as String),
     );
@@ -70,6 +76,7 @@ class StudentFacultyRating {
     return {
       'id': id,
       'student_regno': studentRegno,
+      'student_name': studentName,
       'faculty_id': facultyId,
       'faculty_name': facultyName,
       'teaching': teaching,
@@ -77,6 +84,7 @@ class StudentFacultyRating {
       'supportiveness': supportiveness,
       'marks': marks,
       'overall_rating': overallRating,
+      'review': review,
       'courses': courses.map((c) => c.toJson()).toList(),
     };
   }
@@ -86,12 +94,14 @@ class StudentFacultyRating {
     return {
       'id': id,
       'student_regno': studentRegno,
+      'student_name': studentName,
       'faculty_id': facultyId,
       'faculty_name': facultyName,
       'teaching': teaching,
       'attendance_flex': attendanceFlex,
       'supportiveness': supportiveness,
       'marks': marks,
+      'review': review,
       'courses': courses.map((c) => c.toJson()).toList(),
       'submitted_at': submittedAt.toIso8601String(),
     };
@@ -110,12 +120,14 @@ class StudentFacultyRating {
     return StudentFacultyRating(
       id: json['id'] as String,
       studentRegno: json['student_regno'] as String,
+      studentName: json['student_name'] as String? ?? 'Unknown',
       facultyId: json['faculty_id'] as String,
       facultyName: json['faculty_name'] as String,
       teaching: (json['teaching'] as num).toDouble(),
       attendanceFlex: (json['attendance_flex'] as num).toDouble(),
       supportiveness: (json['supportiveness'] as num).toDouble(),
       marks: (json['marks'] as num).toDouble(),
+      review: json['review'] as String?,
       courses: coursesList,
       submittedAt: DateTime.parse(json['submitted_at'] as String),
     );

@@ -106,7 +106,7 @@ class SubSectionHeader extends StatelessWidget {
       onTap: onTap,
       behavior: HitTestBehavior.opaque, // Full area touchable
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -173,7 +173,7 @@ class SimpleSectionHeader extends StatelessWidget {
     final theme = themeProvider.currentTheme;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
           Text(
