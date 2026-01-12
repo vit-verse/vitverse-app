@@ -73,6 +73,18 @@ class LoadingMessages {
       "🎭 Behind the curtains we go...",
       "🚀 Launching search mission...",
     ],
+    'events': [
+      "🎉 Loading campus events...",
+      "🎭 Discovering upcoming activities...",
+      "📅 Fetching event calendar...",
+      "🎪 Syncing event details...",
+      "🌟 Finding exciting happenings...",
+      "🎨 Painting the events canvas...",
+      "🚀 Launching event explorer...",
+      "🔥 Heating up the event scene...",
+      "✨ Magic moments loading...",
+      "🎯 Targeting best events...",
+    ],
     'fees': [
       "💰 Counting your investment in knowledge...",
       "🧾 Organizing your financial journey...",

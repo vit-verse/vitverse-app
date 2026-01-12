@@ -27,6 +27,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
   bool _showScheduledNotifications = false;
   bool _lostFoundNotifications = true; // Default enabled
   bool _cabShareNotifications = true; // Default enabled
+  bool _eventsNotifications = true; // Default enabled
 
   @override
   void initState() {
@@ -39,6 +40,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
     _loadScheduledNotifications();
     _loadLostFoundNotificationSetting();
     _loadCabShareNotificationSetting();
+    _loadEventsNotificationSetting();
   }
 
   Future<void> _loadLostFoundNotificationSetting() async {
@@ -58,6 +60,16 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
       setState(() => _cabShareNotifications = saved);
     } catch (e) {
       Logger.e('NotificationSettings', 'Error loading CabShare setting', e);
+    }
+  }
+
+  Future<void> _loadEventsNotificationSetting() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final saved = prefs.getBool('events_notifications') ?? true;
+      setState(() => _eventsNotifications = saved);
+    } catch (e) {
+      Logger.e('NotificationSettings', 'Error loading Events setting', e);
     }
   }
 
@@ -206,6 +218,9 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                     const SizedBox(height: ThemeConstants.spacingMd),
 
                     _buildCabShareNotificationCard(themeProvider),
+                    const SizedBox(height: ThemeConstants.spacingMd),
+
+                    _buildEventsNotificationCard(themeProvider),
                     const SizedBox(height: ThemeConstants.spacingMd),
 
                     _buildScheduledNotificationsDropdown(themeProvider),
@@ -636,7 +651,9 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: themeProvider.currentTheme.primary.withValues(alpha: 0.1),
+                color: themeProvider.currentTheme.primary.withValues(
+                  alpha: 0.1,
+                ),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
@@ -818,6 +835,62 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
     );
   }
 
+  Widget _buildEventsNotificationCard(ThemeProvider themeProvider) {
+    return Container(
+      padding: const EdgeInsets.all(ThemeConstants.spacingMd),
+      decoration: BoxDecoration(
+        color: themeProvider.currentTheme.surface,
+        borderRadius: BorderRadius.circular(ThemeConstants.radiusLg),
+        border: Border.all(
+          color: themeProvider.currentTheme.muted.withValues(alpha: 0.1),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.blue.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(
+              Icons.event_outlined,
+              color: Colors.blue,
+              size: 24,
+            ),
+          ),
+          const SizedBox(width: ThemeConstants.spacingMd),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Events Updates',
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    color: themeProvider.currentTheme.text,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Get notified when new events are posted',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: themeProvider.currentTheme.muted,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Switch(
+            value: _eventsNotifications,
+            onChanged: _toggleEventsNotifications,
+            activeColor: themeProvider.currentTheme.primary,
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _toggleCabShareNotifications(bool value) async {
     try {
       if (value) {
@@ -836,6 +909,30 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
       Logger.e(
         'NotificationSettings',
         'Error toggling Cab Share notifications',
+        e,
+      );
+      SnackbarUtils.error(context, 'Failed to update notification settings');
+    }
+  }
+
+  Future<void> _toggleEventsNotifications(bool value) async {
+    try {
+      if (value) {
+        await FCMService.subscribeEventsTopic();
+        SnackbarUtils.success(context, 'Subscribed to Events updates');
+      } else {
+        await FCMService.unsubscribeEventsTopic();
+        SnackbarUtils.success(context, 'Unsubscribed from Events updates');
+      }
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('events_notifications', value);
+
+      setState(() => _eventsNotifications = value);
+    } catch (e) {
+      Logger.e(
+        'NotificationSettings',
+        'Error toggling Events notifications',
         e,
       );
       SnackbarUtils.error(context, 'Failed to update notification settings');

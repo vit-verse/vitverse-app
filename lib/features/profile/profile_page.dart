@@ -4,11 +4,13 @@ import 'package:provider/provider.dart';
 import 'student_profile/widgets/student_card.dart';
 import 'student_profile/presentation/profile_detail_page.dart';
 import 'widgets/semester_sync_card.dart';
+import 'widgets/update_notification_widget.dart';
 import '../../core/theme/theme_provider.dart';
 import '../../core/theme/theme_constants.dart';
 import '../../core/theme/app_card_styles.dart';
 import '../../core/utils/snackbar_utils.dart';
 import '../../core/services/version_checker_service.dart';
+import '../../core/services/github_release_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'theme_settings/presentation/theme_settings_page.dart';
 import 'theme_settings/presentation/color_customization_page.dart';
@@ -108,6 +110,13 @@ class _ProfilePageState extends State<ProfilePage> {
         body: ListView(
           padding: const EdgeInsets.all(ThemeConstants.spacingMd),
           children: [
+            // Update notification (shown above profile card)
+            if (_versionCheckResult?.isUpdateAvailable ?? false)
+              UpdateNotificationWidget(
+                latestVersion: _versionCheckResult!.latestVersion!,
+                themeProvider: themeProvider,
+              ),
+
             StudentCard(
               onMoreDetails: (profile) {
                 Navigator.push(
@@ -245,10 +254,6 @@ class _ProfilePageState extends State<ProfilePage> {
 
             const SizedBox(height: ThemeConstants.spacingMd),
 
-            // Update Checker - Compact
-            _buildCompactUpdateChecker(themeProvider),
-
-            const SizedBox(height: ThemeConstants.spacingMd),
             _buildSimpleListTile(
               context,
               icon: Icons.logout,
@@ -307,7 +312,24 @@ class _ProfilePageState extends State<ProfilePage> {
               },
             ),
 
-            const SizedBox(height: ThemeConstants.spacingXl),
+            const SizedBox(height: ThemeConstants.spacingLg),
+
+            // VIT Verse Love Image
+            Center(
+              child: Image.asset(
+                'assets/images/vit-verse-love.png',
+                height: 80,
+                fit: BoxFit.contain,
+              ),
+            ),
+
+            const SizedBox(height: ThemeConstants.spacingSm),
+
+            // Version info
+            _buildVersionSection(themeProvider),
+
+            // Bottom padding for navbar
+            const SizedBox(height: 100),
           ],
         ),
       ),
@@ -366,54 +388,91 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Widget _buildCompactUpdateChecker(ThemeProvider themeProvider) {
-    // Determine status
-    String title;
-    String? subtitle;
-    IconData icon;
-    Color? iconColor;
-
-    if (_isCheckingUpdate) {
-      title = 'Checking for updates...';
-      icon = Icons.refresh;
-      iconColor = themeProvider.currentTheme.primary;
-    } else if (_versionCheckResult == null) {
-      title = 'Check for Updates';
-      subtitle = 'Tap to check';
-      icon = Icons.system_update;
-    } else if (_versionCheckResult!.isUpdateAvailable) {
-      title = 'Update Available';
-      subtitle = 'v${_versionCheckResult!.latestVersion} is ready';
-      icon = Icons.arrow_circle_up;
-      iconColor = Colors.green;
-    } else if (_versionCheckResult!.isUpToDate) {
-      title = 'Up to Date';
-      subtitle = 'v${_versionCheckResult!.currentVersion}';
-      icon = Icons.check_circle;
-      iconColor = Colors.green;
-    } else {
-      title = 'Check for Updates';
-      subtitle = 'Tap to retry';
-      icon = Icons.refresh;
-      iconColor = Colors.orange;
-    }
-
-    return _buildSimpleListTile(
-      context,
-      icon: icon,
-      title: title,
-      subtitle: subtitle,
-      titleColor: iconColor,
-      onTap:
-          _isCheckingUpdate
-              ? () {}
-              : () {
-                if (_versionCheckResult?.isUpdateAvailable ?? false) {
-                  _handleUpdateAction();
-                } else {
-                  _checkForUpdates();
-                }
-              },
+  Widget _buildVersionSection(ThemeProvider themeProvider) {
+    return Column(
+      children: [
+        // Version info and update button
+        if (_isCheckingUpdate)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: themeProvider.currentTheme.primary,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Checking for updates...',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: themeProvider.currentTheme.muted,
+                ),
+              ),
+            ],
+          )
+        else if (_versionCheckResult?.isUpdateAvailable ?? false) ...[
+          // Show current version when update is available
+          Text(
+            'v${_versionCheckResult!.currentVersion}',
+            style: TextStyle(
+              fontSize: 12,
+              color: themeProvider.currentTheme.muted,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Update available: v${_versionCheckResult!.latestVersion}',
+            style: TextStyle(
+              fontSize: 11,
+              color: Colors.green,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ] else if (_versionCheckResult?.isUpToDate ?? false)
+          Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.check_circle, size: 14, color: Colors.green),
+                  const SizedBox(width: 4),
+                  Text(
+                    'v${_versionCheckResult!.currentVersion}',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: themeProvider.currentTheme.muted,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'You\'re up to date',
+                style: TextStyle(
+                  fontSize: 11,
+                  color: themeProvider.currentTheme.muted.withValues(
+                    alpha: 0.7,
+                  ),
+                ),
+              ),
+            ],
+          )
+        else
+          TextButton(
+            onPressed: _checkForUpdates,
+            child: Text(
+              'Check for updates',
+              style: TextStyle(
+                fontSize: 12,
+                color: themeProvider.currentTheme.primary,
+              ),
+            ),
+          ),
+      ],
     );
   }
 }
@@ -440,7 +499,9 @@ class _ProfileFeatureCard extends StatelessWidget {
       decoration: AppCardStyles.largeCardDecoration(
         isDark: themeProvider.currentTheme.isDark,
         customBackgroundColor: themeProvider.currentTheme.surface,
-        customBorderColor: themeProvider.currentTheme.primary.withValues(alpha: 0.3),
+        customBorderColor: themeProvider.currentTheme.primary.withValues(
+          alpha: 0.3,
+        ),
       ),
       child: Material(
         color: Colors.transparent,
@@ -455,7 +516,9 @@ class _ProfileFeatureCard extends StatelessWidget {
                   width: 60,
                   height: 60,
                   decoration: BoxDecoration(
-                    color: themeProvider.currentTheme.primary.withValues(alpha: 0.1),
+                    color: themeProvider.currentTheme.primary.withValues(
+                      alpha: 0.1,
+                    ),
                     borderRadius: BorderRadius.circular(
                       ThemeConstants.radiusMd,
                     ),

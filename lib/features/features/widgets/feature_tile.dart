@@ -6,6 +6,7 @@ import '../../../core/utils/tap_debouncer.dart';
 import '../models/feature_model.dart';
 import '../logic/feature_provider.dart';
 import '../constants/feature_colors.dart';
+import '../data/feature_repository.dart';
 
 class FeatureTile extends StatelessWidget {
   final Feature feature;

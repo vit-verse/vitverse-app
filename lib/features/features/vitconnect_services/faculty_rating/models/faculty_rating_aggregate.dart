@@ -8,6 +8,7 @@ class FacultyRatingAggregate {
   final double avgSupportiveness;
   final double avgMarks;
   final double avgOverall;
+  final List<Map<String, String>> courses;
   final DateTime lastUpdated;
 
   FacultyRatingAggregate({
@@ -19,11 +20,25 @@ class FacultyRatingAggregate {
     required this.avgSupportiveness,
     required this.avgMarks,
     required this.avgOverall,
+    this.courses = const [],
     required this.lastUpdated,
   });
 
   /// Create from Supabase response
   factory FacultyRatingAggregate.fromMap(Map<String, dynamic> map) {
+    List<Map<String, String>> coursesList = [];
+    if (map['courses'] != null) {
+      final coursesJson = map['courses'] as List;
+      coursesList =
+          coursesJson
+              .map(
+                (c) => {
+                  'code': c['code'] as String? ?? '',
+                  'title': c['title'] as String? ?? '',
+                },
+              )
+              .toList();
+    }
     return FacultyRatingAggregate(
       facultyId: map['faculty_id'] as String,
       facultyName: map['faculty_name'] as String,
@@ -34,6 +49,7 @@ class FacultyRatingAggregate {
       avgSupportiveness: (map['avg_supportiveness'] as num?)?.toDouble() ?? 0.0,
       avgMarks: (map['avg_marks'] as num?)?.toDouble() ?? 0.0,
       avgOverall: (map['avg_overall'] as num?)?.toDouble() ?? 0.0,
+      courses: coursesList,
       lastUpdated: DateTime.parse(map['last_updated'] as String),
     );
   }
@@ -49,12 +65,26 @@ class FacultyRatingAggregate {
       'avg_supportiveness': avgSupportiveness,
       'avg_marks': avgMarks,
       'avg_overall': avgOverall,
+      'courses': courses,
       'last_updated': lastUpdated.toIso8601String(),
     };
   }
 
   /// Create from JSON (cache)
   factory FacultyRatingAggregate.fromJson(Map<String, dynamic> json) {
+    List<Map<String, String>> coursesList = [];
+    if (json['courses'] != null) {
+      final coursesJson = json['courses'] as List;
+      coursesList =
+          coursesJson
+              .map(
+                (c) => {
+                  'code': c['code'] as String? ?? '',
+                  'title': c['title'] as String? ?? '',
+                },
+              )
+              .toList();
+    }
     return FacultyRatingAggregate(
       facultyId: json['faculty_id'] as String,
       facultyName: json['faculty_name'] as String,
@@ -64,6 +94,7 @@ class FacultyRatingAggregate {
       avgSupportiveness: (json['avg_supportiveness'] as num).toDouble(),
       avgMarks: (json['avg_marks'] as num).toDouble(),
       avgOverall: (json['avg_overall'] as num).toDouble(),
+      courses: coursesList,
       lastUpdated: DateTime.parse(json['last_updated'] as String),
     );
   }

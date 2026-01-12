@@ -37,7 +37,6 @@ class MainSectionHeader extends StatelessWidget {
 
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          margin: const EdgeInsets.only(bottom: 12),
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: headerColors,
@@ -108,7 +107,6 @@ class SubSectionHeader extends StatelessWidget {
       behavior: HitTestBehavior.opaque, // Full area touchable
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
-        margin: const EdgeInsets.only(bottom: 12),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -175,7 +173,7 @@ class SimpleSectionHeader extends StatelessWidget {
     final theme = themeProvider.currentTheme;
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         children: [
           Text(

@@ -1,3 +1,15 @@
+/// Course info model
+class CourseInfo {
+  final String code;
+  final String title;
+
+  CourseInfo({required this.code, required this.title});
+
+  Map<String, dynamic> toJson() => {'code': code, 'title': title};
+  factory CourseInfo.fromJson(Map<String, dynamic> json) =>
+      CourseInfo(code: json['code'] as String, title: json['title'] as String);
+}
+
 /// Student's rating submission for a faculty member
 class StudentFacultyRating {
   final String id;
@@ -8,6 +20,7 @@ class StudentFacultyRating {
   final double attendanceFlex;
   final double supportiveness;
   final double marks;
+  final List<CourseInfo> courses;
   final DateTime submittedAt;
 
   StudentFacultyRating({
@@ -19,6 +32,7 @@ class StudentFacultyRating {
     required this.attendanceFlex,
     required this.supportiveness,
     required this.marks,
+    this.courses = const [],
     required this.submittedAt,
   });
 
@@ -29,6 +43,14 @@ class StudentFacultyRating {
 
   /// Create from Supabase response
   factory StudentFacultyRating.fromMap(Map<String, dynamic> map) {
+    List<CourseInfo> coursesList = [];
+    if (map['courses'] != null) {
+      final coursesJson = map['courses'] as List;
+      coursesList =
+          coursesJson
+              .map((c) => CourseInfo.fromJson(c as Map<String, dynamic>))
+              .toList();
+    }
     return StudentFacultyRating(
       id: map['id'] as String,
       studentRegno: map['student_regno'] as String,
@@ -38,6 +60,7 @@ class StudentFacultyRating {
       attendanceFlex: (map['attendance_flex'] as num).toDouble(),
       supportiveness: (map['supportiveness'] as num).toDouble(),
       marks: (map['marks'] as num).toDouble(),
+      courses: coursesList,
       submittedAt: DateTime.parse(map['submitted_at'] as String),
     );
   }
@@ -54,6 +77,7 @@ class StudentFacultyRating {
       'supportiveness': supportiveness,
       'marks': marks,
       'overall_rating': overallRating,
+      'courses': courses.map((c) => c.toJson()).toList(),
     };
   }
 
@@ -68,12 +92,21 @@ class StudentFacultyRating {
       'attendance_flex': attendanceFlex,
       'supportiveness': supportiveness,
       'marks': marks,
+      'courses': courses.map((c) => c.toJson()).toList(),
       'submitted_at': submittedAt.toIso8601String(),
     };
   }
 
   /// Create from JSON (cache)
   factory StudentFacultyRating.fromJson(Map<String, dynamic> json) {
+    List<CourseInfo> coursesList = [];
+    if (json['courses'] != null) {
+      final coursesJson = json['courses'] as List;
+      coursesList =
+          coursesJson
+              .map((c) => CourseInfo.fromJson(c as Map<String, dynamic>))
+              .toList();
+    }
     return StudentFacultyRating(
       id: json['id'] as String,
       studentRegno: json['student_regno'] as String,
@@ -83,6 +116,7 @@ class StudentFacultyRating {
       attendanceFlex: (json['attendance_flex'] as num).toDouble(),
       supportiveness: (json['supportiveness'] as num).toDouble(),
       marks: (json['marks'] as num).toDouble(),
+      courses: coursesList,
       submittedAt: DateTime.parse(json['submitted_at'] as String),
     );
   }

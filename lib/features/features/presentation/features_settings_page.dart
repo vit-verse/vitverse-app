@@ -7,6 +7,7 @@ import '../constants/feature_colors.dart';
 import '../logic/feature_provider.dart';
 import '../models/feature_model.dart';
 import '../data/feature_catalogue.dart';
+import '../data/feature_repository.dart';
 
 class FeaturesSettingsPage extends StatefulWidget {
   const FeaturesSettingsPage({super.key});
@@ -217,8 +218,10 @@ class _FeaturesSettingsPageState extends State<FeaturesSettingsPage> {
             physics: const NeverScrollableScrollPhysics(),
             itemCount: allFeatures.length,
             separatorBuilder:
-                (context, index) =>
-                    Divider(height: 1, color: theme.muted.withValues(alpha: 0.1)),
+                (context, index) => Divider(
+                  height: 1,
+                  color: theme.muted.withValues(alpha: 0.1),
+                ),
             itemBuilder: (context, index) {
               final feature = allFeatures[index];
               final isPinned = provider.pinnedFeatures.any(

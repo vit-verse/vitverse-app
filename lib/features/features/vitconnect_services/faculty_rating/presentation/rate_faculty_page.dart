@@ -4,6 +4,7 @@ import '../../../../../core/theme/theme_provider.dart';
 import '../../../../../core/database/entities/student_profile.dart';
 import '../../../../../core/utils/logger.dart';
 import '../../../../../core/utils/snackbar_utils.dart';
+import '../models/student_faculty_rating.dart';
 import '../logic/faculty_rating_provider.dart';
 import '../data/faculty_rating_repository.dart';
 import '../widgets/rating_slider.dart';
@@ -87,6 +88,13 @@ class _RateFacultyPageState extends State<RateFacultyPage> {
         attendanceFlex: _attendanceFlex,
         supportiveness: _supportiveness,
         marks: _marks,
+        courses:
+            faculty.courses
+                .map(
+                  (course) =>
+                      CourseInfo(code: course.code, title: course.title),
+                )
+                .toList(),
       );
 
       if (mounted) {
@@ -204,7 +212,10 @@ class _RateFacultyPageState extends State<RateFacultyPage> {
 
                   // Existing Ratings Display
                   if (faculty.hasRatings) ...[
-                    Divider(height: 1, color: theme.muted.withValues(alpha: 0.2)),
+                    Divider(
+                      height: 1,
+                      color: theme.muted.withValues(alpha: 0.2),
+                    ),
                     Padding(
                       padding: const EdgeInsets.all(16),
                       child: Column(
@@ -393,10 +404,14 @@ class _RateFacultyPageState extends State<RateFacultyPage> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: _getRatingColor(_overallRating).withValues(alpha: 0.1),
+                      color: _getRatingColor(
+                        _overallRating,
+                      ).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
-                        color: _getRatingColor(_overallRating).withValues(alpha: 0.3),
+                        color: _getRatingColor(
+                          _overallRating,
+                        ).withValues(alpha: 0.3),
                         width: 1,
                       ),
                     ),

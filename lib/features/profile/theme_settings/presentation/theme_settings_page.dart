@@ -627,6 +627,13 @@ class _ThemeSettingsPageState extends State<ThemeSettingsPage> {
         const SizedBox(height: ThemeConstants.spacingMd),
 
         _buildBaseThemeSelector(themeProvider),
+        const SizedBox(height: ThemeConstants.spacingMd),
+
+        if (_customThemes.isNotEmpty) ...[
+          _buildSavedThemesSection(themeProvider),
+          const SizedBox(height: ThemeConstants.spacingMd),
+        ],
+
         const SizedBox(height: ThemeConstants.spacingLg),
 
         Text(
@@ -1006,6 +1013,106 @@ class _ThemeSettingsPageState extends State<ThemeSettingsPage> {
           ],
         );
       },
+    );
+  }
+
+  Widget _buildSavedThemesSection(ThemeProvider themeProvider) {
+    return Container(
+      padding: const EdgeInsets.all(ThemeConstants.spacingMd),
+      decoration: BoxDecoration(
+        color: themeProvider.currentTheme.surface,
+        borderRadius: BorderRadius.circular(ThemeConstants.radiusLg),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.bookmark_outlined,
+                color: themeProvider.currentTheme.primary,
+                size: 20,
+              ),
+              const SizedBox(width: ThemeConstants.spacingSm),
+              Text(
+                'Your Saved Themes',
+                style: TextStyle(
+                  color: themeProvider.currentTheme.text,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: ThemeConstants.spacingSm),
+          Text(
+            'Load a previously saved theme to edit',
+            style: TextStyle(
+              color: themeProvider.currentTheme.muted,
+              fontSize: 12,
+            ),
+          ),
+          const SizedBox(height: ThemeConstants.spacingMd),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children:
+                _customThemes.map((theme) {
+                  return InkWell(
+                    onTap: () {
+                      setState(() {
+                        _customPrimary = theme.primary;
+                        _customBackground = theme.background;
+                        _customSurface = theme.surface;
+                        _customText = theme.text;
+                        _customMuted = theme.muted;
+                        _customIsDark = theme.isDark;
+                        _customThemeName = theme.name;
+                        _themeNameController.text = theme.name;
+                      });
+                    },
+                    borderRadius: BorderRadius.circular(8),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: themeProvider.currentTheme.background,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: themeProvider.currentTheme.muted.withOpacity(
+                            0.2,
+                          ),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 16,
+                            height: 16,
+                            decoration: BoxDecoration(
+                              color: Color(theme.primary.value),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            theme.name,
+                            style: TextStyle(
+                              color: themeProvider.currentTheme.text,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }).toList(),
+          ),
+        ],
+      ),
     );
   }
 

@@ -61,6 +61,3 @@ class FeatureColors {
     'default': [Color(0xFF3b82f6), Color(0xFF1d4ed8)], // Blue
   };
 }
-
-/// View mode for features page
-enum ViewMode { list, grid2Column, grid3Column }

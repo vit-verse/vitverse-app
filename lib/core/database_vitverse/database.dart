@@ -9,13 +9,14 @@ import 'daos/calendar_dao.dart';
 import 'daos/lost_found_dao.dart';
 import 'daos/cab_ride_dao.dart';
 import 'daos/custom_theme_dao.dart';
+import 'daos/events_dao.dart';
 
 /// VIT Verse Database - Separate from VTOP student data
 /// Stores calendar cache, personal events, lost & found cache, cab share cache, and app preferences
 /// Cleared on user logout
 class VitVerseDatabase {
   static const String _databaseName = 'vit_verse.db';
-  static const int _databaseVersion = 4;
+  static const int _databaseVersion = 5;
 
   static VitVerseDatabase? _instance;
   static Database? _database;
@@ -23,6 +24,7 @@ class VitVerseDatabase {
   static LostFoundDao? _lostFoundDao;
   static CabRideDao? _cabRideDao;
   static CustomThemeDao? _customThemeDao;
+  static EventsDao? _eventsDao;
 
   VitVerseDatabase._();
 
@@ -64,6 +66,13 @@ class VitVerseDatabase {
     return _customThemeDao!;
   }
 
+  EventsDao get eventsDao {
+    if (_eventsDao == null) {
+      throw StateError('Database not initialized. Call initialize() first.');
+    }
+    return _eventsDao!;
+  }
+
   /// Initialize the database
   Future<void> initialize() async {
     try {
@@ -72,6 +81,7 @@ class VitVerseDatabase {
       _lostFoundDao = LostFoundDao(_database!);
       _cabRideDao = CabRideDao(_database!);
       _customThemeDao = CustomThemeDao(_database!);
+      _eventsDao = EventsDao(_database!);
       Logger.i('VitVerseDB', 'VIT Verse database initialized successfully');
     } catch (e) {
       Logger.e('VitVerseDB', 'Database initialization failed', e);
@@ -269,6 +279,35 @@ class VitVerseDatabase {
       )
     ''');
 
+    // Events cache table
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS events_cache (
+        id TEXT PRIMARY KEY,
+        event_source TEXT NOT NULL,
+        title TEXT NOT NULL,
+        description TEXT NOT NULL,
+        category TEXT NOT NULL,
+        event_date INTEGER NOT NULL,
+        venue TEXT NOT NULL,
+        poster_url TEXT,
+        contact_info TEXT,
+        event_link TEXT,
+        participant_type TEXT,
+        entry_fee INTEGER NOT NULL DEFAULT 0,
+        team_size TEXT NOT NULL,
+        user_name_regno TEXT NOT NULL,
+        user_email TEXT NOT NULL,
+        likes_count INTEGER NOT NULL DEFAULT 0,
+        comments_count INTEGER NOT NULL DEFAULT 0,
+        is_liked_by_me INTEGER NOT NULL DEFAULT 0,
+        notify_all INTEGER NOT NULL DEFAULT 0,
+        is_active INTEGER NOT NULL DEFAULT 1,
+        is_verified INTEGER NOT NULL DEFAULT 0,
+        created_at INTEGER NOT NULL,
+        cached_at INTEGER NOT NULL
+      )
+    ''');
+
     await _createIndexes(db);
   }
 
@@ -297,6 +336,17 @@ class VitVerseDatabase {
       'CREATE INDEX IF NOT EXISTS idx_cab_ride_regno ON cab_ride_cache(posted_by_regno)',
     );
 
+    // Events cache indexes
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_events_cache_date ON events_cache(event_date)',
+    );
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_events_cache_source ON events_cache(event_source)',
+    );
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_events_cache_category ON events_cache(category)',
+    );
+
     // Personal events indexes
     await db.execute(
       'CREATE INDEX IF NOT EXISTS idx_personal_events_date ON personal_events(date)',
@@ -318,6 +368,9 @@ class VitVerseDatabase {
     await db.execute('DROP TABLE IF EXISTS personal_events');
     await db.execute('DROP TABLE IF EXISTS selected_calendars');
     await db.execute('DROP TABLE IF EXISTS app_preferences');
+    await db.execute('DROP TABLE IF EXISTS lost_found_cache');
+    await db.execute('DROP TABLE IF EXISTS cab_ride_cache');
+    await db.execute('DROP TABLE IF EXISTS custom_themes');
   }
 
   /// Check if database exists
@@ -421,6 +474,10 @@ class VitVerseDatabase {
           await txn.delete('personal_events');
           await txn.delete('selected_calendars');
           await txn.delete('app_preferences');
+          await txn.delete('lost_found_cache');
+          await txn.delete('cab_ride_cache');
+          await txn.delete('custom_themes');
+          await txn.delete('events_cache');
         });
       }
       Logger.i('VitVerseDB', 'All VIT Verse data cleared');
@@ -443,6 +500,10 @@ class VitVerseDatabase {
         'personal_events',
         'selected_calendars',
         'app_preferences',
+        'lost_found_cache',
+        'cab_ride_cache',
+        'custom_themes',
+        'events_cache',
       ];
 
       for (final table in tables) {

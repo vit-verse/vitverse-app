@@ -3,6 +3,7 @@ import '../../../../../core/utils/logger.dart';
 import '../../../vtop_services/my_course_faculties/data/faculty_data_provider.dart';
 import '../models/faculty_with_rating.dart';
 import '../models/faculty_rating_aggregate.dart';
+import '../models/student_faculty_rating.dart';
 import '../data/faculty_rating_repository.dart';
 
 /// Faculty Rating provider
@@ -14,14 +15,20 @@ class FacultyRatingProvider extends ChangeNotifier {
   final _facultyDataProvider = FacultyDataProvider();
 
   List<FacultyWithRating> _faculties = [];
+  List<FacultyWithRating> _allFaculties = [];
   bool _isLoading = false;
   bool _isSubmitting = false;
+  bool _isSyncing = false;
   String? _errorMessage;
+  DateTime? _lastSyncTime;
 
   List<FacultyWithRating> get faculties => _faculties;
+  List<FacultyWithRating> get allFaculties => _allFaculties;
   bool get isLoading => _isLoading;
   bool get isSubmitting => _isSubmitting;
+  bool get isSyncing => _isSyncing;
   String? get errorMessage => _errorMessage;
+  DateTime? get lastSyncTime => _lastSyncTime;
 
   /// Initialize provider
   Future<void> initialize() async {
@@ -81,6 +88,15 @@ class FacultyRatingProvider extends ChangeNotifier {
               facultyId: facultyId,
               facultyName: faculty.facultyName,
               courseTitles: faculty.courses.map((c) => c.title ?? '').toList(),
+              courses:
+                  faculty.courses
+                      .map(
+                        (c) => SimpleCourseInfo(
+                          code: c.code ?? '',
+                          title: c.title ?? '',
+                        ),
+                      )
+                      .toList(),
               ratingData: ratingsMap[facultyId],
             );
           }).toList();
@@ -90,6 +106,7 @@ class FacultyRatingProvider extends ChangeNotifier {
         'Loaded ${_faculties.length} faculties (${ratingsMap.length} with ratings)',
       );
 
+      _lastSyncTime = DateTime.now();
       _isLoading = false;
       notifyListeners();
     } catch (e, stack) {
@@ -108,6 +125,9 @@ class FacultyRatingProvider extends ChangeNotifier {
         return;
       }
 
+      _isSyncing = true;
+      notifyListeners();
+
       Logger.d(_tag, 'Refreshing ratings');
 
       final facultyIds = _faculties.map((f) => f.facultyId).toList();
@@ -124,11 +144,14 @@ class FacultyRatingProvider extends ChangeNotifier {
             return faculty.copyWith(ratingData: ratingsMap[faculty.facultyId]);
           }).toList();
 
+      _lastSyncTime = DateTime.now();
+      _isSyncing = false;
       Logger.success(_tag, 'Ratings refreshed');
       notifyListeners();
     } catch (e, stack) {
       Logger.e(_tag, 'Error refreshing ratings', e, stack);
       _errorMessage = 'Failed to refresh ratings';
+      _isSyncing = false;
       notifyListeners();
     }
   }
@@ -142,6 +165,7 @@ class FacultyRatingProvider extends ChangeNotifier {
     required double attendanceFlex,
     required double supportiveness,
     required double marks,
+    List<CourseInfo> courses = const [],
   }) async {
     try {
       _isSubmitting = true;
@@ -158,6 +182,7 @@ class FacultyRatingProvider extends ChangeNotifier {
         attendanceFlex: attendanceFlex,
         supportiveness: supportiveness,
         marks: marks,
+        courses: courses,
       );
 
       _isSubmitting = false;
@@ -180,6 +205,43 @@ class FacultyRatingProvider extends ChangeNotifier {
       return _faculties.firstWhere((f) => f.facultyId == facultyId);
     } catch (e) {
       return null;
+    }
+  }
+
+  /// Load all faculties from Supabase
+  Future<void> loadAllFaculties() async {
+    try {
+      Logger.d(_tag, 'Loading all faculties from Supabase');
+
+      final ratings = await _repository.getAllFacultyRatings();
+
+      _allFaculties =
+          ratings.map((rating) {
+            return FacultyWithRating(
+              facultyId: rating.facultyId,
+              facultyName: rating.facultyName,
+              courseTitles: [], // No course info in aggregates table
+              courses:
+                  rating.courses
+                      .map(
+                        (c) => SimpleCourseInfo(
+                          code: c['code'] ?? '',
+                          title: c['title'] ?? '',
+                        ),
+                      )
+                      .toList(),
+              ratingData: rating,
+            );
+          }).toList();
+
+      Logger.success(_tag, 'Loaded ${_allFaculties.length} all faculties');
+
+      _lastSyncTime = DateTime.now();
+      notifyListeners();
+    } catch (e, stack) {
+      Logger.e(_tag, 'Error loading all faculties', e, stack);
+      _errorMessage = 'Failed to load all faculties';
+      notifyListeners();
     }
   }
 

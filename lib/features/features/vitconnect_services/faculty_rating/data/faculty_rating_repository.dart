@@ -94,6 +94,7 @@ class FacultyRatingRepository {
     required double attendanceFlex,
     required double supportiveness,
     required double marks,
+    List<CourseInfo> courses = const [],
   }) async {
     try {
       Logger.d(_tag, 'Submitting rating for faculty: $facultyId');
@@ -107,6 +108,7 @@ class FacultyRatingRepository {
         attendanceFlex: attendanceFlex,
         supportiveness: supportiveness,
         marks: marks,
+        courses: courses,
         submittedAt: DateTime.now(),
       );
 
@@ -188,5 +190,29 @@ class FacultyRatingRepository {
   /// Clear all cache
   Future<void> clearCache() async {
     await _cacheService.clearCache();
+  }
+
+  /// Get all faculty ratings from Supabase
+  Future<List<FacultyRatingAggregate>> getAllFacultyRatings() async {
+    try {
+      Logger.d(_tag, 'Fetching all faculty ratings from Supabase');
+
+      final response = await _supabase
+          .from('faculty_rating_aggregates')
+          .select()
+          .order('last_updated', ascending: false);
+
+      final ratings =
+          (response as List)
+              .map((e) => FacultyRatingAggregate.fromMap(e))
+              .toList();
+
+      Logger.success(_tag, 'Fetched ${ratings.length} faculty ratings');
+
+      return ratings;
+    } catch (e, stack) {
+      Logger.e(_tag, 'Error fetching all faculty ratings', e, stack);
+      rethrow;
+    }
   }
 }

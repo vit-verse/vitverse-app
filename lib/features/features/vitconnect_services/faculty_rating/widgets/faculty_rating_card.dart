@@ -54,7 +54,9 @@ class FacultyRatingCard extends StatelessWidget {
                         Text(
                           faculty.facultyId,
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                            color: theme.colorScheme.onSurface.withValues(
+                              alpha: 0.6,
+                            ),
                           ),
                         ),
                       ],
@@ -78,7 +80,9 @@ class FacultyRatingCard extends StatelessWidget {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                          color: theme.colorScheme.primary.withValues(
+                            alpha: 0.1,
+                          ),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
@@ -238,9 +242,8 @@ class FacultyRatingCard extends StatelessWidget {
   }
 
   Color _getRatingColor(double rating) {
-    if (rating >= 8.0) return Colors.green.shade700;
-    if (rating >= 6.0) return Colors.blue.shade700;
-    if (rating >= 4.0) return Colors.orange.shade700;
+    if (rating >= 7.0) return Colors.green.shade700;
+    if (rating >= 5.0) return Colors.orange.shade700;
     return Colors.red.shade700;
   }
 }

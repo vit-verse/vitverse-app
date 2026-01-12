@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:path_provider/path_provider.dart';
 import '../../../../../core/theme/theme_provider.dart';
 import '../../../../../core/utils/logger.dart';
 import '../../../../../core/utils/snackbar_utils.dart';
@@ -47,7 +48,10 @@ class _AddFriendsPageState extends State<AddFriendsPage> {
       setState(() {});
     } catch (e) {
       if (mounted) {
-        SnackbarUtils.error(context, 'Failed to update Friends Schedule visibility');
+        SnackbarUtils.error(
+          context,
+          'Failed to update Friends Schedule visibility',
+        );
       }
     }
   }
@@ -65,33 +69,36 @@ class _AddFriendsPageState extends State<AddFriendsPage> {
 
   Future<void> _updateNickname(Friend friend) async {
     final controller = TextEditingController(text: friend.nickname);
-    
+
     final newNickname = await showDialog<String>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Edit Nickname'),
-        content: TextField(
-          controller: controller,
-          decoration: const InputDecoration(
-            labelText: 'Nickname',
-            hintText: 'Enter a nickname for this friend',
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Edit Nickname'),
+            content: TextField(
+              controller: controller,
+              decoration: const InputDecoration(
+                labelText: 'Nickname',
+                hintText: 'Enter a nickname for this friend',
+              ),
+              autofocus: true,
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, controller.text.trim()),
+                child: const Text('Save'),
+              ),
+            ],
           ),
-          autofocus: true,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, controller.text.trim()),
-            child: const Text('Save'),
-          ),
-        ],
-      ),
     );
 
-    if (newNickname != null && newNickname.isNotEmpty && newNickname != friend.nickname) {
+    if (newNickname != null &&
+        newNickname.isNotEmpty &&
+        newNickname != friend.nickname) {
       try {
         await _service.updateFriendNickname(friend.id, newNickname);
         setState(() {});
@@ -138,6 +145,77 @@ class _AddFriendsPageState extends State<AddFriendsPage> {
         if (mounted) {
           SnackbarUtils.error(context, 'Failed to remove friend');
         }
+      }
+    }
+  }
+
+  Future<void> _saveTimetableToFile(Friend friend) async {
+    try {
+      // Generate timetable text
+      final buffer = StringBuffer();
+      buffer.writeln('======================================');
+      buffer.writeln('   ${friend.name} Timetable');
+      buffer.writeln('   Registration: ${friend.regNumber}');
+      buffer.writeln('======================================\\n');
+
+      // Group by days
+      final days = [
+        'Monday',
+        'Tuesday',
+        'Wednesday',
+        'Thursday',
+        'Friday',
+        'Saturday',
+        'Sunday',
+      ];
+
+      for (final day in days) {
+        final daySlots =
+            friend.classSlots.where((slot) => slot.day == day).toList();
+        if (daySlots.isEmpty) continue;
+
+        buffer.writeln('$day');
+        buffer.writeln('-' * 38);
+
+        // Sort by time
+        daySlots.sort((a, b) => a.timeSlot.compareTo(b.timeSlot));
+
+        for (final slot in daySlots) {
+          buffer.writeln(slot.timeSlot);
+          buffer.writeln('  ${slot.courseCode} - ${slot.courseTitle}');
+          buffer.writeln('  Venue: ${slot.venue}');
+          buffer.writeln('  Slot: ${slot.slotId}');
+          buffer.writeln('');
+        }
+        buffer.writeln('');
+      }
+
+      // Get Downloads directory
+      final directory = await getExternalStorageDirectory();
+      if (directory == null) {
+        throw Exception('Could not access storage');
+      }
+
+      // Create file path
+      final downloadsPath = directory.path.replaceAll(
+        '/Android/data/com.divyanshupatel.vitconnect/files',
+        '/Download',
+      );
+      final file = File('$downloadsPath/${friend.name}_timetable.txt');
+
+      // Write to file
+      await file.writeAsString(buffer.toString());
+
+      if (mounted) {
+        SnackbarUtils.success(
+          context,
+          'Timetable saved to Downloads/${friend.name}_timetable.txt',
+        );
+      }
+    } catch (e) {
+      Logger.e('AddFriendsPage', 'Failed to save timetable', e);
+      if (mounted) {
+        SnackbarUtils.error(context, 'Failed to save timetable');
       }
     }
   }
@@ -281,12 +359,13 @@ class _AddFriendsPageState extends State<AddFriendsPage> {
 
       if (image != null) {
         if (!mounted) return;
-        
+
         showDialog(
           context: context,
           barrierDismissible: false,
           builder:
-              (dialogContext) => const Center(child: CircularProgressIndicator()),
+              (dialogContext) =>
+                  const Center(child: CircularProgressIndicator()),
         );
 
         try {
@@ -307,7 +386,7 @@ class _AddFriendsPageState extends State<AddFriendsPage> {
               try {
                 final friend = Friend.fromQRString(qrData);
                 await _service.addFriend(friend);
-                
+
                 if (!mounted) return;
                 setState(() {});
                 SnackbarUtils.success(
@@ -538,7 +617,9 @@ class _AddFriendsPageState extends State<AddFriendsPage> {
                       ),
                       child: Center(
                         child: Text(
-                          friend.name.isNotEmpty ? friend.name[0].toUpperCase() : '?',
+                          friend.name.isNotEmpty
+                              ? friend.name[0].toUpperCase()
+                              : '?',
                           style: TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
@@ -548,7 +629,7 @@ class _AddFriendsPageState extends State<AddFriendsPage> {
                       ),
                     ),
                     SizedBox(width: screenWidth < 360 ? 16 : 20),
-                    
+
                     // Name and Info
                     Expanded(
                       child: Column(
@@ -574,27 +655,53 @@ class _AddFriendsPageState extends State<AddFriendsPage> {
                         ],
                       ),
                     ),
-                    
-                    // Delete Button
-                    IconButton(
-                      onPressed: () => _removeFriend(friend),
-                      icon: Icon(
-                        Icons.delete_outline,
-                        color: Colors.red.shade400,
-                        size: screenWidth < 360 ? 20 : 24,
-                      ),
-                      style: IconButton.styleFrom(
-                        backgroundColor: Colors.red.shade50,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+
+                    // Save and Delete Buttons
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Save Button
+                        InkWell(
+                          onTap: () => _saveTimetableToFile(friend),
+                          borderRadius: BorderRadius.circular(6),
+                          child: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.blue.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Icon(
+                              Icons.save_outlined,
+                              color: Colors.blue.shade600,
+                              size: screenWidth < 360 ? 18 : 20,
+                            ),
+                          ),
                         ),
-                      ),
+                        const SizedBox(width: 8),
+                        // Delete Button
+                        InkWell(
+                          onTap: () => _removeFriend(friend),
+                          borderRadius: BorderRadius.circular(6),
+                          child: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.red.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Icon(
+                              Icons.delete_outline,
+                              color: Colors.red.shade600,
+                              size: screenWidth < 360 ? 18 : 20,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-                
+
                 SizedBox(height: screenWidth < 360 ? 16 : 20),
-                
+
                 // Nickname Section
                 GestureDetector(
                   onTap: () => _updateNickname(friend),
@@ -644,9 +751,9 @@ class _AddFriendsPageState extends State<AddFriendsPage> {
                     ),
                   ),
                 ),
-                
+
                 SizedBox(height: screenWidth < 360 ? 12 : 16),
-                
+
                 // Total Classes - Horizontal Bar
                 Container(
                   padding: EdgeInsets.symmetric(
@@ -682,9 +789,9 @@ class _AddFriendsPageState extends State<AddFriendsPage> {
                     ],
                   ),
                 ),
-                
+
                 SizedBox(height: screenWidth < 360 ? 12 : 16),
-                
+
                 // Toggle Controls (Vertical)
                 Column(
                   children: [
@@ -695,14 +802,16 @@ class _AddFriendsPageState extends State<AddFriendsPage> {
                         vertical: screenWidth < 360 ? 6 : 8,
                       ),
                       decoration: BoxDecoration(
-                        color: friend.showInFriendsSchedule 
-                            ? friend.color.withValues(alpha: 0.08)
-                            : theme.surface,
+                        color:
+                            friend.showInFriendsSchedule
+                                ? friend.color.withValues(alpha: 0.08)
+                                : theme.surface,
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color: friend.showInFriendsSchedule 
-                              ? friend.color.withValues(alpha: 0.3)
-                              : theme.border.withValues(alpha: 0.5),
+                          color:
+                              friend.showInFriendsSchedule
+                                  ? friend.color.withValues(alpha: 0.3)
+                                  : theme.border.withValues(alpha: 0.5),
                         ),
                       ),
                       child: Row(
@@ -714,9 +823,10 @@ class _AddFriendsPageState extends State<AddFriendsPage> {
                               style: TextStyle(
                                 fontSize: screenWidth < 360 ? 10 : 11,
                                 fontWeight: FontWeight.w600,
-                                color: friend.showInFriendsSchedule 
-                                    ? friend.color 
-                                    : theme.muted,
+                                color:
+                                    friend.showInFriendsSchedule
+                                        ? friend.color
+                                        : theme.muted,
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -726,17 +836,21 @@ class _AddFriendsPageState extends State<AddFriendsPage> {
                             scale: 0.7,
                             child: Switch(
                               value: friend.showInFriendsSchedule,
-                              onChanged: (_) => _toggleFriendsScheduleVisibility(friend.id),
+                              onChanged:
+                                  (_) => _toggleFriendsScheduleVisibility(
+                                    friend.id,
+                                  ),
                               activeColor: friend.color,
-                              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              materialTapTargetSize:
+                                  MaterialTapTargetSize.shrinkWrap,
                             ),
                           ),
                         ],
                       ),
                     ),
-                    
+
                     const SizedBox(height: 8),
-                    
+
                     // Home Page Toggle
                     Container(
                       padding: EdgeInsets.symmetric(
@@ -744,14 +858,16 @@ class _AddFriendsPageState extends State<AddFriendsPage> {
                         vertical: screenWidth < 360 ? 6 : 8,
                       ),
                       decoration: BoxDecoration(
-                        color: friend.showInHomePage 
-                            ? friend.color.withValues(alpha: 0.08)
-                            : theme.surface,
+                        color:
+                            friend.showInHomePage
+                                ? friend.color.withValues(alpha: 0.08)
+                                : theme.surface,
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color: friend.showInHomePage 
-                              ? friend.color.withValues(alpha: 0.3)
-                              : theme.border.withValues(alpha: 0.5),
+                          color:
+                              friend.showInHomePage
+                                  ? friend.color.withValues(alpha: 0.3)
+                                  : theme.border.withValues(alpha: 0.5),
                         ),
                       ),
                       child: Row(
@@ -763,9 +879,10 @@ class _AddFriendsPageState extends State<AddFriendsPage> {
                               style: TextStyle(
                                 fontSize: screenWidth < 360 ? 10 : 11,
                                 fontWeight: FontWeight.w600,
-                                color: friend.showInHomePage 
-                                    ? friend.color 
-                                    : theme.muted,
+                                color:
+                                    friend.showInHomePage
+                                        ? friend.color
+                                        : theme.muted,
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -775,9 +892,11 @@ class _AddFriendsPageState extends State<AddFriendsPage> {
                             scale: 0.7,
                             child: Switch(
                               value: friend.showInHomePage,
-                              onChanged: (_) => _toggleHomePageVisibility(friend.id),
+                              onChanged:
+                                  (_) => _toggleHomePageVisibility(friend.id),
                               activeColor: friend.color,
-                              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              materialTapTargetSize:
+                                  MaterialTapTargetSize.shrinkWrap,
                             ),
                           ),
                         ],

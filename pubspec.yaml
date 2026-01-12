@@ -153,6 +153,7 @@ flutter:
     # - .env  # REMOVED for SECURITY: .env file NO bundled in APK (using --dart-define instead)
     - assets/images/vitconnect-icon.png
     - assets/ml/vellore_weights.json
+    - assets/raw/eventhub_cert.pem
     - assets/icons/gmail.png
     - assets/icons/portfolio.png
     - assets/icons/github.png
@@ -178,6 +179,8 @@ flutter:
     - assets/lottie/SpaceCat.lottie
     - assets/lottie/lostFound.lottie
     - assets/lottie/cabshare.lottie
+    - assets/lottie/loading1.lottie
+    - assets/images/vit-verse-love.png
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

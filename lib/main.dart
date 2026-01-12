@@ -13,8 +13,11 @@ import 'features/authentication/ui/login_screen.dart';
 import 'features/main_screen.dart';
 import 'features/profile/widget_customization/provider/widget_customization_provider.dart';
 import 'features/features/routes/feature_routes.dart';
+import 'supabase/core/supabase_events_client.dart';
 import 'firebase/analytics/analytics_service.dart';
 import 'firebase/core/firebase_initializer.dart';
+import 'firebase/messaging/fcm_service.dart';
+import 'firebase/messaging/notification_handler.dart';
 import 'supabase/core/supabase_client.dart';
 
 // Note: During development I kept the internal app name as VIT Connect, but before release I decided on VIT Verse. So in the codebase and class names it still uses VIT Connect, but anywhere shown to the user is updated to VIT Verse ;) ...
@@ -67,6 +70,11 @@ void main() async {
     await SupabaseClientService.initialize();
   }
 
+  // Initialize Supabase Events (separate client)
+  if (SupabaseEventsClient.isConfigured) {
+    await SupabaseEventsClient.initialize();
+  }
+
   runApp(const VitConnectApp());
   AppStartup.initializeBackground();
 }
@@ -87,7 +95,6 @@ class VitConnectApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(create: (_) => VTOPAuthService.instance),
         ChangeNotifierProvider(create: (_) => WidgetCustomizationProvider()),
-        // Calendar provider now loaded lazily in calendar feature
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, _) {
@@ -98,7 +105,15 @@ class VitConnectApp extends StatelessWidget {
             darkTheme: themeProvider.getThemeData(),
             themeMode:
                 themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
-            builder: (context, child) => StackedSnackbarManager(child: child!),
+            builder: (context, child) {
+              // Set up notification handler callback
+              FCMService.onNotificationTap = (data) {
+                if (context.mounted) {
+                  NotificationHandler.handleNotificationTap(context, data);
+                }
+              };
+              return StackedSnackbarManager(child: child!);
+            },
             home: const AuthGate(),
             routes: FeatureRoutes.getRoutes(),
             navigatorObservers:

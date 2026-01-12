@@ -7,6 +7,7 @@ import '../logic/feature_provider.dart';
 import '../models/feature_model.dart';
 import '../data/feature_catalogue.dart';
 import '../constants/feature_colors.dart';
+import '../data/feature_repository.dart';
 import '../widgets/feature_tile.dart';
 import '../widgets/section_headers.dart';
 import 'features_settings_page.dart';
@@ -26,7 +27,6 @@ class _FeaturesPageState extends State<FeaturesPage> {
   bool _vitconnectSocialExpanded = true;
   bool _vitconnectAcademicsExpanded = true;
   bool _vitconnectUtilitiesExpanded = true;
-  bool _vitconnectClubsExpanded = true;
 
   @override
   void initState() {
@@ -47,8 +47,6 @@ class _FeaturesPageState extends State<FeaturesPage> {
             prefs.getBool('vitconnect_academics_expanded') ?? true;
         _vitconnectUtilitiesExpanded =
             prefs.getBool('vitconnect_utilities_expanded') ?? true;
-        _vitconnectClubsExpanded =
-            prefs.getBool('vitconnect_clubs_expanded') ?? true;
       });
     } catch (e) {
       // Use defaults if loading fails
@@ -73,10 +71,6 @@ class _FeaturesPageState extends State<FeaturesPage> {
         'vitconnect_utilities_expanded',
         _vitconnectUtilitiesExpanded,
       );
-      await prefs.setBool(
-        'vitconnect_clubs_expanded',
-        _vitconnectClubsExpanded,
-      );
     } catch (e) {
       // Ignore save errors
     }
@@ -90,7 +84,6 @@ class _FeaturesPageState extends State<FeaturesPage> {
       _vitconnectSocialExpanded = true;
       _vitconnectAcademicsExpanded = true;
       _vitconnectUtilitiesExpanded = true;
-      _vitconnectClubsExpanded = true;
     });
     _saveExpandedStates();
   }
@@ -103,7 +96,6 @@ class _FeaturesPageState extends State<FeaturesPage> {
       _vitconnectSocialExpanded = false;
       _vitconnectAcademicsExpanded = false;
       _vitconnectUtilitiesExpanded = false;
-      _vitconnectClubsExpanded = false;
     });
     _saveExpandedStates();
   }
@@ -167,7 +159,6 @@ class _FeaturesPageState extends State<FeaturesPage> {
                       featureProvider.pinnedFeatures,
                       featureProvider.viewMode,
                     ),
-                    const SizedBox(height: 24),
                   ],
                 )
               else if (featureProvider.hasCustomizedPins)
@@ -181,7 +172,9 @@ class _FeaturesPageState extends State<FeaturesPage> {
                       decoration: BoxDecoration(
                         color: theme.surface,
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: theme.muted.withValues(alpha: 0.2)),
+                        border: Border.all(
+                          color: theme.muted.withValues(alpha: 0.2),
+                        ),
                       ),
                       child: Column(
                         children: [
@@ -203,7 +196,6 @@ class _FeaturesPageState extends State<FeaturesPage> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 24),
                   ],
                 ),
 
@@ -217,8 +209,6 @@ class _FeaturesPageState extends State<FeaturesPage> {
                   _buildVtopSection(featureProvider.viewMode),
                 ],
               ),
-
-              const SizedBox(height: 24),
 
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -263,8 +253,7 @@ class _FeaturesPageState extends State<FeaturesPage> {
         !_vtopFinanceExpanded ||
         !_vitconnectSocialExpanded ||
         !_vitconnectAcademicsExpanded ||
-        !_vitconnectUtilitiesExpanded ||
-        !_vitconnectClubsExpanded;
+        !_vitconnectUtilitiesExpanded;
 
     return GestureDetector(
       onTap: anyCollapsed ? _expandAll : _collapseAll,
@@ -305,10 +294,7 @@ class _FeaturesPageState extends State<FeaturesPage> {
               _saveExpandedStates();
             },
           ),
-          if (_vtopAcademicExpanded) ...[
-            _buildFeatureGrid(academic, viewMode),
-            const SizedBox(height: 24),
-          ],
+          if (_vtopAcademicExpanded) _buildFeatureGrid(academic, viewMode),
         ],
 
         if (faculty.isNotEmpty) ...[
@@ -323,10 +309,7 @@ class _FeaturesPageState extends State<FeaturesPage> {
               _saveExpandedStates();
             },
           ),
-          if (_vtopFacultyExpanded) ...[
-            _buildFeatureGrid(faculty, viewMode),
-            const SizedBox(height: 24),
-          ],
+          if (_vtopFacultyExpanded) _buildFeatureGrid(faculty, viewMode),
         ],
 
         if (finance.isNotEmpty) ...[
@@ -341,7 +324,7 @@ class _FeaturesPageState extends State<FeaturesPage> {
               _saveExpandedStates();
             },
           ),
-          if (_vtopFinanceExpanded) ...[_buildFeatureGrid(finance, viewMode)],
+          if (_vtopFinanceExpanded) _buildFeatureGrid(finance, viewMode),
         ],
       ],
     );
@@ -362,10 +345,6 @@ class _FeaturesPageState extends State<FeaturesPage> {
         vitConnectFeatures
             .where((f) => f.category == FeatureCategory.utilities)
             .toList();
-    final clubs =
-        vitConnectFeatures
-            .where((f) => f.category == FeatureCategory.club)
-            .toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -382,10 +361,7 @@ class _FeaturesPageState extends State<FeaturesPage> {
               _saveExpandedStates();
             },
           ),
-          if (_vitconnectSocialExpanded) ...[
-            _buildFeatureGrid(social, viewMode),
-            const SizedBox(height: 24),
-          ],
+          if (_vitconnectSocialExpanded) _buildFeatureGrid(social, viewMode),
         ],
 
         if (academics.isNotEmpty) ...[
@@ -400,10 +376,8 @@ class _FeaturesPageState extends State<FeaturesPage> {
               _saveExpandedStates();
             },
           ),
-          if (_vitconnectAcademicsExpanded) ...[
+          if (_vitconnectAcademicsExpanded)
             _buildFeatureGrid(academics, viewMode),
-            const SizedBox(height: 24),
-          ],
         ],
 
         if (utilities.isNotEmpty) ...[
@@ -418,26 +392,11 @@ class _FeaturesPageState extends State<FeaturesPage> {
               _saveExpandedStates();
             },
           ),
-          if (_vitconnectUtilitiesExpanded) ...[
+          if (_vitconnectUtilitiesExpanded)
             _buildFeatureGrid(utilities, viewMode),
-            const SizedBox(height: 24),
-          ],
         ],
-
-        if (clubs.isNotEmpty) ...[
-          SubSectionHeader(
-            title: 'Clubs',
-            count: clubs.length,
-            isExpanded: _vitconnectClubsExpanded,
-            onTap: () {
-              setState(() {
-                _vitconnectClubsExpanded = !_vitconnectClubsExpanded;
-              });
-              _saveExpandedStates();
-            },
-          ),
-          if (_vitconnectClubsExpanded) ...[_buildFeatureGrid(clubs, viewMode)],
-        ],
+        // Add bottom padding to prevent last item from hiding under navbar
+        const SizedBox(height: 100),
       ],
     );
   }
@@ -455,7 +414,7 @@ class _FeaturesPageState extends State<FeaturesPage> {
     final columnCount = viewMode == ViewMode.grid2Column ? 2 : 3;
     final crossAxisSpacing = viewMode == ViewMode.grid2Column ? 12.0 : 8.0;
     final mainAxisSpacing = viewMode == ViewMode.grid2Column ? 12.0 : 8.0;
-    final childAspectRatio = viewMode == ViewMode.grid2Column ? 2.2 : 1 / 1.3;
+    final childAspectRatio = viewMode == ViewMode.grid2Column ? 2.3 : 1.5;
 
     return GridView.builder(
       shrinkWrap: true,

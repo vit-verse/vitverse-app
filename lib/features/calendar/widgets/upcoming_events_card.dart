@@ -17,7 +17,7 @@ class UpcomingEventsCard extends StatelessWidget {
         }
 
         return Container(
-          margin: const EdgeInsets.all(16.0),
+          margin: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 100.0),
           child: Card(
             child: Padding(
               padding: const EdgeInsets.all(16.0),

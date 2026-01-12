@@ -179,7 +179,7 @@ class _HomePageState extends State<HomePage> {
 
                   itemBuilder: (context, index) {
                     return ClassScheduleList(
-                      key: ValueKey('class_list_${index}_${_isDataLoading}'),
+                      key: ValueKey('class_list_$index'),
                       dayIndex: index,
                       homeLogic: _homeLogic,
                       isDataLoading: _isDataLoading,

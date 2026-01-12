@@ -47,15 +47,15 @@ class _ClassScheduleListState extends State<ClassScheduleList> {
       // Silent error handling
     }
   }
-  
+
   bool _isHoliday(int dayIndex) {
     if (_holidayDays.contains(dayIndex)) {
       return true;
     }
-    
+
     final today = DateTime.now().weekday - 1;
     final targetDate = DateTime.now().add(Duration(days: dayIndex - today));
-    
+
     return _calendarService.isHolidayDate(targetDate);
   }
 
@@ -80,7 +80,9 @@ class _ClassScheduleListState extends State<ClassScheduleList> {
             margin: const EdgeInsets.symmetric(horizontal: 16),
             padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
             decoration: BoxDecoration(
-              color: themeProvider.currentTheme.background.withValues(alpha: 0.8),
+              color: themeProvider.currentTheme.background.withValues(
+                alpha: 0.8,
+              ),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Column(
@@ -156,7 +158,7 @@ class _ClassScheduleListState extends State<ClassScheduleList> {
             }
 
             return ListView.builder(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
               itemCount: dayClasses.length,
               itemBuilder: (context, index) {
                 final classData = dayClasses[index];

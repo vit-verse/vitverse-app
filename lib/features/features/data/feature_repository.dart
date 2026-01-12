@@ -198,4 +198,34 @@ class FeatureRepository {
       Logger.e('FeatureRepository', 'Failed to mark as customized', e);
     }
   }
+
+  Future<void> saveViewMode(ViewMode mode) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('feature_view_mode', mode.name);
+      Logger.d('FeatureRepository', 'Saved view mode: ${mode.name}');
+    } catch (e) {
+      Logger.e('FeatureRepository', 'Failed to save view mode', e);
+      rethrow;
+    }
+  }
+
+  Future<ViewMode> getViewMode() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final modeString = prefs.getString('feature_view_mode');
+
+      if (modeString == null) return ViewMode.grid2Column;
+
+      return ViewMode.values.firstWhere(
+        (mode) => mode.name == modeString,
+        orElse: () => ViewMode.grid2Column,
+      );
+    } catch (e) {
+      Logger.e('FeatureRepository', 'Failed to load view mode', e);
+      return ViewMode.grid2Column;
+    }
+  }
 }
+
+enum ViewMode { list, grid2Column, grid3Column }

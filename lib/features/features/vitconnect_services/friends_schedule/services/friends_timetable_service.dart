@@ -55,20 +55,24 @@ class FriendsScheduleService {
   /// Add default student for demonstration
   Future<void> _addDefaultStudent() async {
     try {
-      const defaultQRData = 'Student 011|99REG0011|Monday|08:00-08:50|BCSE101L|Breaking Bad Chemistry of Bad Decisions|AB1 - 101|L1||Wednesday|08:00-08:50|BCSE202L|Stranger Things Upside Down Algorithms|AB1 - 209|L13||Monday|08:50-09:45|BCSE101L|Breaking Bad Chemistry of Bad Decisions|AB1 - 101|L2||Wednesday|08:50-09:45|BCSE202L|Stranger Things Upside Down Algorithms|AB1 - 209|L14||Monday|09:50-10:40|BCSE303P|Friends Level Communication Skills|AB1 - 614|L3||Monday|10:40-11:35|BCSE303P|Friends Level Communication Skills|AB1 - 614|L4||Monday|14:00-14:50|BCSE303L|How Humans Talk Less Than Machines|AB3 - 503|A2||Tuesday|14:00-14:50|BSTS404P|Squid Game Competitive Survival Coding|AB3 - 509|B2||Wednesday|14:00-14:50|BCSE111L|Money Heist Security and Master Plans|AB3 - 513|C2||Thursday|14:00-14:50|BCSE202L|Stranger Things Upside Down Algorithms|AB3 - 505|D2||Friday|14:00-14:50|BHUM999L|Black Mirror Society Reality Check|AB3 - 709|E2||Monday|14:50-15:45|BCSE404L|Dark Timeline Compiler Confusion|AB3 - 504|F2||Tuesday|14:50-15:45|BCSE505L|Sherlock Level Logical Reasoning AI|AB3 - 506|G2||Wednesday|14:50-15:45|BCSE303L|How Humans Talk Less Than Machines|AB3 - 503|A2||Thursday|14:50-15:45|BSTS404P|Squid Game Competitive Survival Coding|AB3 - 509|B2||Friday|14:50-15:45|BCSE111L|Money Heist Security and Master Plans|AB3 - 513|C2||Monday|15:50-16:40|BCSE202L|Stranger Things Upside Down Algorithms|AB3 - 505|D2||Tuesday|15:50-16:40|BHUM999L|Black Mirror Society Reality Check|AB3 - 709|E2||Wednesday|15:50-16:40|BCSE404L|Dark Timeline Compiler Confusion|AB3 - 504|F2||Thursday|15:50-16:40|BCSE505L|Sherlock Level Logical Reasoning AI|AB3 - 506|G2||Friday|15:50-16:40|BCSE303L|How Humans Talk Less Than Machines|AB3 - 503|TA2||Monday|16:45-17:35|BSTS404P|Squid Game Competitive Survival Coding|AB3 - 509|TB2||Tuesday|16:45-17:35|BCSE111L|Money Heist Security and Master Plans|AB3 - 513|TC2||Wednesday|16:45-17:35|BCSE202L|Stranger Things Upside Down Algorithms|AB3 - 505|TD2||Thursday|16:45-17:35|BHUM999L|Black Mirror Society Reality Check|AB3 - 709|TE2||Friday|16:45-17:35|BCSE404L|Dark Timeline Compiler Confusion|AB3 - 504|TF2||Tuesday|17:40-18:30|BCSE404P|Breaking Bad Level Debugging Lab|AB1 - 205A|L41||Tuesday|18:35-19:25|BCSE404P|Breaking Bad Level Debugging Lab|AB1 - 205A|L42';
-      
+      const defaultQRData =
+          'Student|99REG0011|Monday|08:00-08:50|BCSE101L|Breaking Bad|AB1 - 101|L1||Wednesday|08:00-08:50|BCSE202L|Stranger Things|AB1 - 209|L13||Monday|08:50-09:45|BCSE101L|Breaking Bad|AB1 - 101|L2||Wednesday|08:50-09:45|BCSE202L|Stranger Things|AB1 - 209|L14||Monday|09:50-10:40|BCSE303P|Friends|AB1 - 614|L3||Monday|10:40-11:35|BCSE303P|Friends|AB1 - 614|L4||Monday|14:00-14:50|BCSE303L|Westworld|AB3 - 503|A2||Tuesday|14:00-14:50|BSTS404P|Squid Game|AB3 - 509|B2||Wednesday|14:00-14:50|BCSE111L|Money Heist|AB3 - 513|C2||Thursday|14:00-14:50|BCSE202L|Stranger Things|AB3 - 505|D2||Friday|14:00-14:50|BHUM999L|Black Mirror|AB3 - 709|E2||Monday|14:50-15:45|BCSE404L|Dark|AB3 - 504|F2||Tuesday|14:50-15:45|BCSE505L|Sherlock|AB3 - 506|G2||Wednesday|14:50-15:45|BCSE303L|Westworld|AB3 - 503|A2||Thursday|14:50-15:45|BSTS404P|Squid Game|AB3 - 509|B2||Friday|14:50-15:45|BCSE111L|Money Heist|AB3 - 513|C2||Monday|15:50-16:40|BCSE202L|Stranger Things|AB3 - 505|D2||Tuesday|15:50-16:40|BHUM999L|Black Mirror|AB3 - 709|E2||Wednesday|15:50-16:40|BCSE404L|Dark|AB3 - 504|F2||Thursday|15:50-16:40|BCSE505L|Sherlock|AB3 - 506|G2||Friday|15:50-16:40|BCSE303L|Westworld|AB3 - 503|TA2||Monday|16:45-17:35|BSTS404P|Squid Game|AB3 - 509|TB2||Tuesday|16:45-17:35|BCSE111L|Money Heist|AB3 - 513|TC2||Wednesday|16:45-17:35|BCSE202L|Stranger Things|AB3 - 505|TD2||Thursday|16:45-17:35|BHUM999L|Black Mirror|AB3 - 709|TE2||Friday|16:45-17:35|BCSE404L|Dark|AB3 - 504|TF2||Tuesday|17:40-18:30|BCSE404P|Breaking Bad|AB1 - 205A|L41||Tuesday|18:35-19:25|BCSE404P|Breaking Bad|AB1 - 205A|L42';
+
       final defaultFriend = Friend.fromQRString(defaultQRData);
-      
-      // Set both toggles to true by default
+
+      // Set showInFriendsSchedule to true, showInHomePage to false by default
       final friendWithToggles = defaultFriend.copyWith(
         showInFriendsSchedule: true,
-        showInHomePage: true,
+        showInHomePage: false,
       );
-      
+
       _friends.add(friendWithToggles);
       await saveFriends();
-      
-      Logger.success('FriendsSchedule', 'Added default student: ${friendWithToggles.name}');
+
+      Logger.success(
+        'FriendsSchedule',
+        'Added default student: ${friendWithToggles.name}',
+      );
     } catch (e) {
       Logger.e('FriendsSchedule', 'Failed to add default student', e);
     }
@@ -122,7 +126,7 @@ class FriendsScheduleService {
       _friends[friendIndex] = friend.copyWith(
         showInFriendsSchedule: !friend.showInFriendsSchedule,
       );
-      
+
       await saveFriends();
     } catch (e) {
       rethrow;
@@ -139,7 +143,7 @@ class FriendsScheduleService {
       _friends[friendIndex] = friend.copyWith(
         showInHomePage: !friend.showInHomePage,
       );
-      
+
       await saveFriends();
     } catch (e) {
       rethrow;
@@ -154,7 +158,7 @@ class FriendsScheduleService {
 
       final friend = _friends[friendIndex];
       _friends[friendIndex] = friend.copyWith(nickname: nickname);
-      
+
       await saveFriends();
     } catch (e) {
       rethrow;
@@ -169,7 +173,7 @@ class FriendsScheduleService {
 
       final friend = _friends[friendIndex];
       _friends[friendIndex] = friend.copyWith(color: newColor);
-      
+
       await saveFriends();
     } catch (e) {
       rethrow;
@@ -190,12 +194,16 @@ class FriendsScheduleService {
 
   /// Get friends who have class at specific slot
   List<Friend> getFriendsWithClassAt(String day, String timeSlot) {
-    return friendsForSchedulePage.where((f) => f.hasClassAt(day, timeSlot)).toList();
+    return friendsForSchedulePage
+        .where((f) => f.hasClassAt(day, timeSlot))
+        .toList();
   }
 
   /// Get friends who are free at specific slot
   List<Friend> getFriendsFreeAt(String day, String timeSlot) {
-    return friendsForSchedulePage.where((f) => !f.hasClassAt(day, timeSlot)).toList();
+    return friendsForSchedulePage
+        .where((f) => !f.hasClassAt(day, timeSlot))
+        .toList();
   }
 
   /// Get friends with same venue at specific slot

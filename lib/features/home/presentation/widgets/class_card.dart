@@ -34,7 +34,8 @@ class ClassCard extends StatelessWidget {
   Widget _buildFriendClassCard(BuildContext context) {
     return Consumer<ThemeProvider>(
       builder: (context, themeProvider, child) {
-        final friendNickname = classData['friendNickname'] as String? ?? 'Friend';
+        final friendNickname =
+            classData['friendNickname'] as String? ?? 'Friend';
         final friendColor =
             classData['friendColor'] as Color? ??
             themeProvider.currentTheme.primary;
@@ -43,14 +44,15 @@ class ClassCard extends StatelessWidget {
         final venue = course['venue'] as String? ?? '--';
         final startTime = classData['start_time'] as String? ?? '';
         final endTime = classData['end_time'] as String? ?? '';
-        
+
         // Check if class has passed (for any day in the current week)
         final hasPassed = _hasClassPassedInWeek(dayIndex, endTime);
-        
+
         // Format time display
         String displayTime = '--:-- to --:--';
         if (startTime.isNotEmpty && endTime.isNotEmpty) {
-          displayTime = '${_convertTo12HourFormat(startTime)} - ${_convertTo12HourFormat(endTime)}';
+          displayTime =
+              '${_convertTo12HourFormat(startTime)} - ${_convertTo12HourFormat(endTime)}';
         }
 
         return Opacity(
@@ -61,13 +63,19 @@ class ClassCard extends StatelessWidget {
             decoration: BoxDecoration(
               color: friendColor.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: friendColor.withValues(alpha: 0.3), width: 1.5),
+              border: Border.all(
+                color: friendColor.withValues(alpha: 0.3),
+                width: 1.5,
+              ),
             ),
             child: Row(
               children: [
                 // Friend nickname tag
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: friendColor,
                     borderRadius: BorderRadius.circular(8),
@@ -222,12 +230,16 @@ class ClassCard extends StatelessWidget {
                 color: themeProvider.currentTheme.surface,
                 borderRadius: BorderRadius.circular(24),
                 border: Border.all(
-                  color: themeProvider.currentTheme.muted.withValues(alpha: 0.2),
+                  color: themeProvider.currentTheme.muted.withValues(
+                    alpha: 0.2,
+                  ),
                   width: 1.5,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: themeProvider.currentTheme.text.withValues(alpha: 0.02),
+                    color: themeProvider.currentTheme.text.withValues(
+                      alpha: 0.02,
+                    ),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -244,7 +256,8 @@ class ClassCard extends StatelessWidget {
                           width:
                               MediaQuery.of(context).size.width * classProgress,
                           decoration: BoxDecoration(
-                            color: themeProvider.currentTheme.primary.withValues(alpha: 0.08),
+                            color: themeProvider.currentTheme.primary
+                                .withValues(alpha: 0.08),
                             borderRadius: BorderRadius.circular(20),
                           ),
                         ),
@@ -253,47 +266,29 @@ class ClassCard extends StatelessWidget {
 
                   Row(
                     children: [
-                      // Theory/Lab Icon
                       Stack(
                         children: [
-                          Container(
-                            width: 44,
-                            height: 44,
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  themeProvider.currentTheme.primary.withValues(alpha: 0.15),
-                                  themeProvider.currentTheme.primary.withValues(alpha: 0.05),
-                                ],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Image.asset(
-                                isLab
-                                    ? 'assets/icons/lab.png'
-                                    : 'assets/icons/theory.png',
-                                width: 28,
-                                height: 28,
-                                color: themeProvider.currentTheme.primary,
-                                errorBuilder: (context, error, stackTrace) {
-                                  // Fallback to Material icons if asset not found
-                                  return Icon(
-                                    isLab
-                                        ? Icons.science_rounded
-                                        : Icons.book_rounded,
-                                    color: themeProvider.currentTheme.primary,
-                                    size: 24,
-                                  );
-                                },
-                              ),
+                          Padding(
+                            padding: const EdgeInsets.all(2.0),
+                            child: Image.asset(
+                              isLab
+                                  ? 'assets/icons/lab.png'
+                                  : 'assets/icons/theory.png',
+                              width: 40,
+                              height: 40,
+                              color: themeProvider.currentTheme.primary,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Icon(
+                                  isLab
+                                      ? Icons.science_rounded
+                                      : Icons.book_rounded,
+                                  color: themeProvider.currentTheme.primary,
+                                  size: 36,
+                                );
+                              },
                             ),
                           ),
 
-                          // Running indicator badge
                           if (isOngoing)
                             Positioned(
                               right: -2,
@@ -580,7 +575,9 @@ class ClassCard extends StatelessWidget {
               color: themeProvider.currentTheme.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: themeProvider.currentTheme.primary.withValues(alpha: 0.3),
+                color: themeProvider.currentTheme.primary.withValues(
+                  alpha: 0.3,
+                ),
                 width: 2,
               ),
             ),
@@ -666,18 +663,19 @@ class ClassCard extends StatelessWidget {
     try {
       final now = DateTime.now();
       final currentDayIndex = now.weekday - 1; // 0 = Monday, 6 = Sunday
-      final currentTime = '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
-      
+      final currentTime =
+          '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
+
       // If the class day is before current day in the week, it has passed
       if (classDayIndex < currentDayIndex) {
         return true;
       }
-      
+
       // If it's the same day, check the time
       if (classDayIndex == currentDayIndex) {
         return currentTime.compareTo(endTime) >= 0;
       }
-      
+
       // If the class day is after current day, it hasn't passed yet
       return false;
     } catch (e) {

@@ -17,7 +17,7 @@ import '../vtop_services/fee_management/lazy_fee_management_page.dart';
 // VIT Connect Services Pages - Lazy Loading Wrappers
 import '../vitconnect_services/faculty_rating/lazy_faculty_rating_page.dart';
 import '../vitconnect_services/cab_share/lazy_cab_share_page.dart';
-import '../vitconnect_services/eventhub/lazy_eventhub_page.dart';
+import '../vitconnect_services/events/lazy_events_page.dart';
 import '../vitconnect_services/lost_and_found/lazy_lost_and_found_page.dart';
 import '../vitconnect_services/quick_links/lazy_quick_links_page.dart';
 import '../vitconnect_services/mess_menu/lazy_mess_menu_page.dart';
@@ -60,7 +60,7 @@ class FeatureRoutes {
       '/features/vitconnect/faculty_rating':
           (context) => const LazyFacultyRatingPage(),
       '/features/vitconnect/cab_share': (context) => const LazyCabSharePage(),
-      '/features/vitconnect/eventhub': (context) => const LazyEventHubPage(),
+      '/features/vitconnect/events': (context) => const LazyEventsPage(),
       '/features/vitconnect/lost_and_found':
           (context) => const LazyLostAndFoundPage(),
       '/features/vitconnect/quick_links':

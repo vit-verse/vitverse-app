@@ -143,6 +143,11 @@ class ThemeProvider with ChangeNotifier {
   /// Set theme
   Future<void> setTheme(AppTheme theme) async {
     _currentTheme = theme;
+
+    if (theme.id != 'custom') {
+      _customTheme = null;
+    }
+
     notifyListeners();
 
     final prefs = await SharedPreferences.getInstance();
