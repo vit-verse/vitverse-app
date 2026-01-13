@@ -13,7 +13,11 @@ class AllSemesterMarkDao {
   /// Insert mark
   Future<int> insert(AllSemesterMark mark) async {
     final db = await _database;
-    return await db.insert(_tableName, mark.toMap());
+    return await db.insert(
+      _tableName,
+      mark.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
 
   /// Insert multiple marks

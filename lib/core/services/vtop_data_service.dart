@@ -195,18 +195,21 @@ class VTOPDataService {
         DataServiceConstants.step12Name,
       ];
 
-      // Track completed steps for logging
       int completedSteps = 0;
+      List<String> failedSteps = [];
 
       for (int i = 0; i < steps.length; i++) {
         try {
           await _executeStep(steps[i], stepNumbers[i], stepNames[i]);
           completedSteps++;
         } catch (e) {
-          Logger.w(
-            'VTOPData',
-            'Step ${stepNames[i]} failed (non-critical): $e',
-          );
+          Logger.e('VTOPData', 'Step ${stepNames[i]} failed: $e', e);
+          failedSteps.add(stepNames[i]);
+          if (stepNames[i].contains('marks')) {
+            onError?.call(
+              'Failed to sync marks data. Some information may be incomplete.',
+            );
+          }
         }
         await Future.delayed(
           Duration(milliseconds: DataServiceConstants.stepDelayMs),
@@ -215,7 +218,7 @@ class VTOPDataService {
 
       Logger.success(
         DataServiceConstants.logTag,
-        'Phase 2 complete: $completedSteps/${steps.length} steps successful',
+        'Phase 2 complete: $completedSteps/${steps.length} steps successful${failedSteps.isNotEmpty ? " (Failed: ${failedSteps.join(", ")})" : ""}',
       );
       onStatusUpdate?.call(DataServiceConstants.phase2CompleteMessage);
       onComplete?.call();
@@ -2033,31 +2036,38 @@ class VTOPDataService {
     List<AllSemesterMark> savedMarks = [];
 
     for (var markData in marksList) {
-      final signature =
-          '${semesterId}_${markData['course_code']}_${markData['title']}_${markData['score']}'
-              .hashCode;
-      final existing = await _allSemesterMarkDao.getBySignature(signature);
+      try {
+        final signature =
+            '${semesterId}_${markData['course_code']}_${markData['title']}'
+                .hashCode;
+        final existing = await _allSemesterMarkDao.getBySignature(signature);
 
-      if (existing == null) {
-        final mark = AllSemesterMark(
-          semesterId: semesterId,
-          semesterName: semesterName,
-          courseCode: markData['course_code']?.toString() ?? '',
-          courseTitle: markData['course_title']?.toString() ?? '',
-          courseType: markData['course_type']?.toString() ?? '',
-          slot: markData['slot']?.toString() ?? '',
-          title: markData['title']?.toString() ?? '',
-          score: (markData['score'] ?? 0).toDouble(),
-          maxScore: (markData['max_score'] ?? 0).toDouble(),
-          weightage: (markData['weightage'] ?? 0).toDouble(),
-          maxWeightage: (markData['max_weightage'] ?? 0).toDouble(),
-          average: (markData['average'] ?? 0).toDouble(),
-          status: markData['status']?.toString() ?? '',
-          signature: signature,
+        if (existing == null) {
+          final mark = AllSemesterMark(
+            semesterId: semesterId,
+            semesterName: semesterName,
+            courseCode: markData['course_code']?.toString() ?? '',
+            courseTitle: markData['course_title']?.toString() ?? '',
+            courseType: markData['course_type']?.toString() ?? '',
+            slot: markData['slot']?.toString() ?? '',
+            title: markData['title']?.toString() ?? '',
+            score: (markData['score'] ?? 0).toDouble(),
+            maxScore: (markData['max_score'] ?? 0).toDouble(),
+            weightage: (markData['weightage'] ?? 0).toDouble(),
+            maxWeightage: (markData['max_weightage'] ?? 0).toDouble(),
+            average: (markData['average'] ?? 0).toDouble(),
+            status: markData['status']?.toString() ?? '',
+            signature: signature,
+          );
+
+          await _allSemesterMarkDao.insert(mark);
+          savedMarks.add(mark);
+        }
+      } catch (e) {
+        Logger.w(
+          'VTOP',
+          'Failed to save mark: ${markData['course_code']} - ${markData['title']}: $e',
         );
-
-        await _allSemesterMarkDao.insert(mark);
-        savedMarks.add(mark);
       }
     }
     return savedMarks;
