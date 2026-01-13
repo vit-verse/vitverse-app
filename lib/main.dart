@@ -13,6 +13,8 @@ import 'features/authentication/ui/login_screen.dart';
 import 'features/main_screen.dart';
 import 'features/profile/widget_customization/provider/widget_customization_provider.dart';
 import 'features/features/routes/feature_routes.dart';
+import 'features/profile/student_profile/report_generation/presentation/report_generation_page.dart';
+import 'core/database/entities/student_profile.dart';
 import 'supabase/core/supabase_events_client.dart';
 import 'firebase/analytics/analytics_service.dart';
 import 'firebase/core/firebase_initializer.dart';
@@ -115,6 +117,19 @@ class VitConnectApp extends StatelessWidget {
             },
             home: const AuthGate(),
             routes: FeatureRoutes.getRoutes(),
+            onGenerateRoute: (settings) {
+              // Handle custom routes with arguments
+              if (settings.name == '/generate-report') {
+                final profile = settings.arguments as StudentProfile?;
+                if (profile != null) {
+                  return MaterialPageRoute(
+                    builder:
+                        (context) => ReportGenerationPage(profile: profile),
+                  );
+                }
+              }
+              return null;
+            },
             navigatorObservers:
                 AnalyticsService.observer != null
                     ? [AnalyticsService.observer!]
