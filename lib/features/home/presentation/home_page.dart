@@ -195,6 +195,11 @@ class _HomePageState extends State<HomePage> {
                                 _weekDates = weekDates;
                               });
                             },
+                            onCalendarIntegrated: () {
+                              // Clear cache and rebuild when calendar is integrated
+                              _homeLogic.clearCombinedClassesCache();
+                              setState(() {});
+                            },
                           ),
                         ),
                         isCurrentWeek: _isCurrentWeek(),

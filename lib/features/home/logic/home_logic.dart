@@ -63,8 +63,16 @@ class HomeLogic {
 
       Logger.success(_tag, 'All home data loaded successfully');
     } catch (e) {
-      Logger.e(_tag, 'Failed to load home data', e);
-      rethrow;
+      Logger.e(_tag, 'Failed to load home data (user may not be logged in)', e);
+      // Don't rethrow - just log the error
+      // Initialize with empty data so the app doesn't crash
+      _userData = {};
+      _attendanceData = [];
+      _timetableData = [];
+      _examData = [];
+      _coursesData = [];
+      _slotsData = [];
+      _onDutyCount = 0;
     }
   }
 
@@ -101,6 +109,12 @@ class HomeLogic {
     int dayIndex, {
     DateTime? actualDate,
   }) {
+    // Handle case when user is not logged in (no data)
+    if (_timetableData.isEmpty || _coursesData.isEmpty || _slotsData.isEmpty) {
+      Logger.d(_tag, 'No timetable data available (user may not be logged in)');
+      return [];
+    }
+
     // Check if date is a holiday
     if (actualDate != null && _calendarService.isEnabled) {
       final isHoliday = _calendarService.isHolidayDate(actualDate);

@@ -10,12 +10,14 @@ class DaysSelector extends StatefulWidget {
   final int selectedDay;
   final Function(int)? onDayChanged;
   final Function(List<DateTime>)? onWeekChanged;
+  final VoidCallback? onCalendarIntegrated;
 
   const DaysSelector({
     super.key,
     required this.selectedDay,
     this.onDayChanged,
     this.onWeekChanged,
+    this.onCalendarIntegrated,
   });
 
   @override
@@ -110,13 +112,16 @@ class _DaysSelectorState extends State<DaysSelector> {
           (context) => CalendarSelectionDialog(
             onCalendarSelected: (id, name, data) async {
               await _calendarService.applyCalendar(id, name, data);
-              if (context.mounted) {
-                Navigator.of(context).pop();
+              if (mounted) {
                 setState(() {});
-                SnackbarUtils.success(
-                  context,
-                  'Calendar integrated successfully',
-                );
+                // Notify parent to rebuild and refresh data
+                widget.onCalendarIntegrated?.call();
+                if (context.mounted) {
+                  SnackbarUtils.success(
+                    context,
+                    'Calendar integrated successfully',
+                  );
+                }
               }
             },
           ),
