@@ -437,7 +437,7 @@ class _ThemeSettingsPageState extends State<ThemeSettingsPage> {
                       isSelected: isSelected,
                       isCompact: false,
                       onTap: () async {
-                        await themeProvider.setTheme(customTheme);
+                        await themeProvider.setCustomTheme(customTheme);
                         if (mounted)
                           SnackbarUtils.success(
                             context,
@@ -1067,8 +1067,10 @@ class _ThemeSettingsPageState extends State<ThemeSettingsPage> {
                         _customText = theme.text;
                         _customMuted = theme.muted;
                         _customIsDark = theme.isDark;
-                        _customThemeName = theme.name;
-                        _themeNameController.text = theme.name;
+                        // Generate new name instead of copying to avoid overwriting
+                        final nextNumber = _customThemes.length + 1;
+                        _customThemeName = 'My Theme $nextNumber';
+                        _themeNameController.text = _customThemeName;
                       });
                     },
                     borderRadius: BorderRadius.circular(8),

@@ -70,34 +70,48 @@ class ThemeProvider with ChangeNotifier {
 
   /// Load custom theme from preferences
   void _loadCustomTheme(SharedPreferences prefs) {
-    final name = prefs.getString('${_customThemeKey}_name');
-    final primaryHex = prefs.getString('${_customThemeKey}_primary');
-    final backgroundHex = prefs.getString('${_customThemeKey}_background');
-    final surfaceHex = prefs.getString('${_customThemeKey}_surface');
-    final textHex = prefs.getString('${_customThemeKey}_text');
-    final mutedHex = prefs.getString('${_customThemeKey}_muted');
-    final isDark = prefs.getBool('${_customThemeKey}_isDark') ?? true;
+    try {
+      final name = prefs.getString('${_customThemeKey}_name');
+      final primaryHex = prefs.getString('${_customThemeKey}_primary');
+      final backgroundHex = prefs.getString('${_customThemeKey}_background');
+      final surfaceHex = prefs.getString('${_customThemeKey}_surface');
+      final textHex = prefs.getString('${_customThemeKey}_text');
+      final mutedHex = prefs.getString('${_customThemeKey}_muted');
+      final isDark = prefs.getBool('${_customThemeKey}_isDark') ?? true;
 
-    if (primaryHex != null &&
-        backgroundHex != null &&
-        surfaceHex != null &&
-        textHex != null &&
-        mutedHex != null) {
-      _customTheme = AppTheme(
-        id: 'custom',
-        name: name ?? 'Custom', // Load saved name or default to 'Custom'
-        primary: _hexToColor(primaryHex),
-        background: _hexToColor(backgroundHex),
-        surface: _hexToColor(surfaceHex),
-        text: _hexToColor(textHex),
-        muted: _hexToColor(mutedHex),
-        isDark: isDark,
-      );
-      _currentTheme = _customTheme!;
-    } else {
-      // Custom theme data missing, fallback to amoled_black and clear invalid theme key
+      if (primaryHex != null &&
+          backgroundHex != null &&
+          surfaceHex != null &&
+          textHex != null &&
+          mutedHex != null) {
+        _customTheme = AppTheme(
+          id: 'custom',
+          name: name ?? 'Custom', // Load saved name or default to 'Custom'
+          primary: _hexToColor(primaryHex),
+          background: _hexToColor(backgroundHex),
+          surface: _hexToColor(surfaceHex),
+          text: _hexToColor(textHex),
+          muted: _hexToColor(mutedHex),
+          isDark: isDark,
+        );
+        _currentTheme = _customTheme!;
+      } else {
+        // Custom theme data missing, fallback to amoled_black and clear invalid theme key
+        _currentTheme = AppThemes.amoledBlack;
+        prefs.setString(_themeKey, 'amoled_black');
+      }
+    } catch (e) {
+      // Error loading custom theme, fallback to amoled_black
       _currentTheme = AppThemes.amoledBlack;
       prefs.setString(_themeKey, 'amoled_black');
+      // Clear corrupted custom theme data
+      prefs.remove('${_customThemeKey}_name');
+      prefs.remove('${_customThemeKey}_primary');
+      prefs.remove('${_customThemeKey}_background');
+      prefs.remove('${_customThemeKey}_surface');
+      prefs.remove('${_customThemeKey}_text');
+      prefs.remove('${_customThemeKey}_muted');
+      prefs.remove('${_customThemeKey}_isDark');
     }
   }
 
