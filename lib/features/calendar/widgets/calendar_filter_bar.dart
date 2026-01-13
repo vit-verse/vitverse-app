@@ -79,7 +79,7 @@ class CalendarFilterBar extends StatelessWidget {
                         Theme.of(context).colorScheme.primaryContainer,
                     backgroundColor: Theme.of(
                       context,
-                    ).colorScheme.surfaceVariant.withValues(alpha: 0.3),
+                    ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
 
                     side: BorderSide(
                       color:

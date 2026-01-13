@@ -58,19 +58,19 @@ class HomeFriendsIntegrationService {
   ) async {
     try {
       final List<ClassItem> allClasses = [];
-      
+
       // Add user's classes
       allClasses.addAll(_getUserClassesForDay(dayIndex, userTimetableData));
-      
+
       // Add friends' classes
       final friends = await getFriendsForHomePage();
       for (final friend in friends) {
         allClasses.addAll(_getFriendClassesForDay(dayIndex, friend));
       }
-      
+
       // Sort by time
       allClasses.sort((a, b) => a.startTime.compareTo(b.startTime));
-      
+
       return allClasses;
     } catch (e) {
       return _getUserClassesForDay(dayIndex, userTimetableData);
@@ -83,53 +83,58 @@ class HomeFriendsIntegrationService {
     List<Map<String, dynamic>> userTimetableData,
   ) {
     final List<ClassItem> userClasses = [];
-    
+
     try {
       for (final classData in userTimetableData) {
-        userClasses.add(ClassItem(
-          courseCode: classData['course']?['code'] as String? ?? '',
-          courseTitle: classData['course']?['title'] as String? ?? '',
-          timeSlot: '${classData['start_time'] ?? ''}-${classData['end_time'] ?? ''}',
-          venue: classData['course']?['venue'] as String? ?? '',
-          slotId: classData['slotName'] as String? ?? '',
-          isUserClass: true,
-        ));
+        userClasses.add(
+          ClassItem(
+            courseCode: classData['course']?['code'] as String? ?? '',
+            courseTitle: classData['course']?['title'] as String? ?? '',
+            timeSlot:
+                '${classData['start_time'] ?? ''}-${classData['end_time'] ?? ''}',
+            venue: classData['course']?['venue'] as String? ?? '',
+            slotId: classData['slotName'] as String? ?? '',
+            isUserClass: true,
+          ),
+        );
       }
     } catch (e) {
       // Silent error handling
     }
-    
+
     return userClasses;
   }
 
   /// Convert friend's schedule to ClassItem list for specific day
   List<ClassItem> _getFriendClassesForDay(int dayIndex, Friend friend) {
     final List<ClassItem> friendClasses = [];
-    
+
     try {
       if (dayIndex < 0 || dayIndex >= ScheduleConstants.weekDays.length) {
         return friendClasses;
       }
-      
+
       final dayName = ScheduleConstants.weekDays[dayIndex];
       final dayClasses = friend.getClassesForDay(dayName);
-      
+
       for (final classSlot in dayClasses) {
-        friendClasses.add(ClassItem(
-          courseCode: classSlot.courseCode,
-          courseTitle: classSlot.courseTitle,
-          timeSlot: classSlot.timeSlot,
-          venue: classSlot.venue,
-          slotId: classSlot.slotId,
-          isUserClass: false,
-          friend: friend,
-          friendNickname: friend.nickname,
-        ));
+        friendClasses.add(
+          ClassItem(
+            courseCode: classSlot.courseCode,
+            courseTitle: classSlot.courseTitle,
+            timeSlot: classSlot.timeSlot,
+            venue: classSlot.venue,
+            slotId: classSlot.slotId,
+            isUserClass: false,
+            friend: friend,
+            friendNickname: friend.nickname,
+          ),
+        );
       }
     } catch (e) {
       // Silent error handling
     }
-    
+
     return friendClasses;
   }
 

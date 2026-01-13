@@ -148,7 +148,7 @@ class MarksColorScheme {
     this.autoMatchTheme = false,
   });
 
-  /// Create default scheme 
+  /// Create default scheme
   static MarksColorScheme get defaultScheme => MarksColorScheme(
     name: 'Default',
     useRanges: true,

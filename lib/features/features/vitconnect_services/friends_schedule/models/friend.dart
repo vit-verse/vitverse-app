@@ -169,7 +169,8 @@ class Friend {
       classSlots: classSlots ?? this.classSlots,
       color: color ?? this.color,
       addedAt: addedAt ?? this.addedAt,
-      showInFriendsSchedule: showInFriendsSchedule ?? this.showInFriendsSchedule,
+      showInFriendsSchedule:
+          showInFriendsSchedule ?? this.showInFriendsSchedule,
       showInHomePage: showInHomePage ?? this.showInHomePage,
     );
   }

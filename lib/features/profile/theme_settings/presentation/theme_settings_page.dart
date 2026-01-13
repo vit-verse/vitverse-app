@@ -343,11 +343,12 @@ class _ThemeSettingsPageState extends State<ThemeSettingsPage>
                 isCompact: false,
                 onTap: () async {
                   await themeProvider.setTheme(appTheme);
-                  if (mounted)
+                  if (mounted) {
                     SnackbarUtils.success(
                       context,
                       '${appTheme.name} theme applied',
                     );
+                  }
                 },
               );
             },
@@ -392,11 +393,12 @@ class _ThemeSettingsPageState extends State<ThemeSettingsPage>
                 isCompact: false,
                 onTap: () async {
                   await themeProvider.setTheme(appTheme);
-                  if (mounted)
+                  if (mounted) {
                     SnackbarUtils.success(
                       context,
                       '${appTheme.name} theme applied',
                     );
+                  }
                 },
               );
             },
@@ -445,11 +447,12 @@ class _ThemeSettingsPageState extends State<ThemeSettingsPage>
                       isCompact: false,
                       onTap: () async {
                         await themeProvider.setCustomTheme(customTheme);
-                        if (mounted)
+                        if (mounted) {
                           SnackbarUtils.success(
                             context,
                             '${customTheme.name} theme applied',
                           );
+                        }
                       },
                     ),
                     Positioned(
@@ -550,8 +553,9 @@ class _ThemeSettingsPageState extends State<ThemeSettingsPage>
                 borderRadius: BorderRadius.circular(ThemeConstants.radiusLg),
                 onTap: () async {
                   await themeProvider.setFont(font.family);
-                  if (mounted)
+                  if (mounted) {
                     SnackbarUtils.success(context, '${font.name} font applied');
+                  }
                 },
                 child: Padding(
                   padding: const EdgeInsets.all(ThemeConstants.spacingMd),
@@ -607,7 +611,7 @@ class _ThemeSettingsPageState extends State<ThemeSettingsPage>
               ),
             ),
           );
-        }).toList(),
+        }),
       ],
     );
   }

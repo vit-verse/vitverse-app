@@ -279,25 +279,4 @@ class _StaffPageState extends State<StaffPage> with TickerProviderStateMixin {
           ),
     );
   }
-
-  Widget _buildStaffList(ThemeProvider themeProvider) {
-    final staffList = _staffByType[_selectedType] ?? [];
-    if (staffList.isEmpty) {
-      return EmptyStaffState(
-        staffType: _selectedType,
-        themeProvider: themeProvider,
-      );
-    }
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      itemCount: staffList.length,
-      itemBuilder:
-          (context, index) => StaffCard(
-            staffData: staffList[index],
-            staffType: _selectedType,
-            themeProvider: themeProvider,
-            logic: _logic,
-          ),
-    );
-  }
 }

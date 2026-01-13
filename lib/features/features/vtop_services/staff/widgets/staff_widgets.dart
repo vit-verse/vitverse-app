@@ -279,7 +279,9 @@ class StaffCard extends StatelessWidget {
                 if (additionalDetails.isNotEmpty) ...[
                   const SizedBox(height: 8),
                   Divider(
-                    color: themeProvider.currentTheme.muted.withValues(alpha: 0.2),
+                    color: themeProvider.currentTheme.muted.withValues(
+                      alpha: 0.2,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   ...additionalDetails.entries.map((entry) {
@@ -388,7 +390,9 @@ class StaffCard extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: themeProvider.currentTheme.primary.withValues(alpha: 0.1),
+                  color: themeProvider.currentTheme.primary.withValues(
+                    alpha: 0.1,
+                  ),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(

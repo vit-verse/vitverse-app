@@ -157,7 +157,9 @@ class _MessMenuPageState extends State<MessMenuPage> {
                   decoration: BoxDecoration(
                     color: theme.surface.withValues(alpha: 0.5),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: theme.muted.withValues(alpha: 0.2)),
+                    border: Border.all(
+                      color: theme.muted.withValues(alpha: 0.2),
+                    ),
                   ),
                   child: Icon(
                     Icons.settings_outlined,
@@ -282,7 +284,9 @@ class _MessMenuPageState extends State<MessMenuPage> {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: theme.surface,
-        border: Border(bottom: BorderSide(color: theme.muted.withValues(alpha: 0.1))),
+        border: Border(
+          bottom: BorderSide(color: theme.muted.withValues(alpha: 0.1)),
+        ),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,

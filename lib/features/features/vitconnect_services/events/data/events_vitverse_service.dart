@@ -6,7 +6,6 @@ import '../models/event_model.dart';
 /// Service for managing events cache in VitVerse database
 class EventsVitverseService {
   static const String _tag = 'EventsVitverseService';
-  static const String _syncKey = 'events_last_sync';
 
   final VitVerseDatabase _database;
 

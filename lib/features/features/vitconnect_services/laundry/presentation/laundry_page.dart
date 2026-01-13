@@ -174,7 +174,9 @@ class _LaundryPageState extends State<LaundryPage> {
                   decoration: BoxDecoration(
                     color: theme.surface.withValues(alpha: 0.5),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: theme.muted.withValues(alpha: 0.2)),
+                    border: Border.all(
+                      color: theme.muted.withValues(alpha: 0.2),
+                    ),
                   ),
                   child: Icon(
                     Icons.settings_outlined,
@@ -465,7 +467,9 @@ class _LaundryPageState extends State<LaundryPage> {
               decoration: AppCardStyles.listTileDecoration(
                 isDark: theme.isDark,
                 customBackgroundColor:
-                    isUserRoom ? theme.primary.withValues(alpha: 0.1) : theme.surface,
+                    isUserRoom
+                        ? theme.primary.withValues(alpha: 0.1)
+                        : theme.surface,
               ),
               child: Stack(
                 children: [

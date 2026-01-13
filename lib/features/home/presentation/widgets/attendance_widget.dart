@@ -3,13 +3,10 @@ import 'package:provider/provider.dart';
 import '../../../../core/theme/theme_provider.dart';
 import '../../../../core/theme/color_utils.dart';
 import '../../../../core/widgets/app_card.dart';
-import '../../../../core/utils/logger.dart';
 import '../../logic/home_logic.dart';
 
 /// Widget displaying overall attendance
 class AttendanceWidget extends StatelessWidget {
-  static const String _tag = 'AttendanceWidget';
-
   final HomeLogic homeLogic;
 
   const AttendanceWidget({super.key, required this.homeLogic});

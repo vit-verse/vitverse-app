@@ -6,7 +6,6 @@ import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import '../../../../../core/theme/theme_provider.dart';
 import '../../../../../core/database/entities/student_profile.dart';
@@ -285,14 +284,6 @@ class _ReportGenerationPageState extends State<ReportGenerationPage> {
         // iOS
         targetDir = await getApplicationDocumentsDirectory();
         folderDescription = 'Documents';
-      }
-
-      if (targetDir == null) {
-        Logger.e(_tag, 'Could not determine target directory');
-        if (mounted) {
-          SnackbarUtils.error(context, 'Could not access storage');
-        }
-        return;
       }
 
       // Export JSON

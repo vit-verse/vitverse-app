@@ -747,7 +747,10 @@ class _ContributorRow extends StatelessWidget {
           decoration: BoxDecoration(
             color: theme.primary.withValues(alpha: 0.15),
             shape: BoxShape.circle,
-            border: Border.all(color: theme.primary.withValues(alpha: 0.3), width: 2),
+            border: Border.all(
+              color: theme.primary.withValues(alpha: 0.3),
+              width: 2,
+            ),
           ),
           padding: const EdgeInsets.all(8),
           child:

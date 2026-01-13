@@ -134,7 +134,10 @@ class FeeSummaryCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: theme.background,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: theme.muted.withValues(alpha: 0.15), width: 1),
+        border: Border.all(
+          color: theme.muted.withValues(alpha: 0.15),
+          width: 1,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

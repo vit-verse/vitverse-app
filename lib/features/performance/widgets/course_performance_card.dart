@@ -215,7 +215,7 @@ class _CoursePerformanceCardState extends State<CoursePerformanceCard>
                             _showAddAverageDialog(context, assessment);
                           },
                         );
-                      }).toList(),
+                      }),
                     ],
                   ),
                 ),

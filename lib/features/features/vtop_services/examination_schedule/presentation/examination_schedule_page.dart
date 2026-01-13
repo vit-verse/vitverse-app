@@ -18,9 +18,6 @@ class ExaminationSchedulePage extends StatefulWidget {
 
 class _ExaminationSchedulePageState extends State<ExaminationSchedulePage>
     with TickerProviderStateMixin {
-  @override
-  String get screenName => 'ExamSchedule';
-
   final ExaminationDataProvider _dataProvider = ExaminationDataProvider();
   final ExaminationLogic _logic = ExaminationLogic();
 
@@ -327,37 +324,6 @@ class _ExaminationSchedulePageState extends State<ExaminationSchedulePage>
     return ListView.builder(
       padding: const EdgeInsets.only(bottom: 16),
       physics: const AlwaysScrollableScrollPhysics(),
-      itemCount: exams.length,
-      itemBuilder: (context, index) {
-        final exam = exams[index];
-        return ExamCard(
-          exam: exam,
-          themeProvider: themeProvider,
-          logic: _logic,
-        );
-      },
-    );
-  }
-
-  Widget _buildExamList(ThemeProvider themeProvider) {
-    if (_selectedType == null || !_examsByType.containsKey(_selectedType)) {
-      return EmptyExamState(
-        message: 'No exams found for this type.',
-        themeProvider: themeProvider,
-      );
-    }
-
-    final exams = _examsByType[_selectedType!]!;
-
-    if (exams.isEmpty) {
-      return EmptyExamState(
-        message: 'No $_selectedType exams scheduled.',
-        themeProvider: themeProvider,
-      );
-    }
-
-    return ListView.builder(
-      padding: const EdgeInsets.only(bottom: 16),
       itemCount: exams.length,
       itemBuilder: (context, index) {
         final exam = exams[index];

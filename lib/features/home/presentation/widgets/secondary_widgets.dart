@@ -3,15 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/theme/theme_provider.dart';
 import '../../../../core/widgets/app_card.dart';
-import '../../../../core/utils/logger.dart';
 import '../../logic/home_logic.dart';
 import '../../../profile/widget_customization/provider/widget_customization_provider.dart';
 import 'secondary_widget_types.dart';
 
 /// Container for rotating secondary widgets based on user preferences
 class SecondaryWidgets extends StatefulWidget {
-  static const String _tag = 'SecondaryWidgets';
-
   final HomeLogic homeLogic;
 
   const SecondaryWidgets({super.key, required this.homeLogic});
@@ -22,8 +19,6 @@ class SecondaryWidgets extends StatefulWidget {
 
 class _SecondaryWidgetsState extends State<SecondaryWidgets>
     with SingleTickerProviderStateMixin {
-  static const String _tag = 'SecondaryWidgets';
-
   late PageController _pageController;
   int _currentIndex = 0;
   Timer? _rotationTimer;

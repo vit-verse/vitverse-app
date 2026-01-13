@@ -716,7 +716,10 @@ class _AddCoursesPageState extends State<_AddCoursesPage> {
       decoration: BoxDecoration(
         color: theme.surface,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: theme.primary.withValues(alpha: 0.3), width: 1.5),
+        border: Border.all(
+          color: theme.primary.withValues(alpha: 0.3),
+          width: 1.5,
+        ),
       ),
       child: Row(
         children: [

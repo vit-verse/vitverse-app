@@ -30,7 +30,7 @@ class _AllFacultiesPageState extends State<AllFacultiesPage> {
     super.initState();
     AnalyticsService.instance.logScreenView(
       screenName: 'AllFaculities',
-      screenClass: 'AllFaculitiesPage'
+      screenClass: 'AllFaculitiesPage',
     );
     _loadFacultyData();
     _searchController.addListener(_performSearch);
@@ -190,7 +190,9 @@ class _AllFacultiesPageState extends State<AllFacultiesPage> {
                   ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
                   border: Border(
                     top: BorderSide(color: Colors.grey.withValues(alpha: 0.2)),
-                    bottom: BorderSide(color: Colors.grey.withValues(alpha: 0.2)),
+                    bottom: BorderSide(
+                      color: Colors.grey.withValues(alpha: 0.2),
+                    ),
                   ),
                 ),
                 child: Column(

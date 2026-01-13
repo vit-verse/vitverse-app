@@ -21,7 +21,6 @@ class _SearchPapersPageState extends State<SearchPapersPage> {
   final CourseDao _courseDao = CourseDao();
   String _searchQuery = '';
   bool _showMyCoursesOnly = false;
-  List<String> _userCourseCodes = [];
   List<Map<String, dynamic>> _filteredCourses = [];
   bool _isLoadingCourses = false;
 
@@ -44,14 +43,7 @@ class _SearchPapersPageState extends State<SearchPapersPage> {
 
   Future<void> _loadUserCourses() async {
     try {
-      final courses = await _courseDao.getAllCourses();
-      setState(() {
-        _userCourseCodes =
-            courses
-                .map((c) => c['code']?.toString() ?? '')
-                .where((code) => code.isNotEmpty)
-                .toList();
-      });
+      await _courseDao.getAllCourses();
       _updateFilteredCourses();
     } catch (e) {
       Logger.e(_tag, 'Failed to load user courses', e);
@@ -200,7 +192,6 @@ class _SearchPapersPageState extends State<SearchPapersPage> {
         }
 
         final filteredCourses = _filteredCourses;
-        final isLoading = _isLoadingCourses;
 
         return Column(
           children: [

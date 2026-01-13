@@ -74,7 +74,7 @@ class UpcomingEventsCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Date column
-          Container(
+          SizedBox(
             width: 50,
             child: Column(
               children: [

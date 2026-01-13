@@ -27,7 +27,7 @@ class _MyCourseFacultiesPageState extends State<MyCourseFacultiesPage> {
     super.initState();
     AnalyticsService.instance.logScreenView(
       screenName: 'MyCourseFaculities',
-      screenClass: 'MyCourseFaculitiesPage'
+      screenClass: 'MyCourseFaculitiesPage',
     );
     _loadData();
   }

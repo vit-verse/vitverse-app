@@ -202,7 +202,9 @@ class _ClassDetailsDialogState extends State<ClassDetailsDialog> {
                                     Container(
                                       padding: const EdgeInsets.all(8),
                                       decoration: BoxDecoration(
-                                        color: theme.primary.withValues(alpha: 0.1),
+                                        color: theme.primary.withValues(
+                                          alpha: 0.1,
+                                        ),
                                         borderRadius: BorderRadius.circular(10),
                                       ),
                                       child: Icon(
@@ -231,7 +233,9 @@ class _ClassDetailsDialogState extends State<ClassDetailsDialog> {
                                     Container(
                                       padding: const EdgeInsets.all(8),
                                       decoration: BoxDecoration(
-                                        color: theme.primary.withValues(alpha: 0.1),
+                                        color: theme.primary.withValues(
+                                          alpha: 0.1,
+                                        ),
                                         borderRadius: BorderRadius.circular(10),
                                       ),
                                       child: Icon(
@@ -262,7 +266,9 @@ class _ClassDetailsDialogState extends State<ClassDetailsDialog> {
                                     Container(
                                       padding: const EdgeInsets.all(8),
                                       decoration: BoxDecoration(
-                                        color: theme.primary.withValues(alpha: 0.1),
+                                        color: theme.primary.withValues(
+                                          alpha: 0.1,
+                                        ),
                                         borderRadius: BorderRadius.circular(10),
                                       ),
                                       child: Icon(

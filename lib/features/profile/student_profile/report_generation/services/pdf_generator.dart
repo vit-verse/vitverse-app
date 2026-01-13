@@ -1920,7 +1920,7 @@ class PdfGeneratorService {
                   // Shorten semester name for display
                   String shortName = sem.semesterName;
                   if (shortName.length > 15) {
-                    shortName = shortName.substring(0, 12) + '...';
+                    shortName = '${shortName.substring(0, 12)}...';
                   }
                   return pw.Container(
                     width: (chartWidth - 40) / semesters.length,

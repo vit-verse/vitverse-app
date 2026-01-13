@@ -109,7 +109,10 @@ class _ClassCardDisplaySection extends StatelessWidget {
       decoration: BoxDecoration(
         color: theme.surface,
         borderRadius: BorderRadius.circular(ThemeConstants.radiusLg),
-        border: Border.all(color: theme.primary.withValues(alpha: 0.2), width: 1),
+        border: Border.all(
+          color: theme.primary.withValues(alpha: 0.2),
+          width: 1,
+        ),
       ),
       padding: const EdgeInsets.all(ThemeConstants.spacingMd),
       child: Column(
@@ -157,7 +160,10 @@ class _HomeSecondaryWidgetSection extends StatelessWidget {
       decoration: BoxDecoration(
         color: theme.surface,
         borderRadius: BorderRadius.circular(ThemeConstants.radiusLg),
-        border: Border.all(color: theme.primary.withValues(alpha: 0.2), width: 1),
+        border: Border.all(
+          color: theme.primary.withValues(alpha: 0.2),
+          width: 1,
+        ),
       ),
       padding: const EdgeInsets.all(ThemeConstants.spacingMd),
       child: Column(
@@ -200,7 +206,7 @@ class _HomeSecondaryWidgetSection extends StatelessWidget {
                 themeProvider: themeProvider,
               ),
             );
-          }).toList(),
+          }),
         ],
       ),
     );

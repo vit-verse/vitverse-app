@@ -4,7 +4,6 @@ import '../../../core/database/database.dart';
 import '../../../core/database/daos/attendance_dao.dart';
 import '../../../core/database/daos/course_dao.dart';
 import '../../../core/database/daos/exam_dao.dart';
-import '../../../core/database/daos/slot_dao.dart';
 import '../../../core/utils/logger.dart';
 
 class HomeDataProvider {

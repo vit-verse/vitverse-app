@@ -206,7 +206,9 @@ class _EmptyPerformancePageWithAnalyticsState
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 14,
-                  color: themeProvider.currentTheme.muted.withValues(alpha: 0.7),
+                  color: themeProvider.currentTheme.muted.withValues(
+                    alpha: 0.7,
+                  ),
                   height: 1.4,
                 ),
               ),

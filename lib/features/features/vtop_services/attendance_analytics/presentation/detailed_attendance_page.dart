@@ -218,7 +218,9 @@ class _DetailedAttendancePageState extends State<DetailedAttendancePage> {
                     Container(
                       height: 40,
                       width: 1,
-                      color: themeProvider.currentTheme.muted.withValues(alpha: 0.2),
+                      color: themeProvider.currentTheme.muted.withValues(
+                        alpha: 0.2,
+                      ),
                     ),
                     _buildSummaryItem(
                       themeProvider,
@@ -229,7 +231,9 @@ class _DetailedAttendancePageState extends State<DetailedAttendancePage> {
                     Container(
                       height: 40,
                       width: 1,
-                      color: themeProvider.currentTheme.muted.withValues(alpha: 0.2),
+                      color: themeProvider.currentTheme.muted.withValues(
+                        alpha: 0.2,
+                      ),
                     ),
                     _buildSummaryItem(
                       themeProvider,
@@ -426,7 +430,9 @@ class _DetailedAttendancePageState extends State<DetailedAttendancePage> {
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
-                        color: theme.currentTheme.primary.withValues(alpha: 0.15),
+                        color: theme.currentTheme.primary.withValues(
+                          alpha: 0.15,
+                        ),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(

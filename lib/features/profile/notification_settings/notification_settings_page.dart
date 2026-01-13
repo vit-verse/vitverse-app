@@ -24,7 +24,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
   bool _isLoading = true;
   bool _permissionsGranted = false;
   List<PendingNotificationRequest> _scheduledNotifications = [];
-  bool _showScheduledNotifications = false;
+  final bool _showScheduledNotifications = false;
   bool _lostFoundNotifications = true; // Default enabled
   bool _cabShareNotifications = true; // Default enabled
   bool _eventsNotifications = true; // Default enabled
@@ -613,19 +613,22 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
     final minute = dateTime.minute;
     final period = hour >= 12 ? 'PM' : 'AM';
     final displayHour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
-    return '${displayHour}:${minute.toString().padLeft(2, '0')} $period';
+    return '$displayHour:${minute.toString().padLeft(2, '0')} $period';
   }
 
   ({Color color, String label}) _getNotificationTypeInfo(int id) {
     if (id >= 2001 && id < 3000) return (color: Colors.green, label: 'CLASS');
     if (id >= 3000 && id < 4000) return (color: Colors.blue, label: 'REMINDER');
     if (id >= 4000 && id < 5000) return (color: Colors.red, label: 'EXAM');
-    if (id >= 5000 && id < 6000)
+    if (id >= 5000 && id < 6000) {
       return (color: Colors.orange, label: 'EXAM-REM');
-    if (id >= 6000 && id < 7000)
+    }
+    if (id >= 6000 && id < 7000) {
       return (color: Colors.purple, label: 'LAUNDRY');
-    if (id >= 7000 && id < 8000)
+    }
+    if (id >= 7000 && id < 8000) {
       return (color: Colors.indigo, label: 'PERSONAL');
+    }
     if (id >= 9999) return (color: Colors.pink, label: 'TEST');
     return (color: Colors.grey, label: 'OTHER');
   }

@@ -1,5 +1,6 @@
 /// Calculator Result Models
 /// Contains calculation results for different calculator types
+library;
 
 /// CGPA Estimator Result
 /// Shows required GPA to reach target CGPA

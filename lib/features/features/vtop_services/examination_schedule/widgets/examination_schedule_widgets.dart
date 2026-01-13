@@ -551,7 +551,9 @@ class EmptyExamState extends StatelessWidget {
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: themeProvider.currentTheme.text.withValues(alpha: 0.05),
+                    color: themeProvider.currentTheme.text.withValues(
+                      alpha: 0.05,
+                    ),
                     blurRadius: 20,
                     offset: const Offset(0, 4),
                   ),
@@ -560,7 +562,9 @@ class EmptyExamState extends StatelessWidget {
               child: Icon(
                 Icons.event_busy_outlined,
                 size: 64,
-                color: themeProvider.currentTheme.primary.withValues(alpha: 0.5),
+                color: themeProvider.currentTheme.primary.withValues(
+                  alpha: 0.5,
+                ),
               ),
             ),
             const SizedBox(height: 24),

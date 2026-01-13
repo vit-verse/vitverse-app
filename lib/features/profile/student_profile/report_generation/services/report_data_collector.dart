@@ -36,7 +36,9 @@ class ReportDataCollectorService {
   }
 
   /// Collect all student data for report generation
-  Future<StudentReportData> collectReportData({bool forceRefresh = false}) async {
+  Future<StudentReportData> collectReportData({
+    bool forceRefresh = false,
+  }) async {
     try {
       // Return cached data if valid and not forcing refresh
       if (!forceRefresh && _isCacheValid()) {
@@ -310,7 +312,7 @@ class ReportDataCollectorService {
       // Get semester order from SharedPreferences (this is the correct order from app)
       final prefs = await SharedPreferences.getInstance();
       List<String> semesterOrder = [];
-      
+
       // Try multiple keys for semester order
       final semesterList = prefs.getStringList('semester_order');
       if (semesterList != null && semesterList.isNotEmpty) {
@@ -398,7 +400,7 @@ class ReportDataCollectorService {
       // Get semester order from SharedPreferences
       final prefs = await SharedPreferences.getInstance();
       List<String> semesterOrder = [];
-      
+
       // Try multiple keys for semester order
       final semesterList = prefs.getStringList('semester_order');
       if (semesterList != null && semesterList.isNotEmpty) {

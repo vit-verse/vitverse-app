@@ -62,7 +62,7 @@ class VTOPAuthService extends ChangeNotifier {
   String? _username;
   String? _password;
   String? _semesterID;
-  Map<String, String> _semesters = {};
+  final Map<String, String> _semesters = {};
 
   CaptchaType _captchaType = CaptchaType.defaultCaptcha;
   Uint8List? _captchaImage;
@@ -212,7 +212,7 @@ class VTOPAuthService extends ChangeNotifier {
       if (daysSinceSync > 30) {
         Logger.d(
           'Auth',
-          'Cached data too old (${daysSinceSync} days), clearing session',
+          'Cached data too old ($daysSinceSync days), clearing session',
         );
         await prefs.setBool(AuthConstants.keyIsSignedIn, false);
         return;
@@ -221,7 +221,7 @@ class VTOPAuthService extends ChangeNotifier {
       // Show last synced data (user can refresh manually if needed)
       Logger.i(
         'Auth',
-        'Previous session found - showing last synced data (${daysSinceSync} days old)',
+        'Previous session found - showing last synced data ($daysSinceSync days old)',
       );
       _setState(AuthState.complete);
     } catch (e) {
@@ -409,7 +409,7 @@ class VTOPAuthService extends ChangeNotifier {
   Future<void> _onPageFinished(String url) async {
     Logger.d(
       'Auth',
-      ' Page loaded: ${url.length > 100 ? url.substring(0, 100) + "..." : url}',
+      ' Page loaded: ${url.length > 100 ? "${url.substring(0, 100)}..." : url}',
     );
     await _detectPageState();
   }

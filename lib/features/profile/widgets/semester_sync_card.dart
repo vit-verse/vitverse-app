@@ -458,7 +458,9 @@ class _SemesterSyncCardState extends State<SemesterSyncCard> {
                 color: themeProvider.currentTheme.background,
                 borderRadius: BorderRadius.circular(ThemeConstants.radiusMd),
                 border: Border.all(
-                  color: themeProvider.currentTheme.primary.withValues(alpha: 0.3),
+                  color: themeProvider.currentTheme.primary.withValues(
+                    alpha: 0.3,
+                  ),
                   width: 1,
                 ),
               ),

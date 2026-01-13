@@ -6,7 +6,6 @@ import '../../../core/theme/theme_provider.dart';
 import '../logic/calendar_provider.dart';
 import '../widgets/calendar_app_bar.dart';
 import '../widgets/calendar_filter_bar.dart';
-import '../widgets/calendar_view_switcher.dart';
 import '../widgets/month_calendar_view.dart';
 import '../widgets/timeline_calendar_view.dart';
 import '../widgets/day_details_card.dart';

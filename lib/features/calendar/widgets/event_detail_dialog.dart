@@ -60,7 +60,10 @@ class EventDetailDialog extends StatelessWidget {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: _getEventColor(context, event).withValues(alpha: 0.15),
+                      color: _getEventColor(
+                        context,
+                        event,
+                      ).withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(

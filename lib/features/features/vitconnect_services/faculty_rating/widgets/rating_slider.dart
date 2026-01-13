@@ -68,7 +68,9 @@ class RatingSlider extends StatelessWidget {
         SliderTheme(
           data: SliderTheme.of(context).copyWith(
             activeTrackColor: _getRatingColor(value),
-            inactiveTrackColor: theme.colorScheme.onSurface.withValues(alpha: 0.2),
+            inactiveTrackColor: theme.colorScheme.onSurface.withValues(
+              alpha: 0.2,
+            ),
             thumbColor: _getRatingColor(value),
             overlayColor: _getRatingColor(value).withValues(alpha: 0.2),
             valueIndicatorColor: _getRatingColor(value),

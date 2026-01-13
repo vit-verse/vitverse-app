@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/theme/theme_constants.dart';
 import '../../../firebase/analytics/analytics_service.dart';
-import '../constants/feature_colors.dart';
 import '../logic/feature_provider.dart';
 import '../models/feature_model.dart';
 import '../data/feature_catalogue.dart';

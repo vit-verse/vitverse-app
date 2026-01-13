@@ -73,7 +73,9 @@ class LostFoundGridCard extends StatelessWidget {
                     _formatDate(item.createdAt),
                     style: theme.textTheme.bodySmall?.copyWith(
                       fontSize: 9,
-                      color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.6),
+                      color: theme.textTheme.bodySmall?.color?.withValues(
+                        alpha: 0.6,
+                      ),
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,

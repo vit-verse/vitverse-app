@@ -216,7 +216,7 @@ class CourseProjection {
     } else if (bufferClasses > 0) {
       return '+$bufferClasses ${bufferClasses == 1 ? 'class' : 'classes'}';
     } else {
-      return '${bufferClasses} ${bufferClasses == -1 ? 'class' : 'classes'}';
+      return '$bufferClasses ${bufferClasses == -1 ? 'class' : 'classes'}';
     }
   }
 

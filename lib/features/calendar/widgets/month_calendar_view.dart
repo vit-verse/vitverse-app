@@ -16,12 +16,14 @@ class MonthCalendarView extends StatelessWidget {
           children: [
             Container(
               margin: const EdgeInsets.all(16.0),
-              padding: const EdgeInsets.only(bottom: 8.0), 
+              padding: const EdgeInsets.only(bottom: 8.0),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.outline.withValues(alpha: 0.2),
                 ),
               ),
               child: TableCalendar<Event>(
@@ -334,7 +336,9 @@ class MonthCalendarView extends StatelessWidget {
       return Colors.red.withValues(alpha: 0.2);
     }
 
-    return Theme.of(context).colorScheme.secondaryContainer.withValues(alpha: 0.3);
+    return Theme.of(
+      context,
+    ).colorScheme.secondaryContainer.withValues(alpha: 0.3);
   }
 
   Color _getDayTextColor(BuildContext context, List<Event> events) {

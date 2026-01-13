@@ -82,7 +82,7 @@ class LostFoundRepository {
       final cacheCount = await _cacheService.getCacheCount();
       Logger.success(
         _tag,
-        'Fetched ${items.length} items (${cacheCount} cached)',
+        'Fetched ${items.length} items ($cacheCount cached)',
       );
 
       return items;

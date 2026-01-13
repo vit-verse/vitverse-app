@@ -160,7 +160,9 @@ class _CalendarSelectionDialogState extends State<CalendarSelectionDialog> {
             Container(
               padding: const EdgeInsets.all(ThemeConstants.spacingSm),
               decoration: BoxDecoration(
-                color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
+                color: theme.colorScheme.primaryContainer.withValues(
+                  alpha: 0.3,
+                ),
                 borderRadius: BorderRadius.circular(ThemeConstants.radiusSm),
               ),
               child: Row(
@@ -175,7 +177,9 @@ class _CalendarSelectionDialogState extends State<CalendarSelectionDialog> {
                     child: Text(
                       'If your calendar is not shown here, go to Calendar Settings and fetch calendar',
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: 0.8,
+                        ),
                       ),
                     ),
                   ),
@@ -221,7 +225,9 @@ class _CalendarSelectionDialogState extends State<CalendarSelectionDialog> {
                       Icon(
                         Icons.calendar_today,
                         size: 48,
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: 0.3,
+                        ),
                       ),
                       const SizedBox(height: ThemeConstants.spacingSm),
                       Text(
@@ -232,7 +238,9 @@ class _CalendarSelectionDialogState extends State<CalendarSelectionDialog> {
                       Text(
                         'Please fetch calendars from Settings',
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                          color: theme.colorScheme.onSurface.withValues(
+                            alpha: 0.6,
+                          ),
                         ),
                       ),
                     ],

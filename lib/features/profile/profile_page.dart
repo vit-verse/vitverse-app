@@ -10,7 +10,6 @@ import '../../core/theme/theme_constants.dart';
 import '../../core/theme/app_card_styles.dart';
 import '../../core/utils/snackbar_utils.dart';
 import '../../core/services/version_checker_service.dart';
-import '../../core/services/github_release_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'theme_settings/presentation/theme_settings_page.dart';
 import 'theme_settings/presentation/color_customization_page.dart';
@@ -63,15 +62,6 @@ class _ProfilePageState extends State<ProfilePage> {
           _isCheckingUpdate = false;
         });
       }
-    }
-  }
-
-  void _handleUpdateAction() {
-    if (_versionCheckResult?.isUpdateAvailable ?? false) {
-      _openDownloadPage();
-    } else {
-      // Already updated - show message
-      SnackbarUtils.success(context, 'You\'re using the latest version!');
     }
   }
 

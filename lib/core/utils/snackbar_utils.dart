@@ -23,8 +23,7 @@ class SnackbarItem {
 class StackedSnackbarManager extends StatefulWidget {
   final Widget child;
 
-  const StackedSnackbarManager({Key? key, required this.child})
-    : super(key: key);
+  const StackedSnackbarManager({super.key, required this.child});
 
   @override
   State<StackedSnackbarManager> createState() => _StackedSnackbarManagerState();

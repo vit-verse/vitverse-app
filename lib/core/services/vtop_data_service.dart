@@ -45,12 +45,12 @@ class VTOPDataService {
   final int _totalSteps = 14;
   String _currentStepName = '';
 
-  Map<String, Slot> _theorySlots = {};
-  Map<String, Slot> _labSlots = {};
-  Map<String, Slot> _projectSlots = {};
-  Map<int, Course> _theoryCourses = {};
-  Map<int, Course> _labCourses = {};
-  Map<int, Course> _projectCourses = {};
+  final Map<String, Slot> _theorySlots = {};
+  final Map<String, Slot> _labSlots = {};
+  final Map<String, Slot> _projectSlots = {};
+  final Map<int, Course> _theoryCourses = {};
+  final Map<int, Course> _labCourses = {};
+  final Map<int, Course> _projectCourses = {};
 
   // Progress callbacks
   Function(int current, int total, String stepName)? onProgress;
@@ -1657,9 +1657,9 @@ class VTOPDataService {
       deanHodData.forEach((staffType, staffList) async {
         if (staffList is List) {
           String type = staffType.toString().toLowerCase();
-          if (type.contains('dean'))
+          if (type.contains('dean')) {
             type = 'dean';
-          else if (type.contains('hod'))
+          } else if (type.contains('hod'))
             type = 'hod';
 
           for (var staffItem in staffList) {
@@ -1810,7 +1810,7 @@ class VTOPDataService {
                   }
                   
                   if (!response.gpa) {
-                    var gpaMatch = lastCellText.match(/GPA\s*:?\s*([\d.]+)/i);
+                    var gpaMatch = lastCellText.match(/GPAs*:?s*([d.]+)/i);
                     if (gpaMatch && gpaMatch[1]) {
                       response.gpa = parseFloat(gpaMatch[1]);
                     }
@@ -2150,9 +2150,9 @@ class VTOPDataService {
             int hour = int.parse(hourMinute[0]);
             final minute = int.parse(hourMinute[1]);
 
-            if (amPm.toUpperCase() == 'PM' && hour != 12)
+            if (amPm.toUpperCase() == 'PM' && hour != 12) {
               hour += 12;
-            else if (amPm.toUpperCase() == 'AM' && hour == 12)
+            } else if (amPm.toUpperCase() == 'AM' && hour == 12)
               hour = 0;
 
             return DateTime(year, month, day, hour, minute);

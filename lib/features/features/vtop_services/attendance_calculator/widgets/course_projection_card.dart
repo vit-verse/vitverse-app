@@ -143,7 +143,11 @@ class CourseProjectionCard extends StatelessWidget {
           ),
         ),
         const SizedBox(width: ThemeConstants.spacingMd),
-        Container(width: 1, height: 40, color: theme.muted.withValues(alpha: 0.2)),
+        Container(
+          width: 1,
+          height: 40,
+          color: theme.muted.withValues(alpha: 0.2),
+        ),
         const SizedBox(width: ThemeConstants.spacingMd),
         Expanded(
           child: _buildStatItem(

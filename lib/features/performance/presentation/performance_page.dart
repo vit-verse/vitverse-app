@@ -142,7 +142,7 @@ class _PerformancePageState extends State<PerformancePage> {
                 forceExpanded: _expandAll,
                 onUpdateAverage: _handleUpdateAverage,
               );
-            }).toList(),
+            }),
           ],
         ),
       ),

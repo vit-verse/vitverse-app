@@ -37,7 +37,9 @@ class ImportantLinkCard extends StatelessWidget {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: themeProvider.currentTheme.primary.withValues(alpha: 0.1),
+                    color: themeProvider.currentTheme.primary.withValues(
+                      alpha: 0.1,
+                    ),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
@@ -139,7 +141,9 @@ class CommunityLinkCard extends StatelessWidget {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: themeProvider.currentTheme.primary.withValues(alpha: 0.1),
+                    color: themeProvider.currentTheme.primary.withValues(
+                      alpha: 0.1,
+                    ),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(

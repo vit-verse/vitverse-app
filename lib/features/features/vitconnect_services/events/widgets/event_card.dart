@@ -6,7 +6,6 @@ import 'dart:convert';
 import '../models/event_model.dart';
 import '../presentation/event_detail_page.dart';
 import '../logic/events_provider.dart';
-import '../../../../../core/theme/theme_provider.dart';
 import '../../../../../core/widgets/themed_lottie_widget.dart';
 import '../../../../../core/utils/snackbar_utils.dart';
 import '../../../../../core/utils/logger.dart';
@@ -32,7 +31,6 @@ class _EventCardState extends State<EventCard> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.watch<ThemeProvider>().currentTheme;
     final eventsProvider = context.watch<EventsProvider>();
 
     final currentEvent = eventsProvider.events.firstWhere(

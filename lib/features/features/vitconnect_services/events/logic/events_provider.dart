@@ -423,8 +423,4 @@ class EventsProvider extends ChangeNotifier {
     _errorMessage = message;
     notifyListeners();
   }
-
-  void _clearError() {
-    _errorMessage = null;
-  }
 }

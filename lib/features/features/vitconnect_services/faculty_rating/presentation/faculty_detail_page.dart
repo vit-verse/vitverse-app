@@ -306,7 +306,7 @@ class _FacultyDetailPageState extends State<FacultyDetailPage> {
                             ],
                           ),
                         );
-                      }).toList()
+                      })
                     else if (widget.faculty.ratingData?.courses.isNotEmpty ==
                         true)
                       ...widget.faculty.ratingData!.courses.map((course) {
@@ -330,7 +330,7 @@ class _FacultyDetailPageState extends State<FacultyDetailPage> {
                             ],
                           ),
                         );
-                      }).toList()
+                      })
                     else
                       Text(
                         'No courses listed',

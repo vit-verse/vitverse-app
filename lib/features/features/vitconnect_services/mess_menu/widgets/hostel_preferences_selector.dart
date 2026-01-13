@@ -225,11 +225,15 @@ class _HostelPreferencesSelectorState extends State<HostelPreferencesSelector> {
                 fillColor: theme.background,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: theme.muted.withValues(alpha: 0.2)),
+                  borderSide: BorderSide(
+                    color: theme.muted.withValues(alpha: 0.2),
+                  ),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: theme.muted.withValues(alpha: 0.2)),
+                  borderSide: BorderSide(
+                    color: theme.muted.withValues(alpha: 0.2),
+                  ),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),

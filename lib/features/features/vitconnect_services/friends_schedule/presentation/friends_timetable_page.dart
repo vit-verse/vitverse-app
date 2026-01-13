@@ -421,7 +421,9 @@ class _FriendsSchedulePageState extends State<FriendsSchedulePage> {
                       ),
                       decoration: AppCardStyles.smallWidgetDecoration(
                         isDark: theme.isDark,
-                        customBackgroundColor: friend.color.withValues(alpha: 0.1),
+                        customBackgroundColor: friend.color.withValues(
+                          alpha: 0.1,
+                        ),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -665,7 +667,9 @@ class _FriendsSchedulePageState extends State<FriendsSchedulePage> {
                           final colorIndex =
                               (DateTime.now().millisecondsSinceEpoch ~/ 1000) %
                               friendColors.length;
-                          cellColor = friendColors[colorIndex].withValues(alpha: 0.7);
+                          cellColor = friendColors[colorIndex].withValues(
+                            alpha: 0.7,
+                          );
                         }
                       }
 
@@ -762,7 +766,9 @@ class _FriendsSchedulePageState extends State<FriendsSchedulePage> {
                 ),
                 child: Center(
                   child: Text(
-                    friend.nickname.isNotEmpty ? friend.nickname[0].toUpperCase() : '?',
+                    friend.nickname.isNotEmpty
+                        ? friend.nickname[0].toUpperCase()
+                        : '?',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: screenWidth < 360 ? 14 : 16,
@@ -804,8 +810,9 @@ class _FriendsSchedulePageState extends State<FriendsSchedulePage> {
   }
 
   Widget _buildSlotDetailsBottomSheet() {
-    if (_selectedDay == null || _selectedTimeSlot == null)
+    if (_selectedDay == null || _selectedTimeSlot == null) {
       return const SizedBox();
+    }
 
     final theme = Provider.of<ThemeProvider>(context).currentTheme;
     final screenWidth = MediaQuery.of(context).size.width;

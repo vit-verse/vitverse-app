@@ -1,14 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/theme_provider.dart';
-import '../../../../core/utils/logger.dart';
 import '../../logic/home_logic.dart';
-import '../../../profile/widget_customization/provider/widget_customization_provider.dart';
 import '../../../profile/widget_customization/data/widget_preferences_service.dart';
 
 /// Factory class for building different types of secondary widgets
 class SecondaryWidgetTypes {
-  static const String _tag = 'SecondaryWidgetTypes';
-
   static Widget buildWidget(
     HomeSecondaryWidgetType type,
     HomeLogic homeLogic,
@@ -242,19 +238,21 @@ class SecondaryWidgetTypes {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
               decoration: BoxDecoration(
-                color: themeProvider.currentTheme.primary.withValues(alpha: 0.1),
+                color: themeProvider.currentTheme.primary.withValues(
+                  alpha: 0.1,
+                ),
                 borderRadius: BorderRadius.circular(10),
               ),
-                child: Text(
-                  '${_formatTimeTo12Hour(startTime)} - ${_formatTimeTo12Hour(endTime)}',
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: themeProvider.currentTheme.primary,
-                    fontWeight: FontWeight.w600,
-                  ),
+              child: Text(
+                '${_formatTimeTo12Hour(startTime)} - ${_formatTimeTo12Hour(endTime)}',
+                style: TextStyle(
+                  fontSize: 10,
+                  color: themeProvider.currentTheme.primary,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ),
+          ),
         ],
       ),
     );
@@ -380,7 +378,9 @@ class SecondaryWidgetTypes {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
               decoration: BoxDecoration(
-                color: themeProvider.currentTheme.primary.withValues(alpha: 0.1),
+                color: themeProvider.currentTheme.primary.withValues(
+                  alpha: 0.1,
+                ),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Text(
@@ -507,9 +507,14 @@ class SecondaryWidgetTypes {
             FittedBox(
               fit: BoxFit.scaleDown,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 5,
+                ),
                 decoration: BoxDecoration(
-                  color: themeProvider.currentTheme.primary.withValues(alpha: 0.1),
+                  color: themeProvider.currentTheme.primary.withValues(
+                    alpha: 0.1,
+                  ),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(

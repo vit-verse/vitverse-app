@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/feature_model.dart';
 import '../data/feature_repository.dart';
-import '../constants/feature_colors.dart';
 import '../../../core/utils/logger.dart';
 
 class FeatureProvider with ChangeNotifier {
