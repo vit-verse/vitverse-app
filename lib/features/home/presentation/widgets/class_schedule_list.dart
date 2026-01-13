@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/theme/theme_provider.dart';
 import '../../../../core/widgets/themed_lottie_widget.dart';
 import '../../../profile/widget_customization/data/calendar_home_service.dart';
@@ -11,12 +10,15 @@ class ClassScheduleList extends StatefulWidget {
   final int dayIndex;
   final HomeLogic homeLogic;
   final bool isDataLoading;
+  final DateTime?
+  actualDate; // Actual date for this day (considering week navigation)
 
   const ClassScheduleList({
     super.key,
     required this.dayIndex,
     required this.homeLogic,
     required this.isDataLoading,
+    this.actualDate,
   });
 
   @override
@@ -24,37 +26,22 @@ class ClassScheduleList extends StatefulWidget {
 }
 
 class _ClassScheduleListState extends State<ClassScheduleList> {
-  Set<int> _holidayDays = {};
   final _calendarService = CalendarHomeService.instance;
 
-  @override
-  void initState() {
-    super.initState();
-    _loadHolidays();
-  }
-
-  Future<void> _loadHolidays() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final holidayList = prefs.getStringList('holiday_days') ?? [];
-
-      if (mounted) {
-        setState(() {
-          _holidayDays = holidayList.map((day) => int.parse(day)).toSet();
-        });
-      }
-    } catch (e) {
-      // Silent error handling
-    }
-  }
-
   bool _isHoliday(int dayIndex) {
-    if (_holidayDays.contains(dayIndex)) {
-      return true;
+    final DateTime targetDate;
+    if (widget.actualDate != null) {
+      targetDate = widget.actualDate!;
+    } else {
+      final now = DateTime.now();
+      final currentDayIndex = now.weekday - 1;
+      final daysOffset = dayIndex - currentDayIndex;
+      targetDate = DateTime(
+        now.year,
+        now.month,
+        now.day,
+      ).add(Duration(days: daysOffset));
     }
-
-    final today = DateTime.now().weekday - 1;
-    final targetDate = DateTime.now().add(Duration(days: dayIndex - today));
 
     return _calendarService.isHolidayDate(targetDate);
   }
@@ -129,7 +116,10 @@ class _ClassScheduleListState extends State<ClassScheduleList> {
     }
 
     return FutureBuilder<List<Map<String, dynamic>>>(
-      future: widget.homeLogic.getCombinedClassesForDay(widget.dayIndex),
+      future: widget.homeLogic.getCombinedClassesForDay(
+        widget.dayIndex,
+        actualDate: widget.actualDate,
+      ),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Center(
@@ -161,6 +151,7 @@ class _ClassScheduleListState extends State<ClassScheduleList> {
               classData: classData,
               dayIndex: widget.dayIndex,
               homeLogic: widget.homeLogic,
+              actualDate: widget.actualDate,
             );
           },
         );

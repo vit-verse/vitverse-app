@@ -30,6 +30,9 @@ class _HomePageState extends State<HomePage> {
   /// Current selected day (highlighted)
   int _selectedDay = DateTime.now().weekday - 1;
 
+  /// Actual dates for the current week being viewed
+  List<DateTime> _weekDates = [];
+
   bool _isAnimatingDayChange = false;
 
   @override
@@ -40,6 +43,16 @@ class _HomePageState extends State<HomePage> {
       screenName: 'Home',
       screenClass: 'HomePage',
     );
+
+    // Initialize week dates (current week)
+    final now = DateTime.now();
+    final weekday = now.weekday - 1; // 0 = Monday
+    final monday = DateTime(
+      now.year,
+      now.month,
+      now.day,
+    ).subtract(Duration(days: weekday));
+    _weekDates = List.generate(7, (index) => monday.add(Duration(days: index)));
 
     _dayPageController = PageController(initialPage: _selectedDay);
     _loadData();
@@ -68,6 +81,25 @@ class _HomePageState extends State<HomePage> {
         SnackbarUtils.error(context, 'Failed to load data');
       }
     }
+  }
+
+  bool _isCurrentWeek() {
+    if (_weekDates.isEmpty) return true;
+
+    final now = DateTime.now();
+    final currentWeekStart = now.subtract(Duration(days: now.weekday - 1));
+    final currentWeekStartDate = DateTime(
+      currentWeekStart.year,
+      currentWeekStart.month,
+      currentWeekStart.day,
+    );
+    final weekStartDate = DateTime(
+      _weekDates[0].year,
+      _weekDates[0].month,
+      _weekDates[0].day,
+    );
+
+    return currentWeekStartDate.isAtSameMomentAs(weekStartDate);
   }
 
   Future<void> _handleRefresh() async {
@@ -153,13 +185,19 @@ class _HomePageState extends State<HomePage> {
                       pinned: true,
                       delegate: _DaysSelectorDelegate(
                         child: Container(
-                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+                          padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
                           color: themeProvider.currentTheme.background,
                           child: DaysSelector(
                             selectedDay: _selectedDay,
                             onDayChanged: (index) => _onDayTap(index),
+                            onWeekChanged: (weekDates) {
+                              setState(() {
+                                _weekDates = weekDates;
+                              });
+                            },
                           ),
                         ),
+                        isCurrentWeek: _isCurrentWeek(),
                       ),
                     ),
                   ];
@@ -183,6 +221,10 @@ class _HomePageState extends State<HomePage> {
                       dayIndex: index,
                       homeLogic: _homeLogic,
                       isDataLoading: _isDataLoading,
+                      actualDate:
+                          _weekDates.isNotEmpty && index < _weekDates.length
+                              ? _weekDates[index]
+                              : null,
                     );
                   },
                 ),
@@ -198,13 +240,15 @@ class _HomePageState extends State<HomePage> {
 // Sticky header (days selector)
 class _DaysSelectorDelegate extends SliverPersistentHeaderDelegate {
   final Widget child;
-  _DaysSelectorDelegate({required this.child});
+  final bool isCurrentWeek;
+
+  _DaysSelectorDelegate({required this.child, required this.isCurrentWeek});
 
   @override
-  double get minExtent => 88.0;
+  double get minExtent => isCurrentWeek ? 110.0 : 130.0;
 
   @override
-  double get maxExtent => 88.0;
+  double get maxExtent => isCurrentWeek ? 110.0 : 130.0;
 
   @override
   Widget build(
@@ -212,11 +256,12 @@ class _DaysSelectorDelegate extends SliverPersistentHeaderDelegate {
     double shrinkOffset,
     bool overlapsContent,
   ) {
-    return child;
+    return SizedBox(height: maxExtent, child: child);
   }
 
   @override
   bool shouldRebuild(_DaysSelectorDelegate oldDelegate) {
-    return oldDelegate.child != child;
+    return oldDelegate.child != child ||
+        oldDelegate.isCurrentWeek != isCurrentWeek;
   }
 }

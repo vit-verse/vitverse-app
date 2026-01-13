@@ -173,7 +173,7 @@ class _CalendarSelectionDialogState extends State<CalendarSelectionDialog> {
                   const SizedBox(width: ThemeConstants.spacingXs),
                   Expanded(
                     child: Text(
-                      'If your calendar is not shown here, go to Settings and fetch calendar',
+                      'If your calendar is not shown here, go to Calendar Settings and fetch calendar',
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
                       ),

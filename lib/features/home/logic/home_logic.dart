@@ -9,7 +9,8 @@ class HomeLogic {
 
   final HomeDataProvider _dataProvider = HomeDataProvider();
   final CalendarHomeService _calendarService = CalendarHomeService.instance;
-  final HomeFriendsIntegrationService _friendsIntegration = HomeFriendsIntegrationService();
+  final HomeFriendsIntegrationService _friendsIntegration =
+      HomeFriendsIntegrationService();
 
   // Cached data
   Map<String, dynamic> _userData = {};
@@ -19,7 +20,7 @@ class HomeLogic {
   List<Map<String, dynamic>> _coursesData = [];
   List<Map<String, dynamic>> _slotsData = [];
   int _onDutyCount = 0;
-  
+
   // Cache for combined classes per day
   final Map<int, List<Map<String, dynamic>>> _combinedClassesCache = {};
 
@@ -57,7 +58,7 @@ class HomeLogic {
       _slotsData = results[5] as List<Map<String, dynamic>>;
 
       await _loadOnDutyCount();
-      
+
       clearCombinedClassesCache();
 
       Logger.success(_tag, 'All home data loaded successfully');
@@ -96,11 +97,30 @@ class HomeLogic {
   }
 
   /// Get classes for a specific day (0=Monday, 6=Sunday)
-  List<Map<String, dynamic>> getClassesForDay(int dayIndex) {
-    final effectiveDayIndex = _getEffectiveDayIndex(dayIndex);
+  List<Map<String, dynamic>> getClassesForDay(
+    int dayIndex, {
+    DateTime? actualDate,
+  }) {
+    // Check if date is a holiday
+    if (actualDate != null && _calendarService.isEnabled) {
+      final isHoliday = _calendarService.isHolidayDate(actualDate);
+      if (isHoliday) {
+        Logger.d(_tag, 'Date $actualDate is a holiday, showing no classes');
+        return [];
+      }
+    }
 
-    if (effectiveDayIndex == -1) {
-      return [];
+    // For Saturday with calendar integration, fetch classes from the mapped day
+    int effectiveDayIndex = dayIndex;
+
+    if (actualDate != null &&
+        _calendarService.isEnabled &&
+        actualDate.weekday == 6) {
+      final mappedDay = _calendarService.getDayOrderForDate(actualDate);
+      if (mappedDay != null) {
+        effectiveDayIndex = mappedDay;
+        Logger.d(_tag, 'Saturday $actualDate mapped to day index $mappedDay');
+      }
     }
 
     // Convert dayIndex to database day format
@@ -240,55 +260,86 @@ class HomeLogic {
     return merged;
   }
 
-  /// Get combined classes for a specific day (user + friends)
-  Future<List<Map<String, dynamic>>> getCombinedClassesForDay(int dayIndex) async {
-    if (_combinedClassesCache.containsKey(dayIndex)) {
+  /// Get combined classes for a specific day (user + friends) with optional actual date
+  Future<List<Map<String, dynamic>>> getCombinedClassesForDay(
+    int dayIndex, {
+    DateTime? actualDate,
+  }) async {
+    // Don't use cache when actualDate is provided (different weeks/dates)
+    if (actualDate == null && _combinedClassesCache.containsKey(dayIndex)) {
       return _combinedClassesCache[dayIndex]!;
     }
-    
+
     try {
-      final userClasses = getClassesForDay(dayIndex);
-      final friendsClasses = await _getFriendsClassesForDay(dayIndex);
-      final mergedFriendsClasses = _mergeConsecutiveFriendClasses(friendsClasses);
-      
+      final userClasses = getClassesForDay(dayIndex, actualDate: actualDate);
+      final friendsClasses = await _getFriendsClassesForDay(
+        dayIndex,
+        actualDate: actualDate,
+      );
+      final mergedFriendsClasses = _mergeConsecutiveFriendClasses(
+        friendsClasses,
+      );
+
       final allClasses = <Map<String, dynamic>>[];
       allClasses.addAll(userClasses);
       allClasses.addAll(mergedFriendsClasses);
-      
+
       allClasses.sort((a, b) {
         final timeA = a['start_time']?.toString() ?? '';
         final timeB = b['start_time']?.toString() ?? '';
         return timeA.compareTo(timeB);
       });
-      
-      _combinedClassesCache[dayIndex] = allClasses;
-      
+
+      // Only cache when actualDate is null (current week)
+      if (actualDate == null) {
+        _combinedClassesCache[dayIndex] = allClasses;
+      }
+
       return allClasses;
     } catch (e) {
-      // Fallback to user classes only
-      final userClasses = getClassesForDay(dayIndex);
-      _combinedClassesCache[dayIndex] = userClasses;
+      final userClasses = getClassesForDay(dayIndex, actualDate: actualDate);
+      // Only cache when actualDate is null
+      if (actualDate == null) {
+        _combinedClassesCache[dayIndex] = userClasses;
+      }
       return userClasses;
     }
   }
-  
+
   /// Clear the combined classes cache (call when data changes)
   void clearCombinedClassesCache() {
     _combinedClassesCache.clear();
   }
 
   /// Get friends' classes for a specific day
-  Future<List<Map<String, dynamic>>> _getFriendsClassesForDay(int dayIndex) async {
+  Future<List<Map<String, dynamic>>> _getFriendsClassesForDay(
+    int dayIndex, {
+    DateTime? actualDate,
+  }) async {
     try {
       final friends = await _friendsIntegration.getFriendsForHomePage();
       final friendsClasses = <Map<String, dynamic>>[];
-      
+
+      int effectiveDayIndex = dayIndex;
+
+      // Check if this date has a scheduled day order from calendar
+      if (actualDate != null && _calendarService.isEnabled) {
+        final mappedDay = _calendarService.getDayOrderForDate(actualDate);
+        if (mappedDay != null) {
+          effectiveDayIndex = mappedDay;
+          Logger.d(
+            _tag,
+            'Friends classes for $actualDate using mapped day index $mappedDay',
+          );
+        }
+      }
+
       for (final friend in friends) {
-        final dayName = _getDayNameFromIndex(dayIndex);
+        final dayName = _getDayNameFromIndex(effectiveDayIndex);
         if (dayName == null) continue;
-        
+
         final dayClasses = friend.getClassesForDay(dayName);
-        
+
         for (final classSlot in dayClasses) {
           friendsClasses.add({
             'start_time': _parseTimeSlotStart(classSlot.timeSlot),
@@ -307,7 +358,7 @@ class HomeLogic {
           });
         }
       }
-      
+
       return friendsClasses;
     } catch (e) {
       return [];
@@ -390,7 +441,15 @@ class HomeLogic {
 
   /// Convert day index to day name
   String? _getDayNameFromIndex(int dayIndex) {
-    const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    const dayNames = [
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+      'Sunday',
+    ];
     if (dayIndex >= 0 && dayIndex < dayNames.length) {
       return dayNames[dayIndex];
     }
@@ -534,31 +593,5 @@ class HomeLogic {
       'attended': attended,
       'total': total,
     };
-  }
-
-  /// Get effective day index considering calendar integration
-  int _getEffectiveDayIndex(int requestedDayIndex) {
-    if (!_calendarService.isEnabled) {
-      return requestedDayIndex;
-    }
-
-    final today = DateTime.now().weekday - 1;
-    final targetDate = DateTime.now().add(
-      Duration(days: requestedDayIndex - today),
-    );
-
-    final isHoliday = _calendarService.isHolidayDate(targetDate);
-    if (isHoliday) {
-      Logger.d(_tag, 'Date $targetDate is a holiday, showing no classes');
-      return -1;
-    }
-
-    final dayOrder = _calendarService.getDayOrderForDate(targetDate);
-    if (dayOrder != null && targetDate.weekday == 6) {
-      Logger.d(_tag, 'Saturday mapped to day order $dayOrder');
-      return dayOrder;
-    }
-
-    return requestedDayIndex;
   }
 }

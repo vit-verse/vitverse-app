@@ -156,7 +156,9 @@ class ControlCard extends StatelessWidget {
       style: OutlinedButton.styleFrom(
         foregroundColor: allPresent ? Colors.red : Colors.green,
         side: BorderSide(
-          color: (allPresent ? Colors.red : Colors.green).withValues(alpha: 0.5),
+          color: (allPresent ? Colors.red : Colors.green).withValues(
+            alpha: 0.5,
+          ),
         ),
         padding: const EdgeInsets.symmetric(
           horizontal: ThemeConstants.spacingXs,

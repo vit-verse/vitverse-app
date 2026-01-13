@@ -12,12 +12,15 @@ class ClassCard extends StatelessWidget {
   final Map<String, dynamic> classData;
   final int dayIndex;
   final HomeLogic homeLogic;
+  final DateTime?
+  actualDate; // Actual date for this class (considering week navigation)
 
   const ClassCard({
     super.key,
     required this.classData,
     required this.dayIndex,
     required this.homeLogic,
+    this.actualDate,
   });
 
   @override
@@ -649,21 +652,34 @@ class ClassCard extends StatelessWidget {
   bool _hasClassPassedInWeek(int classDayIndex, String endTime) {
     try {
       final now = DateTime.now();
-      final currentDayIndex = now.weekday - 1; // 0 = Monday, 6 = Sunday
       final currentTime =
           '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
 
-      // If the class day is before current day in the week, it has passed
-      if (classDayIndex < currentDayIndex) {
+      final DateTime classDate;
+      if (actualDate != null) {
+        classDate = actualDate!;
+      } else {
+        final currentDayIndex = now.weekday - 1;
+        final daysOffset = classDayIndex - currentDayIndex;
+        classDate = DateTime(
+          now.year,
+          now.month,
+          now.day,
+        ).add(Duration(days: daysOffset));
+      }
+
+      final today = DateTime(now.year, now.month, now.day);
+
+      if (classDate.isBefore(today)) {
         return true;
       }
 
-      // If it's the same day, check the time
-      if (classDayIndex == currentDayIndex) {
-        return currentTime.compareTo(endTime) >= 0;
+      if (classDate.year == today.year &&
+          classDate.month == today.month &&
+          classDate.day == today.day) {
+        return currentTime.compareTo(endTime) > 0;
       }
 
-      // If the class day is after current day, it hasn't passed yet
       return false;
     } catch (e) {
       return false;
