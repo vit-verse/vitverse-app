@@ -17,8 +17,9 @@ class EventsPage extends StatefulWidget {
   State<EventsPage> createState() => _EventsPageState();
 }
 
-class _EventsPageState extends State<EventsPage> {
-  int _selectedTabIndex = 0;
+class _EventsPageState extends State<EventsPage>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   String _sortBy = 'upcoming';
@@ -26,6 +27,7 @@ class _EventsPageState extends State<EventsPage> {
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 2, vsync: this);
     _searchController.addListener(() {
       setState(() => _searchQuery = _searchController.text);
       context.read<EventsProvider>().setSearchQuery(_searchQuery);
@@ -37,6 +39,7 @@ class _EventsPageState extends State<EventsPage> {
 
   @override
   void dispose() {
+    _tabController.dispose();
     _searchController.dispose();
     super.dispose();
   }
@@ -58,7 +61,7 @@ class _EventsPageState extends State<EventsPage> {
     return Consumer<EventsProvider>(
       builder: (context, provider, _) {
         final eventsCount =
-            _selectedTabIndex == 0
+            _tabController.index == 0
                 ? provider.exploreEvents.length
                 : context
                         .findAncestorStateOfType<_MyEventsTabState>()
@@ -209,12 +212,18 @@ class _EventsPageState extends State<EventsPage> {
             _buildSearchAndSortBar(themeProvider.currentTheme),
             _buildStatistics(themeProvider.currentTheme),
             Expanded(
-              child: _selectedTabIndex == 0 ? _ExploreTab() : _MyEventsTab(),
+              child: TabBarView(
+                controller: _tabController,
+                physics: const BouncingScrollPhysics(),
+                children: [_ExploreTab(), _MyEventsTab()],
+              ),
             ),
           ],
         ),
-        floatingActionButton:
-            _selectedTabIndex == 1
+        floatingActionButton: AnimatedBuilder(
+          animation: _tabController,
+          builder: (context, child) {
+            return _tabController.index == 1
                 ? FloatingActionButton.extended(
                   onPressed: () async {
                     final result = await Navigator.push(
@@ -234,7 +243,9 @@ class _EventsPageState extends State<EventsPage> {
                   ),
                   icon: const Icon(Icons.add, color: Colors.white),
                 )
-                : null,
+                : const SizedBox.shrink();
+          },
+        ),
       ),
     );
   }
@@ -277,35 +288,50 @@ class _EventsPageState extends State<EventsPage> {
     required int index,
     required dynamic theme,
   }) {
-    final isSelected = _selectedTabIndex == index;
-    return GestureDetector(
-      onTap: () => setState(() => _selectedTabIndex = index),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        decoration: BoxDecoration(
-          color: isSelected ? theme.primary : Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              size: 18,
-              color: isSelected ? Colors.white : theme.muted,
+    return AnimatedBuilder(
+      animation: _tabController,
+      builder: (context, child) {
+        final isSelected = _tabController.index == index;
+        final animValue = _tabController.animation?.value ?? 0.0;
+        final progress = (animValue - index).abs().clamp(0.0, 1.0);
+        final colorValue = 1.0 - progress;
+
+        return GestureDetector(
+          onTap: () {
+            _tabController.animateTo(
+              index,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+            );
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            decoration: BoxDecoration(
+              color: Color.lerp(Colors.transparent, theme.primary, colorValue),
+              borderRadius: BorderRadius.circular(8),
             ),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                color: isSelected ? Colors.white : theme.muted,
-              ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  icon,
+                  size: 18,
+                  color: Color.lerp(theme.muted, Colors.white, colorValue),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                    color: Color.lerp(theme.muted, Colors.white, colorValue),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 

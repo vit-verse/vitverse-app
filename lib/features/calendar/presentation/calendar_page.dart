@@ -23,7 +23,33 @@ class CalendarPage extends StatefulWidget {
   State<CalendarPage> createState() => _CalendarPageState();
 }
 
-class _CalendarPageState extends State<CalendarPage> {
+class _CalendarPageState extends State<CalendarPage>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+    _tabController.addListener(() {
+      if (!_tabController.indexIsChanging) {
+        // Update provider when tab changes via swipe
+        final provider = context.read<CalendarProvider>();
+        provider.setViewType(
+          _tabController.index == 0
+              ? CalendarViewType.month
+              : CalendarViewType.timeline,
+        );
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
   Future<void> _refreshCalendars() async {
     final provider = context.read<CalendarProvider>();
     final status = await provider.refreshSelectedCalendars();
@@ -87,10 +113,20 @@ class _CalendarPageState extends State<CalendarPage> {
                     child: Column(
                       children: [
                         const CalendarFilterBar(),
-                        const CalendarViewSwitcher(),
+                        _buildTabBar(themeProvider),
                         provider.selectedCalendars.isEmpty
                             ? _buildEmptyState()
-                            : _buildCalendarContent(provider),
+                            : SizedBox(
+                              height: MediaQuery.of(context).size.height * 0.7,
+                              child: TabBarView(
+                                controller: _tabController,
+                                physics: const BouncingScrollPhysics(),
+                                children: [
+                                  _buildMonthViewTab(provider),
+                                  const TimelineCalendarView(),
+                                ],
+                              ),
+                            ),
                       ],
                     ),
                   ),
@@ -103,16 +139,101 @@ class _CalendarPageState extends State<CalendarPage> {
     );
   }
 
-  Widget _buildCalendarContent(CalendarProvider provider) {
-    return Column(
-      children: [
-        // Main calendar view
-        provider.viewType == CalendarViewType.month
-            ? const MonthCalendarView()
-            : const TimelineCalendarView(),
+  Widget _buildTabBar(ThemeProvider themeProvider) {
+    return Container(
+      margin: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: themeProvider.currentTheme.surface,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          _buildTabButton('Month View', Icons.calendar_month, 0, themeProvider),
+          _buildTabButton('Timeline', Icons.view_timeline, 1, themeProvider),
+        ],
+      ),
+    );
+  }
 
-        // Selected day details (month view only)
-        if (provider.viewType == CalendarViewType.month)
+  Widget _buildTabButton(
+    String label,
+    IconData icon,
+    int index,
+    ThemeProvider themeProvider,
+  ) {
+    final isSelected = _tabController.index == index;
+    return Expanded(
+      child: AnimatedBuilder(
+        animation: _tabController,
+        builder: (context, child) {
+          final animValue = _tabController.animation?.value ?? 0.0;
+          final progress = (animValue - index).abs().clamp(0.0, 1.0);
+          final colorValue = 1.0 - progress;
+
+          return GestureDetector(
+            onTap: () {
+              _tabController.animateTo(
+                index,
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+              );
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              decoration: BoxDecoration(
+                color: Color.lerp(
+                  Colors.transparent,
+                  themeProvider.currentTheme.primary,
+                  colorValue,
+                ),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    icon,
+                    size: 18,
+                    color: Color.lerp(
+                      themeProvider.currentTheme.muted,
+                      themeProvider.currentTheme.isDark
+                          ? Colors.black
+                          : Colors.white,
+                      colorValue,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight:
+                          isSelected ? FontWeight.w600 : FontWeight.normal,
+                      color: Color.lerp(
+                        themeProvider.currentTheme.muted,
+                        themeProvider.currentTheme.isDark
+                            ? Colors.black
+                            : Colors.white,
+                        colorValue,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildMonthViewTab(CalendarProvider provider) {
+    return SingleChildScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      child: Column(
+        children: [
+          const MonthCalendarView(),
           Consumer<CalendarProvider>(
             builder: (_, p, __) {
               return p.getEventsForDate(p.selectedDate).isNotEmpty
@@ -120,9 +241,6 @@ class _CalendarPageState extends State<CalendarPage> {
                   : const SizedBox.shrink();
             },
           ),
-
-        // Upcoming events
-        if (provider.viewType == CalendarViewType.month)
           Consumer<CalendarProvider>(
             builder: (_, p, __) {
               return p.getUpcomingEvents().isNotEmpty
@@ -130,7 +248,8 @@ class _CalendarPageState extends State<CalendarPage> {
                   : const SizedBox.shrink();
             },
           ),
-      ],
+        ],
+      ),
     );
   }
 

@@ -19,9 +19,9 @@ class ThemeSettingsPage extends StatefulWidget {
   State<ThemeSettingsPage> createState() => _ThemeSettingsPageState();
 }
 
-class _ThemeSettingsPageState extends State<ThemeSettingsPage> {
-  int _selectedTab = 0;
-  late PageController _pageController;
+class _ThemeSettingsPageState extends State<ThemeSettingsPage>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
   late TextEditingController _themeNameController;
 
   String? _selectedBaseThemeId;
@@ -41,7 +41,7 @@ class _ThemeSettingsPageState extends State<ThemeSettingsPage> {
       screenName: 'ThemeSettings',
       screenClass: 'ThemeSettingsPage',
     );
-    _pageController = PageController();
+    _tabController = TabController(length: 3, vsync: this);
     _themeNameController = TextEditingController(text: _customThemeName);
     _loadCustomThemes();
     _loadSavedCustomTheme();
@@ -88,19 +88,9 @@ class _ThemeSettingsPageState extends State<ThemeSettingsPage> {
 
   @override
   void dispose() {
-    _pageController.dispose();
+    _tabController.dispose();
     _themeNameController.dispose();
     super.dispose();
-  }
-
-  void _onPageChanged(int index) => setState(() => _selectedTab = index);
-
-  void _onNavButtonTap(int index) {
-    _pageController.animateToPage(
-      index,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-    );
   }
 
   TextStyle _getGoogleFontStyle(
@@ -219,9 +209,9 @@ class _ThemeSettingsPageState extends State<ThemeSettingsPage> {
             ),
           ),
           Expanded(
-            child: PageView(
-              controller: _pageController,
-              onPageChanged: _onPageChanged,
+            child: TabBarView(
+              controller: _tabController,
+              physics: const BouncingScrollPhysics(),
               children: [
                 _buildThemesTab(themeProvider),
                 _buildFontsTab(themeProvider),
@@ -240,50 +230,67 @@ class _ThemeSettingsPageState extends State<ThemeSettingsPage> {
     int index,
     ThemeProvider themeProvider,
   ) {
-    final isSelected = _selectedTab == index;
     return Expanded(
-      child: GestureDetector(
-        onTap: () => _onNavButtonTap(index),
-        child: AnimatedContainer(
-          duration: ThemeConstants.durationNormal,
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: BoxDecoration(
-            color:
-                isSelected
-                    ? themeProvider.currentTheme.primary
-                    : Colors.transparent,
-            borderRadius: BorderRadius.circular(ThemeConstants.radiusMd),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                icon,
-                size: 18,
-                color:
-                    isSelected
-                        ? (themeProvider.currentTheme.isDark
-                            ? Colors.black
-                            : Colors.white)
-                        : themeProvider.currentTheme.muted,
-              ),
-              const SizedBox(width: 6),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color:
-                      isSelected
-                          ? (themeProvider.currentTheme.isDark
-                              ? Colors.black
-                              : Colors.white)
-                          : themeProvider.currentTheme.muted,
+      child: AnimatedBuilder(
+        animation: _tabController,
+        builder: (context, child) {
+          final isSelected = _tabController.index == index;
+          final animValue = _tabController.animation?.value ?? 0.0;
+          final progress = (animValue - index).abs().clamp(0.0, 1.0);
+          final colorValue = 1.0 - progress;
+
+          return GestureDetector(
+            onTap: () {
+              _tabController.animateTo(
+                index,
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+              );
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              decoration: BoxDecoration(
+                color: Color.lerp(
+                  Colors.transparent,
+                  themeProvider.currentTheme.primary,
+                  colorValue,
                 ),
+                borderRadius: BorderRadius.circular(ThemeConstants.radiusMd),
               ),
-            ],
-          ),
-        ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    icon,
+                    size: 18,
+                    color: Color.lerp(
+                      themeProvider.currentTheme.muted,
+                      themeProvider.currentTheme.isDark
+                          ? Colors.black
+                          : Colors.white,
+                      colorValue,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Color.lerp(
+                        themeProvider.currentTheme.muted,
+                        themeProvider.currentTheme.isDark
+                            ? Colors.black
+                            : Colors.white,
+                        colorValue,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -1275,8 +1282,11 @@ class _ThemeSettingsPageState extends State<ThemeSettingsPage> {
                 context,
                 'Theme "$_customThemeName" saved and applied!',
               );
-              // Switch to themes tab to show the saved theme
-              _onNavButtonTap(0);
+              _tabController.animateTo(
+                0,
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+              );
             }
           } catch (e) {
             if (mounted) {

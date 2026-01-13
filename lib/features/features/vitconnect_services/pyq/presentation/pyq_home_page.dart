@@ -14,16 +14,24 @@ class PyqHomePage extends StatefulWidget {
   State<PyqHomePage> createState() => _PyqHomePageState();
 }
 
-class _PyqHomePageState extends State<PyqHomePage> {
-  int _selectedTabIndex = 0;
+class _PyqHomePageState extends State<PyqHomePage>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 2, vsync: this);
     AnalyticsService.instance.logScreenView(
       screenName: 'PYQ_Home',
       screenClass: 'PyqHomePage',
     );
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
 
   @override
@@ -48,7 +56,16 @@ class _PyqHomePageState extends State<PyqHomePage> {
           iconTheme: IconThemeData(color: theme.text),
         ),
         body: Column(
-          children: [_buildTabBar(theme), Expanded(child: _buildCurrentTab())],
+          children: [
+            _buildTabBar(theme),
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                physics: const BouncingScrollPhysics(),
+                children: const [SearchPapersPage(), SubmitPapersPage()],
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -92,49 +109,61 @@ class _PyqHomePageState extends State<PyqHomePage> {
     required int index,
     required dynamic theme,
   }) {
-    final isSelected = _selectedTabIndex == index;
+    return AnimatedBuilder(
+      animation: _tabController,
+      builder: (context, child) {
+        final isSelected = _tabController.index == index;
+        final animValue = _tabController.animation?.value ?? 0.0;
+        final progress = (animValue - index).abs().clamp(0.0, 1.0);
+        final colorValue = 1.0 - progress;
 
-    return InkWell(
-      onTap: () => setState(() => _selectedTabIndex = index),
-      borderRadius: BorderRadius.circular(8),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? theme.primary : Colors.transparent,
+        return InkWell(
+          onTap: () {
+            _tabController.animateTo(
+              index,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+            );
+          },
           borderRadius: BorderRadius.circular(8),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 18,
-              color: isSelected ? Colors.white : theme.text.withValues(alpha: 0.6),
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+            decoration: BoxDecoration(
+              color: Color.lerp(Colors.transparent, theme.primary, colorValue),
+              borderRadius: BorderRadius.circular(8),
             ),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                color: isSelected ? Colors.white : theme.text.withValues(alpha: 0.6),
-              ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  icon,
+                  size: 18,
+                  color: Color.lerp(
+                    theme.text.withValues(alpha: 0.6),
+                    Colors.white,
+                    colorValue,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight:
+                        isSelected ? FontWeight.w600 : FontWeight.normal,
+                    color: Color.lerp(
+                      theme.text.withValues(alpha: 0.6),
+                      Colors.white,
+                      colorValue,
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
-  }
-
-  Widget _buildCurrentTab() {
-    switch (_selectedTabIndex) {
-      case 0:
-        return const SearchPapersPage();
-      case 1:
-        return const SubmitPapersPage();
-      default:
-        return const SearchPapersPage();
-    }
   }
 }

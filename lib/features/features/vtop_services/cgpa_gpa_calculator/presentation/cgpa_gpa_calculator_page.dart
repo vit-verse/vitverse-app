@@ -18,23 +18,31 @@ class CgpaGpaCalculatorPage extends StatefulWidget {
   State<CgpaGpaCalculatorPage> createState() => _CgpaGpaCalculatorPageState();
 }
 
-class _CgpaGpaCalculatorPageState extends State<CgpaGpaCalculatorPage> {
+class _CgpaGpaCalculatorPageState extends State<CgpaGpaCalculatorPage>
+    with SingleTickerProviderStateMixin {
   static const String _tag = 'CgpaGpaCalculator';
   final CalculatorDataProvider _dataProvider = CalculatorDataProvider();
 
   CalculatorState? _calculatorState;
   bool _isLoading = true;
   String? _errorMessage;
-  int _selectedTabIndex = 0;
+  late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 3, vsync: this);
     AnalyticsService.instance.logScreenView(
       screenName: 'CgpaGpaCalculator',
       screenClass: 'CgpaGpaCalculatorPage',
     );
     _loadData();
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadData() async {
@@ -156,7 +164,33 @@ class _CgpaGpaCalculatorPageState extends State<CgpaGpaCalculatorPage> {
           child: RefreshIndicator(
             onRefresh: _refreshData,
             color: theme.primary,
-            child: _buildCurrentTab(),
+            child: TabBarView(
+              controller: _tabController,
+              physics: const BouncingScrollPhysics(),
+              children: [
+                EstimatorTab(
+                  state: _calculatorState!,
+                  onStateChanged: (newState) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (mounted) {
+                        setState(() => _calculatorState = newState);
+                      }
+                    });
+                  },
+                ),
+                PredictorTab(
+                  state: _calculatorState!,
+                  onStateChanged: (newState) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (mounted) {
+                        setState(() => _calculatorState = newState);
+                      }
+                    });
+                  },
+                ),
+                SummaryTab(state: _calculatorState!),
+              ],
+            ),
           ),
         ),
       ],
@@ -209,69 +243,52 @@ class _CgpaGpaCalculatorPageState extends State<CgpaGpaCalculatorPage> {
     required int index,
     required dynamic theme,
   }) {
-    final isSelected = _selectedTabIndex == index;
+    return AnimatedBuilder(
+      animation: _tabController,
+      builder: (context, child) {
+        final isSelected = _tabController.index == index;
+        final animValue = _tabController.animation?.value ?? 0.0;
+        final progress = (animValue - index).abs().clamp(0.0, 1.0);
+        final colorValue = 1.0 - progress;
 
-    return GestureDetector(
-      onTap: () => setState(() => _selectedTabIndex = index),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? theme.primary : Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 18,
-              color: isSelected ? Colors.white : theme.muted,
+        return GestureDetector(
+          onTap: () {
+            _tabController.animateTo(
+              index,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+            );
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+            decoration: BoxDecoration(
+              color: Color.lerp(Colors.transparent, theme.primary, colorValue),
+              borderRadius: BorderRadius.circular(8),
             ),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                color: isSelected ? Colors.white : theme.muted,
-              ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  icon,
+                  size: 18,
+                  color: Color.lerp(theme.muted, Colors.white, colorValue),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                    color: Color.lerp(theme.muted, Colors.white, colorValue),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
-  }
-
-  Widget _buildCurrentTab() {
-    switch (_selectedTabIndex) {
-      case 0:
-        return EstimatorTab(
-          state: _calculatorState!,
-          onStateChanged: (newState) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (mounted) {
-                setState(() => _calculatorState = newState);
-              }
-            });
-          },
-        );
-      case 1:
-        return PredictorTab(
-          state: _calculatorState!,
-          onStateChanged: (newState) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (mounted) {
-                setState(() => _calculatorState = newState);
-              }
-            });
-          },
-        );
-      case 2:
-        return SummaryTab(state: _calculatorState!);
-      default:
-        return const SizedBox.shrink();
-    }
   }
 
   Widget _buildErrorView(dynamic theme) {

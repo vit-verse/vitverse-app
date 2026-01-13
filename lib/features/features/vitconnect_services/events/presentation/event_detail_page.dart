@@ -612,9 +612,9 @@ ${posterUrl.isNotEmpty ? '🖼️ $posterUrl' : ''}
               onPressed:
                   () =>
                       _launchEventUrl('https://eventhubcc.vit.ac.in/EventHub/'),
-              icon: Icons.open_in_new,
+              emoji: '🌐',
               label: 'Visit EventHub',
-              backgroundColor: const Color(0xFF6366F1),
+              backgroundColor: theme.primary,
               theme: theme,
             ),
 
@@ -625,7 +625,7 @@ ${posterUrl.isNotEmpty ? '🖼️ $posterUrl' : ''}
             if (widget.event.source == 'official') const SizedBox(height: 12),
             _buildEventLinkButton(
               onPressed: () => _launchEventUrl(widget.event.eventLink!),
-              icon: Icons.link,
+              emoji: '🌐',
               label: 'Visit Event Link',
               backgroundColor: theme.primary,
               theme: theme,
@@ -650,7 +650,7 @@ ${posterUrl.isNotEmpty ? '🖼️ $posterUrl' : ''}
 
   Widget _buildEventLinkButton({
     required VoidCallback onPressed,
-    required IconData icon,
+    required String emoji,
     required String label,
     required Color backgroundColor,
     required dynamic theme,
@@ -659,15 +659,15 @@ ${posterUrl.isNotEmpty ? '🖼️ $posterUrl' : ''}
       width: double.infinity,
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [backgroundColor, backgroundColor.withValues(alpha: 0.8)],
+          colors: [backgroundColor, backgroundColor.withValues(alpha: 0.85)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: backgroundColor.withValues(alpha: 0.3),
-            blurRadius: 8,
+            color: backgroundColor.withValues(alpha: 0.25),
+            blurRadius: 12,
             offset: const Offset(0, 4),
           ),
         ],
@@ -682,7 +682,7 @@ ${posterUrl.isNotEmpty ? '🖼️ $posterUrl' : ''}
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(icon, color: Colors.white, size: 22),
+                Text(emoji, style: const TextStyle(fontSize: 22)),
                 const SizedBox(width: 12),
                 Text(
                   label,
@@ -693,8 +693,12 @@ ${posterUrl.isNotEmpty ? '🖼️ $posterUrl' : ''}
                     letterSpacing: 0.5,
                   ),
                 ),
-                const SizedBox(width: 8),
-                const Icon(Icons.arrow_forward, color: Colors.white, size: 20),
+                const Spacer(),
+                const Icon(
+                  Icons.arrow_forward_rounded,
+                  color: Colors.white,
+                  size: 22,
+                ),
               ],
             ),
           ),

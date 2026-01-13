@@ -18,16 +18,18 @@ class LostFoundHomePage extends StatefulWidget {
   State<LostFoundHomePage> createState() => _LostFoundHomePageState();
 }
 
-class _LostFoundHomePageState extends State<LostFoundHomePage> {
+class _LostFoundHomePageState extends State<LostFoundHomePage>
+    with SingleTickerProviderStateMixin {
   LostFoundProvider? _provider;
   bool _isSupabaseConfigured = false;
-  int _selectedTabIndex = 0;
+  late TabController _tabController;
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
 
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 3, vsync: this);
     _searchController.addListener(() {
       setState(() => _searchQuery = _searchController.text.toLowerCase());
     });
@@ -64,6 +66,13 @@ class _LostFoundHomePageState extends State<LostFoundHomePage> {
     if (mounted && _provider!.errorMessage != null) {
       SnackbarUtils.error(context, _provider!.errorMessage!);
     }
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    _searchController.dispose();
+    super.dispose();
   }
 
   @override
@@ -115,7 +124,15 @@ class _LostFoundHomePageState extends State<LostFoundHomePage> {
               child: RefreshIndicator(
                 onRefresh: _onRefresh,
                 color: theme.primary,
-                child: _buildCurrentTab(),
+                child: TabBarView(
+                  controller: _tabController,
+                  physics: const BouncingScrollPhysics(),
+                  children: [
+                    LostTab(searchQuery: _searchQuery),
+                    FoundTab(searchQuery: _searchQuery),
+                    MeTab(searchQuery: _searchQuery),
+                  ],
+                ),
               ),
             ),
           ],
@@ -216,52 +233,62 @@ class _LostFoundHomePageState extends State<LostFoundHomePage> {
     required int index,
     required dynamic theme,
   }) {
-    final isSelected = _selectedTabIndex == index;
+    return AnimatedBuilder(
+      animation: _tabController,
+      builder: (context, child) {
+        final isSelected = _tabController.index == index;
+        final animValue = _tabController.animation?.value ?? 0.0;
+        final progress = (animValue - index).abs().clamp(0.0, 1.0);
+        final colorValue = 1.0 - progress;
 
-    return InkWell(
-      onTap: () => setState(() => _selectedTabIndex = index),
-      borderRadius: BorderRadius.circular(8),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? theme.primary : Colors.transparent,
+        return InkWell(
+          onTap: () {
+            _tabController.animateTo(
+              index,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+            );
+          },
           borderRadius: BorderRadius.circular(8),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 18,
-              color: isSelected ? Colors.white : theme.text.withValues(alpha: 0.6),
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+            decoration: BoxDecoration(
+              color: Color.lerp(Colors.transparent, theme.primary, colorValue),
+              borderRadius: BorderRadius.circular(8),
             ),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                color: isSelected ? Colors.white : theme.text.withValues(alpha: 0.6),
-              ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  icon,
+                  size: 18,
+                  color: Color.lerp(
+                    theme.text.withValues(alpha: 0.6),
+                    Colors.white,
+                    colorValue,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight:
+                        isSelected ? FontWeight.w600 : FontWeight.normal,
+                    color: Color.lerp(
+                      theme.text.withValues(alpha: 0.6),
+                      Colors.white,
+                      colorValue,
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
-  }
-
-  Widget _buildCurrentTab() {
-    switch (_selectedTabIndex) {
-      case 0:
-        return LostTab(searchQuery: _searchQuery);
-      case 1:
-        return FoundTab(searchQuery: _searchQuery);
-      case 2:
-        return MeTab(searchQuery: _searchQuery);
-      default:
-        return const LostTab();
-    }
   }
 
   void _openAddPage() async {

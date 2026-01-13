@@ -30,18 +30,11 @@ class _FacultyRatingsPageState extends State<FacultyRatingsPage>
   bool _isSupabaseConfigured = false;
   StudentProfile? _profile;
   late TabController _tabController;
-  int _selectedTabIndex = 0;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    _tabController.addListener(() {
-      if (!_tabController.indexIsChanging) {
-        setState(() => _selectedTabIndex = _tabController.index);
-      }
-    });
-
     _checkSupabaseAndInit();
     _loadProfile();
 
@@ -93,7 +86,7 @@ class _FacultyRatingsPageState extends State<FacultyRatingsPage>
 
   Future<void> _refreshRatings() async {
     try {
-      if (_selectedTabIndex == 0) {
+      if (_tabController.index == 0) {
         await _provider?.refresh();
       } else {
         await _provider?.loadAllFaculties();
@@ -240,6 +233,7 @@ class _FacultyRatingsPageState extends State<FacultyRatingsPage>
             Expanded(
               child: TabBarView(
                 controller: _tabController,
+                physics: const BouncingScrollPhysics(),
                 children: [
                   RateFacultyTab(profile: _profile),
                   const AllFacultiesTab(),
@@ -290,48 +284,64 @@ class _FacultyRatingsPageState extends State<FacultyRatingsPage>
     required int index,
     required dynamic theme,
   }) {
-    final isSelected = _selectedTabIndex == index;
+    return AnimatedBuilder(
+      animation: _tabController,
+      builder: (context, child) {
+        final isSelected = _tabController.index == index;
+        final animValue = _tabController.animation?.value ?? 0.0;
+        final progress = (animValue - index).abs().clamp(0.0, 1.0);
+        final colorValue = 1.0 - progress;
 
-    return InkWell(
-      onTap: () {
-        _tabController.animateTo(index);
-        setState(() => _selectedTabIndex = index);
-      },
-      borderRadius: BorderRadius.circular(8),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? theme.primary : Colors.transparent,
+        return InkWell(
+          onTap: () {
+            _tabController.animateTo(
+              index,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+            );
+          },
           borderRadius: BorderRadius.circular(8),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 16,
-              color:
-                  isSelected ? Colors.white : theme.text.withValues(alpha: 0.6),
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+            decoration: BoxDecoration(
+              color: Color.lerp(Colors.transparent, theme.primary, colorValue),
+              borderRadius: BorderRadius.circular(8),
             ),
-            const SizedBox(width: 6),
-            Flexible(
-              child: Text(
-                label,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                  color:
-                      isSelected
-                          ? Colors.white
-                          : theme.text.withValues(alpha: 0.6),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  icon,
+                  size: 16,
+                  color: Color.lerp(
+                    theme.text.withValues(alpha: 0.6),
+                    Colors.white,
+                    colorValue,
+                  ),
                 ),
-                overflow: TextOverflow.ellipsis,
-              ),
+                const SizedBox(width: 6),
+                Flexible(
+                  child: Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight:
+                          isSelected ? FontWeight.w600 : FontWeight.normal,
+                      color: Color.lerp(
+                        theme.text.withValues(alpha: 0.6),
+                        Colors.white,
+                        colorValue,
+                      ),
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

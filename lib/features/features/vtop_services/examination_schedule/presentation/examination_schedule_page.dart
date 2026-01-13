@@ -16,7 +16,8 @@ class ExaminationSchedulePage extends StatefulWidget {
       _ExaminationSchedulePageState();
 }
 
-class _ExaminationSchedulePageState extends State<ExaminationSchedulePage> {
+class _ExaminationSchedulePageState extends State<ExaminationSchedulePage>
+    with TickerProviderStateMixin {
   @override
   String get screenName => 'ExamSchedule';
 
@@ -29,15 +30,23 @@ class _ExaminationSchedulePageState extends State<ExaminationSchedulePage> {
   Map<String, dynamic>? _nextExam;
   bool _isLoading = true;
   String? _error;
+  late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 0, vsync: this);
     AnalyticsService.instance.logScreenView(
       screenName: 'ExaminationSchedule',
       screenClass: 'ExaminationSchedulePage',
     );
     _loadExamData();
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadExamData() async {
@@ -81,6 +90,20 @@ class _ExaminationSchedulePageState extends State<ExaminationSchedulePage> {
         _selectedType = mostUpcomingType;
         _nextExam = nextExam;
         _isLoading = false;
+        // Reinitialize TabController with correct length
+        _tabController.dispose();
+        _tabController = TabController(
+          length: examTypes.length,
+          vsync: this,
+          initialIndex: examTypes.indexOf(mostUpcomingType ?? examTypes.first),
+        );
+        _tabController.addListener(() {
+          if (!_tabController.indexIsChanging) {
+            setState(() {
+              _selectedType = _examTypes[_tabController.index];
+            });
+          }
+        });
       });
     } catch (e) {
       setState(() {
@@ -204,24 +227,115 @@ class _ExaminationSchedulePageState extends State<ExaminationSchedulePage> {
               logic: _logic,
             ),
 
-          // Exam type tabs
-          ExamTypeTabs(
-            examTypes: _examTypes,
-            selectedType: _selectedType ?? '',
-            onTypeSelected: (type) {
-              setState(() {
-                _selectedType = type;
-              });
-            },
-            themeProvider: themeProvider,
-          ),
+          // Exam type tabs with swipeable view
+          _buildTabBar(themeProvider),
 
           const SizedBox(height: 8),
 
-          // Exam list
-          Expanded(child: _buildExamList(themeProvider)),
+          // Exam list with TabBarView
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              physics: const BouncingScrollPhysics(),
+              children:
+                  _examTypes.map((type) {
+                    return _buildExamListForType(type, themeProvider);
+                  }).toList(),
+            ),
+          ),
         ],
       ),
+    );
+  }
+
+  Widget _buildTabBar(ThemeProvider themeProvider) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: themeProvider.currentTheme.surface,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: List.generate(_examTypes.length, (index) {
+          return Expanded(
+            child: AnimatedBuilder(
+              animation: _tabController,
+              builder: (context, child) {
+                final isSelected = _tabController.index == index;
+                final animValue = _tabController.animation?.value ?? 0.0;
+                final progress = (animValue - index).abs().clamp(0.0, 1.0);
+                final colorValue = 1.0 - progress;
+
+                return GestureDetector(
+                  onTap: () {
+                    _tabController.animateTo(
+                      index,
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 10,
+                      horizontal: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Color.lerp(
+                        Colors.transparent,
+                        themeProvider.currentTheme.primary,
+                        colorValue,
+                      ),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      _examTypes[index],
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight:
+                            isSelected ? FontWeight.w600 : FontWeight.normal,
+                        color: Color.lerp(
+                          themeProvider.currentTheme.muted,
+                          themeProvider.currentTheme.isDark
+                              ? Colors.black
+                              : Colors.white,
+                          colorValue,
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          );
+        }),
+      ),
+    );
+  }
+
+  Widget _buildExamListForType(String type, ThemeProvider themeProvider) {
+    final exams = _examsByType[type] ?? [];
+
+    if (exams.isEmpty) {
+      return EmptyExamState(
+        message: 'No $type exams scheduled.',
+        themeProvider: themeProvider,
+      );
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.only(bottom: 16),
+      physics: const AlwaysScrollableScrollPhysics(),
+      itemCount: exams.length,
+      itemBuilder: (context, index) {
+        final exam = exams[index];
+        return ExamCard(
+          exam: exam,
+          themeProvider: themeProvider,
+          logic: _logic,
+        );
+      },
     );
   }
 

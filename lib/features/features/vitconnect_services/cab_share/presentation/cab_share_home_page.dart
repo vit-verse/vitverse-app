@@ -17,10 +17,11 @@ class CabShareHomePage extends StatefulWidget {
   State<CabShareHomePage> createState() => _CabShareHomePageState();
 }
 
-class _CabShareHomePageState extends State<CabShareHomePage> {
+class _CabShareHomePageState extends State<CabShareHomePage>
+    with SingleTickerProviderStateMixin {
   CabRideProvider? _provider;
   bool _isSupabaseConfigured = false;
-  int _selectedTabIndex = 0;
+  late TabController _tabController;
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   Map<String, String> _filters = {};
@@ -28,6 +29,7 @@ class _CabShareHomePageState extends State<CabShareHomePage> {
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 2, vsync: this);
     _searchController.addListener(() {
       setState(() => _searchQuery = _searchController.text.toLowerCase());
     });
@@ -68,6 +70,7 @@ class _CabShareHomePageState extends State<CabShareHomePage> {
 
   @override
   void dispose() {
+    _tabController.dispose();
     _searchController.dispose();
     super.dispose();
   }
@@ -121,7 +124,14 @@ class _CabShareHomePageState extends State<CabShareHomePage> {
               child: RefreshIndicator(
                 onRefresh: _onRefresh,
                 color: theme.primary,
-                child: _buildCurrentTab(),
+                child: TabBarView(
+                  controller: _tabController,
+                  physics: const BouncingScrollPhysics(),
+                  children: [
+                    ExploreTab(searchQuery: _searchQuery, filters: _filters),
+                    const MyRidesTab(),
+                  ],
+                ),
               ),
             ),
           ],
@@ -554,60 +564,62 @@ class _CabShareHomePageState extends State<CabShareHomePage> {
     required int index,
     required dynamic theme,
   }) {
-    final isSelected = _selectedTabIndex == index;
+    return AnimatedBuilder(
+      animation: _tabController,
+      builder: (context, child) {
+        final isSelected = _tabController.index == index;
+        final animValue = _tabController.animation?.value ?? 0.0;
+        final progress = (animValue - index).abs().clamp(0.0, 1.0);
+        final colorValue = 1.0 - progress;
 
-    return InkWell(
-      onTap: () => setState(() => _selectedTabIndex = index),
-      borderRadius: BorderRadius.circular(8),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? theme.primary : Colors.transparent,
+        return InkWell(
+          onTap: () {
+            _tabController.animateTo(
+              index,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+            );
+          },
           borderRadius: BorderRadius.circular(8),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 18,
-              color:
-                  isSelected ? Colors.white : theme.text.withValues(alpha: 0.6),
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+            decoration: BoxDecoration(
+              color: Color.lerp(Colors.transparent, theme.primary, colorValue),
+              borderRadius: BorderRadius.circular(8),
             ),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                color:
-                    isSelected
-                        ? Colors.white
-                        : theme.text.withValues(alpha: 0.6),
-              ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  icon,
+                  size: 18,
+                  color: Color.lerp(
+                    theme.text.withValues(alpha: 0.6),
+                    Colors.white,
+                    colorValue,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight:
+                        isSelected ? FontWeight.w600 : FontWeight.normal,
+                    color: Color.lerp(
+                      theme.text.withValues(alpha: 0.6),
+                      Colors.white,
+                      colorValue,
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
-  }
-
-  Widget _buildCurrentTab() {
-    switch (_selectedTabIndex) {
-      case 0:
-        return ExploreTab(
-          searchQuery: _searchQuery,
-          filters: _filters.isNotEmpty ? _filters : null,
-        );
-      case 1:
-        return const MyRidesTab();
-      default:
-        return ExploreTab(
-          searchQuery: _searchQuery,
-          filters: _filters.isNotEmpty ? _filters : null,
-        );
-    }
   }
 
   void _openAddPage() async {
