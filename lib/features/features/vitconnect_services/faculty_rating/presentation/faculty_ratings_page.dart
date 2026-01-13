@@ -180,7 +180,7 @@ class _FacultyRatingsPageState extends State<FacultyRatingsPage>
       );
     }
 
-    if (_provider == null || _profile == null) {
+    if (_provider == null) {
       return Scaffold(
         backgroundColor: theme.background,
         body: Center(child: CircularProgressIndicator(color: theme.primary)),
@@ -241,7 +241,7 @@ class _FacultyRatingsPageState extends State<FacultyRatingsPage>
               child: TabBarView(
                 controller: _tabController,
                 children: [
-                  RateFacultyTab(profile: _profile!),
+                  RateFacultyTab(profile: _profile),
                   const AllFacultiesTab(),
                 ],
               ),

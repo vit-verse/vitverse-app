@@ -32,355 +32,342 @@ class ClassCard extends StatelessWidget {
   }
 
   Widget _buildFriendClassCard(BuildContext context) {
-    return Consumer<ThemeProvider>(
-      builder: (context, themeProvider, child) {
-        final friendNickname =
-            classData['friendNickname'] as String? ?? 'Friend';
-        final friendColor =
-            classData['friendColor'] as Color? ??
-            themeProvider.currentTheme.primary;
-        final course = classData['course'] as Map<String, dynamic>? ?? {};
-        final courseTitle = course['title'] as String? ?? 'Unknown Course';
-        final venue = course['venue'] as String? ?? '--';
-        final startTime = classData['start_time'] as String? ?? '';
-        final endTime = classData['end_time'] as String? ?? '';
+    final themeProvider = context.read<ThemeProvider>();
+    final friendNickname = classData['friendNickname'] as String? ?? 'Friend';
+    final friendColor =
+        classData['friendColor'] as Color? ??
+        themeProvider.currentTheme.primary;
+    final course = classData['course'] as Map<String, dynamic>? ?? {};
+    final courseTitle = course['title'] as String? ?? 'Unknown Course';
+    final venue = course['venue'] as String? ?? '--';
+    final startTime = classData['start_time'] as String? ?? '';
+    final endTime = classData['end_time'] as String? ?? '';
 
-        // Check if class has passed (for any day in the current week)
-        final hasPassed = _hasClassPassedInWeek(dayIndex, endTime);
+    // Check if class has passed (for any day in the current week)
+    final hasPassed = _hasClassPassedInWeek(dayIndex, endTime);
 
-        // Format time display
-        String displayTime = '--:-- to --:--';
-        if (startTime.isNotEmpty && endTime.isNotEmpty) {
-          displayTime =
-              '${_convertTo12HourFormat(startTime)} - ${_convertTo12HourFormat(endTime)}';
-        }
+    // Format time display
+    String displayTime = '--:-- to --:--';
+    if (startTime.isNotEmpty && endTime.isNotEmpty) {
+      displayTime =
+          '${_convertTo12HourFormat(startTime)} - ${_convertTo12HourFormat(endTime)}';
+    }
 
-        return Opacity(
-          opacity: hasPassed ? 0.4 : 1.0,
-          child: Container(
-            margin: const EdgeInsets.only(bottom: 8),
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: friendColor.withValues(alpha: 0.05),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: friendColor.withValues(alpha: 0.3),
-                width: 1.5,
+    return Opacity(
+      opacity: hasPassed ? 0.4 : 1.0,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: friendColor.withValues(alpha: 0.05),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: friendColor.withValues(alpha: 0.3),
+            width: 1.5,
+          ),
+        ),
+        child: Row(
+          children: [
+            // Friend nickname tag
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: friendColor,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                friendNickname,
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
               ),
             ),
-            child: Row(
-              children: [
-                // Friend nickname tag
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: friendColor,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    friendNickname,
-                    style: const TextStyle(
-                      fontSize: 11,
+            const SizedBox(width: 10),
+
+            // Course details
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    courseTitle,
+                    style: TextStyle(
+                      fontSize: 13,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: themeProvider.currentTheme.text,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-                const SizedBox(width: 10),
+                  const SizedBox(height: 4),
 
-                // Course details
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  Row(
                     children: [
-                      Text(
-                        courseTitle,
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold,
-                          color: themeProvider.currentTheme.text,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                      Icon(
+                        Icons.access_time_rounded,
+                        size: 11,
+                        color: friendColor,
                       ),
-                      const SizedBox(height: 4),
-
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.access_time_rounded,
-                            size: 11,
-                            color: friendColor,
+                      const SizedBox(width: 3),
+                      Text(
+                        displayTime,
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: themeProvider.currentTheme.muted,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Icon(
+                        Icons.location_on_rounded,
+                        size: 11,
+                        color: friendColor,
+                      ),
+                      const SizedBox(width: 3),
+                      Expanded(
+                        child: Text(
+                          venue,
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: themeProvider.currentTheme.muted,
+                            fontWeight: FontWeight.w600,
                           ),
-                          const SizedBox(width: 3),
-                          Text(
-                            displayTime,
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: themeProvider.currentTheme.muted,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Icon(
-                            Icons.location_on_rounded,
-                            size: 11,
-                            color: friendColor,
-                          ),
-                          const SizedBox(width: 3),
-                          Expanded(
-                            child: Text(
-                              venue,
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: themeProvider.currentTheme.muted,
-                                fontWeight: FontWeight.w600,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                     ],
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        );
-      },
+          ],
+        ),
+      ),
     );
   }
 
   Widget _buildUserClassCard(BuildContext context) {
-    return Consumer2<ThemeProvider, WidgetCustomizationProvider>(
-      builder: (context, themeProvider, widgetProvider, child) {
-        final course = classData['course'] as Map<String, dynamic>?;
-        final courseCode = course?['code']?.toString() ?? 'Unknown';
-        final courseTitle = course?['title']?.toString() ?? 'Unknown Course';
-        final courseType = course?['type']?.toString().toLowerCase() ?? '';
-        final startTime = classData['start_time']?.toString() ?? '--:--';
-        final endTime = classData['end_time']?.toString() ?? '--:--';
+    final themeProvider = context.read<ThemeProvider>();
+    final widgetProvider = context.read<WidgetCustomizationProvider>();
+    final course = classData['course'] as Map<String, dynamic>?;
+    final courseCode = course?['code']?.toString() ?? 'Unknown';
+    final courseTitle = course?['title']?.toString() ?? 'Unknown Course';
+    final courseType = course?['type']?.toString().toLowerCase() ?? '';
+    final startTime = classData['start_time']?.toString() ?? '--:--';
+    final endTime = classData['end_time']?.toString() ?? '--:--';
 
-        // Determine if it's lab
-        final isLab =
-            courseType.contains('lab') || courseType.contains('embedded lab');
+    // Determine if it's lab
+    final isLab =
+        courseType.contains('lab') || courseType.contains('embedded lab');
 
-        // Check if class is currently ongoing or has passed
-        final now = DateTime.now();
-        final isToday = dayIndex == (now.weekday - 1);
-        final currentTime =
-            '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
-        final isOngoing =
-            isToday && _isClassOngoing(startTime, endTime, currentTime);
-        final hasPassed = _hasClassPassedInWeek(dayIndex, endTime);
-        final classProgress =
-            isToday ? _getClassProgress(startTime, endTime, currentTime) : 0.0;
+    // Check if class is currently ongoing or has passed
+    final now = DateTime.now();
+    final isToday = dayIndex == (now.weekday - 1);
+    final currentTime =
+        '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
+    final isOngoing =
+        isToday && _isClassOngoing(startTime, endTime, currentTime);
+    final hasPassed = _hasClassPassedInWeek(dayIndex, endTime);
+    final classProgress =
+        isToday ? _getClassProgress(startTime, endTime, currentTime) : 0.0;
 
-        // Get attendance data for this course
-        // For embedded courses, pass the course type to get the correct attendance (theory vs lab)
-        final courseAttendance = homeLogic.getCourseAttendance(
-          courseCode,
-          courseType: courseType,
+    // Get attendance data for this course
+    // For embedded courses, pass the course type to get the correct attendance (theory vs lab)
+    final courseAttendance = homeLogic.getCourseAttendance(
+      courseCode,
+      courseType: courseType,
+    );
+
+    // Get slot name(s) for the dialog - handle merged slots
+    String slotName = 'Unknown';
+    final slotNames = classData['slotNames'] as List?;
+    if (slotNames != null && slotNames.isNotEmpty) {
+      // Multiple slots merged - join with " + "
+      slotName = slotNames.join(' + ');
+    } else {
+      // Single slot - backward compatibility
+      final slotId = classData['slotId'] as int?;
+      if (slotId != null) {
+        final slot = homeLogic.slotsData.firstWhere(
+          (slot) => slot['id'] == slotId,
+          orElse: () => {'slot': 'Unknown'},
         );
+        slotName = slot['slot']?.toString() ?? 'Slot $slotId';
+      }
+    }
 
-        // Get slot name(s) for the dialog - handle merged slots
-        String slotName = 'Unknown';
-        final slotNames = classData['slotNames'] as List?;
-        if (slotNames != null && slotNames.isNotEmpty) {
-          // Multiple slots merged - join with " + "
-          slotName = slotNames.join(' + ');
-        } else {
-          // Single slot - backward compatibility
-          final slotId = classData['slotId'] as int?;
-          if (slotId != null) {
-            final slot = homeLogic.slotsData.firstWhere(
-              (slot) => slot['id'] == slotId,
-              orElse: () => {'slot': 'Unknown'},
-            );
-            slotName = slot['slot']?.toString() ?? 'Slot $slotId';
-          }
-        }
-
-        return Opacity(
-          opacity: hasPassed ? 0.4 : 1.0,
-          child: GestureDetector(
-            behavior: HitTestBehavior.translucent,
-            onTap: () {
-              showModalBottomSheet(
-                context: context,
-                isScrollControlled: true,
-                backgroundColor: Colors.transparent,
-                builder:
-                    (context) => ClassDetailsDialog(
-                      classData: classData,
-                      courseAttendance: courseAttendance,
-                      slotName: slotName,
-                    ),
-              );
-            },
-            child: Container(
-              margin: const EdgeInsets.only(bottom: 10),
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: themeProvider.currentTheme.surface,
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(
-                  color: themeProvider.currentTheme.muted.withValues(
-                    alpha: 0.2,
-                  ),
-                  width: 1.5,
+    return Opacity(
+      opacity: hasPassed ? 0.4 : 1.0,
+      child: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTap: () {
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            backgroundColor: Colors.transparent,
+            builder:
+                (context) => ClassDetailsDialog(
+                  classData: classData,
+                  courseAttendance: courseAttendance,
+                  slotName: slotName,
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: themeProvider.currentTheme.text.withValues(
-                      alpha: 0.02,
-                    ),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
+          );
+        },
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 10),
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: themeProvider.currentTheme.surface,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: themeProvider.currentTheme.muted.withValues(alpha: 0.2),
+              width: 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: themeProvider.currentTheme.text.withValues(alpha: 0.02),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
               ),
-              child: Stack(
+            ],
+          ),
+          child: Stack(
+            children: [
+              // Progress indicator for ongoing class
+              if (isOngoing && classProgress > 0)
+                Positioned.fill(
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Container(
+                      width: MediaQuery.of(context).size.width * classProgress,
+                      decoration: BoxDecoration(
+                        color: themeProvider.currentTheme.primary.withValues(
+                          alpha: 0.08,
+                        ),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                  ),
+                ),
+
+              Row(
                 children: [
-                  // Progress indicator for ongoing class
-                  if (isOngoing && classProgress > 0)
-                    Positioned.fill(
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Container(
-                          width:
-                              MediaQuery.of(context).size.width * classProgress,
-                          decoration: BoxDecoration(
-                            color: themeProvider.currentTheme.primary
-                                .withValues(alpha: 0.08),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
+                  Stack(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(2.0),
+                        child: Image.asset(
+                          isLab
+                              ? 'assets/icons/lab.png'
+                              : 'assets/icons/theory.png',
+                          width: 40,
+                          height: 40,
+                          color: themeProvider.currentTheme.primary,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Icon(
+                              isLab
+                                  ? Icons.science_rounded
+                                  : Icons.book_rounded,
+                              color: themeProvider.currentTheme.primary,
+                              size: 36,
+                            );
+                          },
                         ),
                       ),
-                    ),
 
-                  Row(
-                    children: [
-                      Stack(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(2.0),
-                            child: Image.asset(
-                              isLab
-                                  ? 'assets/icons/lab.png'
-                                  : 'assets/icons/theory.png',
-                              width: 40,
-                              height: 40,
+                      if (isOngoing)
+                        Positioned(
+                          right: -2,
+                          top: -2,
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
                               color: themeProvider.currentTheme.primary,
-                              errorBuilder: (context, error, stackTrace) {
-                                return Icon(
-                                  isLab
-                                      ? Icons.science_rounded
-                                      : Icons.book_rounded,
-                                  color: themeProvider.currentTheme.primary,
-                                  size: 36,
-                                );
-                              },
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: themeProvider.currentTheme.surface,
+                                width: 2,
+                              ),
+                            ),
+                            child: Icon(
+                              Icons.play_arrow_rounded,
+                              color: themeProvider.currentTheme.background,
+                              size: 12,
                             ),
                           ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(width: 12),
 
-                          if (isOngoing)
-                            Positioned(
-                              right: -2,
-                              top: -2,
-                              child: Container(
-                                padding: const EdgeInsets.all(4),
-                                decoration: BoxDecoration(
-                                  color: themeProvider.currentTheme.primary,
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: themeProvider.currentTheme.surface,
-                                    width: 2,
-                                  ),
-                                ),
-                                child: Icon(
-                                  Icons.play_arrow_rounded,
-                                  color: themeProvider.currentTheme.background,
-                                  size: 12,
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-                      const SizedBox(width: 12),
+                  // Class details
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          courseTitle,
+                          style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.bold,
+                            color: themeProvider.currentTheme.text,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 8),
 
-                      // Class details
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        Row(
                           children: [
-                            Text(
-                              courseTitle,
-                              style: TextStyle(
-                                fontSize: 17,
-                                fontWeight: FontWeight.bold,
-                                color: themeProvider.currentTheme.text,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                            Icon(
+                              Icons.access_time_rounded,
+                              size: 15,
+                              color:
+                                  isOngoing
+                                      ? themeProvider.currentTheme.primary
+                                      : themeProvider.currentTheme.muted,
                             ),
-                            const SizedBox(height: 8),
-
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.access_time_rounded,
-                                  size: 15,
-                                  color:
-                                      isOngoing
-                                          ? themeProvider.currentTheme.primary
-                                          : themeProvider.currentTheme.muted,
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  '${_convertTo12HourFormat(startTime)} - ${_convertTo12HourFormat(endTime)}',
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color:
-                                        isOngoing
-                                            ? themeProvider.currentTheme.primary
-                                            : themeProvider.currentTheme.text,
-                                    fontWeight:
-                                        isOngoing
-                                            ? FontWeight.w700
-                                            : FontWeight.w600,
-                                  ),
-                                ),
-                              ],
+                            const SizedBox(width: 4),
+                            Text(
+                              '${_convertTo12HourFormat(startTime)} - ${_convertTo12HourFormat(endTime)}',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color:
+                                    isOngoing
+                                        ? themeProvider.currentTheme.primary
+                                        : themeProvider.currentTheme.text,
+                                fontWeight:
+                                    isOngoing
+                                        ? FontWeight.w700
+                                        : FontWeight.w600,
+                              ),
                             ),
                           ],
                         ),
-                      ),
-                      const SizedBox(width: 12),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 12),
 
-                      // Dynamic widget based on user preference
-                      _buildClassCardWidget(
-                        context,
-                        themeProvider,
-                        widgetProvider,
-                        classData,
-                        courseCode,
-                        slotName,
-                        courseAttendance,
-                      ),
-                    ],
+                  // Dynamic widget based on user preference
+                  _buildClassCardWidget(
+                    context,
+                    themeProvider,
+                    widgetProvider,
+                    classData,
+                    courseCode,
+                    slotName,
+                    courseAttendance,
                   ),
                 ],
               ),
-            ),
+            ],
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 

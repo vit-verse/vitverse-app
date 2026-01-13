@@ -462,7 +462,8 @@ class VitVerseDatabase {
     }
   }
 
-  /// Clear all data (for logout)
+  /// Clear all data (for app reset/uninstall only - NOT for logout)
+  /// WARNING: This clears ALL VitVerse data including user preferences
   Future<void> clearAllData() async {
     try {
       if (_calendarDao != null) {
@@ -483,6 +484,19 @@ class VitVerseDatabase {
       Logger.i('VitVerseDB', 'All VIT Verse data cleared');
     } catch (e) {
       Logger.e('VitVerseDB', 'Error clearing all data', e);
+    }
+  }
+
+  /// Clear only student-specific data (currently not used in logout)
+  /// VitVerse database contains primarily app-level data
+  /// This method is provided for potential future use
+  Future<void> clearStudentData() async {
+    try {
+      // Currently no tables need clearing on logout
+      // personal_events and selected_calendars are now app-level data
+      Logger.i('VitVerseDB', 'No student-specific data to clear');
+    } catch (e) {
+      Logger.e('VitVerseDB', 'Error in clearStudentData', e);
     }
   }
 

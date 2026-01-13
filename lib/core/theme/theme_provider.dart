@@ -94,6 +94,10 @@ class ThemeProvider with ChangeNotifier {
         isDark: isDark,
       );
       _currentTheme = _customTheme!;
+    } else {
+      // Custom theme data missing, fallback to amoled_black and clear invalid theme key
+      _currentTheme = AppThemes.amoledBlack;
+      prefs.setString(_themeKey, 'amoled_black');
     }
   }
 
@@ -140,14 +144,16 @@ class ThemeProvider with ChangeNotifier {
     }
   }
 
-  /// Set theme
+  /// Set a built-in theme (NOT for custom themes)
+  /// Use [setCustomTheme] for custom themes to ensure proper persistence
   Future<void> setTheme(AppTheme theme) async {
+    assert(
+      !theme.id.startsWith('custom_'),
+      'Use setCustomTheme() for custom themes',
+    );
+
     _currentTheme = theme;
-
-    if (theme.id != 'custom') {
-      _customTheme = null;
-    }
-
+    _customTheme = null;
     notifyListeners();
 
     final prefs = await SharedPreferences.getInstance();
@@ -163,7 +169,8 @@ class ThemeProvider with ChangeNotifier {
     await prefs.setString(_fontKey, fontFamily);
   }
 
-  /// Set custom theme
+  /// Set a custom theme with full data persistence
+  /// Saves all theme colors to SharedPreferences for reliable startup loading
   Future<void> setCustomTheme(AppTheme theme) async {
     _customTheme = theme;
     _currentTheme = theme;
@@ -171,10 +178,7 @@ class ThemeProvider with ChangeNotifier {
 
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_themeKey, 'custom');
-    await prefs.setString(
-      '${_customThemeKey}_name',
-      theme.name,
-    ); // Save theme name
+    await prefs.setString('${_customThemeKey}_name', theme.name);
     await prefs.setString(
       '${_customThemeKey}_primary',
       _colorToHex(theme.primary),

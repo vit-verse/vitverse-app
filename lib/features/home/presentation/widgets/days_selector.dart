@@ -74,17 +74,17 @@ class _DaysSelectorState extends State<DaysSelector> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ThemeProvider>(
-      builder: (context, themeProvider, child) {
-        final days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
-        final today = DateTime.now().weekday - 1; // 0=Monday, 6=Sunday
-        final now = DateTime.now();
+    final themeProvider = context.read<ThemeProvider>();
+    final days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+    final today = DateTime.now().weekday - 1;
+    final now = DateTime.now();
 
-        return Container(
-          padding: const EdgeInsets.only(top: 24),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: List.generate(7, (index) {
+    return Container(
+      padding: const EdgeInsets.only(top: 24),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children:
+            List.generate(7, (index) {
               final isSelected = index == widget.selectedDay;
               final isHoliday = _holidayDays.contains(index);
               final isToday = index == today;
@@ -215,10 +215,8 @@ class _DaysSelectorState extends State<DaysSelector> {
                   ),
                 ),
               );
-            }),
-          ),
-        );
-      },
+            }).toList(),
+      ),
     );
   }
 }

@@ -24,20 +24,14 @@ class HomeWidgetsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ThemeProvider>(
-      builder: (context, themeProvider, child) {
-        return LayoutBuilder(
-          builder: (context, constraints) {
-            return Row(
-              children: [
-                // Left Widget - Overall Attendance
-                Expanded(child: AttendanceWidget(homeLogic: homeLogic)),
-                const SizedBox(width: 16),
-                // Right Widget - Secondary Widgets
-                Expanded(child: SecondaryWidgets(homeLogic: homeLogic)),
-              ],
-            );
-          },
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Row(
+          children: [
+            Expanded(child: AttendanceWidget(homeLogic: homeLogic)),
+            const SizedBox(width: 16),
+            Expanded(child: SecondaryWidgets(homeLogic: homeLogic)),
+          ],
         );
       },
     );

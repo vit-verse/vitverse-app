@@ -11,9 +11,9 @@ import '../rate_faculty_page.dart';
 
 /// Tab for rating your own faculties
 class RateFacultyTab extends StatefulWidget {
-  final StudentProfile profile;
+  final StudentProfile? profile;
 
-  const RateFacultyTab({super.key, required this.profile});
+  const RateFacultyTab({super.key, this.profile});
 
   @override
   State<RateFacultyTab> createState() => _RateFacultyTabState();
@@ -32,6 +32,14 @@ class _RateFacultyTabState extends State<RateFacultyTab>
   }
 
   void _navigateToRatePage(String facultyId) async {
+    // Check if profile exists (user is logged in)
+    if (widget.profile == null) {
+      if (mounted) {
+        SnackbarUtils.error(context, 'Please login first to rate faculties');
+      }
+      return;
+    }
+
     final provider = context.read<FacultyRatingProvider>();
 
     try {
@@ -48,7 +56,7 @@ class _RateFacultyTabState extends State<RateFacultyTab>
                 value: provider,
                 child: RateFacultyPage(
                   facultyId: faculty.facultyId,
-                  studentProfile: widget.profile,
+                  studentProfile: widget.profile!,
                 ),
               ),
         ),
@@ -70,6 +78,41 @@ class _RateFacultyTabState extends State<RateFacultyTab>
     super.build(context);
     final theme = context.watch<ThemeProvider>().currentTheme;
     final provider = context.watch<FacultyRatingProvider>();
+
+    // Check if user is logged in
+    if (widget.profile == null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.login_outlined,
+                size: 80,
+                color: theme.primary.withValues(alpha: 0.5),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                'Login Required',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                  color: theme.text,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Please login first to submit ratings & reviews for your faculties',
+                style: TextStyle(color: theme.muted, fontSize: 14),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
 
     if (provider.isLoading && provider.faculties.isEmpty) {
       return Center(child: CircularProgressIndicator(color: theme.primary));

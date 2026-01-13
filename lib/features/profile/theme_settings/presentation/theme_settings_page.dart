@@ -1262,15 +1262,10 @@ class _ThemeSettingsPageState extends State<ThemeSettingsPage> {
             isDark: _customIsDark,
           );
 
-          // Save to database
           try {
             final db = VitVerseDatabase.instance;
             await db.customThemeDao.saveCustomTheme(customTheme);
-
-            // Apply the theme
-            await themeProvider.setTheme(customTheme);
-
-            // Reload the list to show the new theme
+            await themeProvider.setCustomTheme(customTheme);
             await _loadCustomThemes();
 
             if (mounted) {

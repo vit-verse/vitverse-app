@@ -75,24 +75,23 @@ void main() async {
     await SupabaseEventsClient.initialize();
   }
 
-  runApp(const VitConnectApp());
+  final themeProvider = ThemeProvider();
+  await themeProvider.initialize();
+
+  runApp(VitConnectApp(themeProvider: themeProvider));
   AppStartup.initializeBackground();
 }
 
 class VitConnectApp extends StatelessWidget {
-  const VitConnectApp({super.key});
+  final ThemeProvider themeProvider;
+
+  const VitConnectApp({super.key, required this.themeProvider});
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(
-          create: (_) {
-            final provider = ThemeProvider();
-            provider.initialize();
-            return provider;
-          },
-        ),
+        ChangeNotifierProvider.value(value: themeProvider),
         ChangeNotifierProvider(create: (_) => VTOPAuthService.instance),
         ChangeNotifierProvider(create: (_) => WidgetCustomizationProvider()),
       ],

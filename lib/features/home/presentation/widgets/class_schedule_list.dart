@@ -121,53 +121,46 @@ class _ClassScheduleListState extends State<ClassScheduleList> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ThemeProvider>(
-      builder: (context, themeProvider, child) {
-        final isHoliday = _isHoliday(widget.dayIndex);
+    final themeProvider = context.read<ThemeProvider>();
+    final isHoliday = _isHoliday(widget.dayIndex);
 
-        if (isHoliday) {
-          return _buildEmptyState(
-            themeProvider,
-            'Holiday',
-            'No classes scheduled',
+    if (isHoliday) {
+      return _buildEmptyState(themeProvider, 'Holiday', 'No classes scheduled');
+    }
+
+    return FutureBuilder<List<Map<String, dynamic>>>(
+      future: widget.homeLogic.getCombinedClassesForDay(widget.dayIndex),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(32),
+              child: CircularProgressIndicator(
+                color: themeProvider.currentTheme.primary,
+              ),
+            ),
           );
         }
 
-        return FutureBuilder<List<Map<String, dynamic>>>(
-          future: widget.homeLogic.getCombinedClassesForDay(widget.dayIndex),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(32),
-                  child: CircularProgressIndicator(
-                    color: themeProvider.currentTheme.primary,
-                  ),
-                ),
-              );
-            }
+        final dayClasses = snapshot.data ?? [];
 
-            final dayClasses = snapshot.data ?? [];
+        if (dayClasses.isEmpty) {
+          return _buildEmptyState(
+            themeProvider,
+            'No classes scheduled',
+            'Enjoy your free day!',
+          );
+        }
 
-            if (dayClasses.isEmpty) {
-              return _buildEmptyState(
-                themeProvider,
-                'No classes scheduled',
-                'Enjoy your free day!',
-              );
-            }
-
-            return ListView.builder(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
-              itemCount: dayClasses.length,
-              itemBuilder: (context, index) {
-                final classData = dayClasses[index];
-                return ClassCard(
-                  classData: classData,
-                  dayIndex: widget.dayIndex,
-                  homeLogic: widget.homeLogic,
-                );
-              },
+        return ListView.builder(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+          itemCount: dayClasses.length,
+          itemBuilder: (context, index) {
+            final classData = dayClasses[index];
+            return ClassCard(
+              classData: classData,
+              dayIndex: widget.dayIndex,
+              homeLogic: widget.homeLogic,
             );
           },
         );
