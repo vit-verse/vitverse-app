@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/theme/theme_provider.dart';
+import '../../../firebase/analytics/analytics_service.dart';
 import '../logic/feature_provider.dart';
 import '../models/feature_model.dart';
 import '../data/feature_catalogue.dart';
@@ -31,6 +32,10 @@ class _FeaturesPageState extends State<FeaturesPage> {
   @override
   void initState() {
     super.initState();
+    AnalyticsService.instance.logScreenView(
+      screenName: 'FeaturesPage',
+      screenClass: 'FeaturesPage',
+    );
     _loadExpandedStates();
   }
 

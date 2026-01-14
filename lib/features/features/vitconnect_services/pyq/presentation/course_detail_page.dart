@@ -10,6 +10,7 @@ import '../../../../../core/theme/theme_provider.dart';
 import '../../../../../core/theme/app_card_styles.dart';
 import '../../../../../core/utils/logger.dart';
 import '../../../../../core/utils/snackbar_utils.dart';
+import '../../../../../firebase/analytics/analytics_service.dart';
 import '../controller/pyq_controller.dart';
 import '../data/pyq_models.dart';
 
@@ -40,6 +41,10 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
   @override
   void initState() {
     super.initState();
+    AnalyticsService.instance.logScreenView(
+      screenName: 'PyqCourseDetail',
+      screenClass: 'CourseDetailPage',
+    );
     _initNotifications();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadPapers();

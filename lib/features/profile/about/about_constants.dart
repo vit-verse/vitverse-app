@@ -22,13 +22,14 @@ class AboutConstants {
   // TECH STACK
   static const String techStackTitle = 'Tech Stack';
   static const String techStackDescription =
-      'Flutter Framework • Firebase Analytics, Crashlytics, Messaging, Functions • Supabase Database • GitHub Version Control • Vercel Edge Runtime • + many more';
+      'Flutter Framework • Firebase Analytics, Crashlytics, Messaging, Functions • Supabase Database • Google Cloud Storage • GitHub Version Control • Vercel Edge Runtime • + many more';
 
   // Tech Stack Icons
   static const List<Map<String, String>> techStackIcons = [
     {'name': 'Flutter', 'icon': 'assets/icons/flutter.png'},
     {'name': 'Firebase', 'icon': 'assets/icons/firebase.png'},
     {'name': 'Supabase', 'icon': 'assets/icons/supabase.png'},
+    {'name': 'Google Cloud', 'icon': 'assets/icons/google_cloud.png'},
     {'name': 'GitHub', 'icon': 'assets/icons/github.png'},
     {'name': 'Vercel', 'icon': 'assets/icons/vercel.png'},
   ];

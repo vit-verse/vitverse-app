@@ -9,6 +9,7 @@ import 'package:permission_handler/permission_handler.dart';
 import '../../../../../core/theme/theme_provider.dart';
 import '../../../../../core/utils/logger.dart';
 import '../../../../../core/utils/snackbar_utils.dart';
+import '../../../../../firebase/analytics/analytics_service.dart';
 import '../models/friend.dart';
 import '../services/friends_timetable_service.dart';
 import '../widgets/qr_scanner_widget.dart';
@@ -27,6 +28,10 @@ class _AddFriendsPageState extends State<AddFriendsPage> {
   @override
   void initState() {
     super.initState();
+    AnalyticsService.instance.logScreenView(
+      screenName: 'AddFriends',
+      screenClass: 'AddFriendsPage',
+    );
     _loadData();
   }
 

@@ -15,6 +15,7 @@ import '../../../../../core/theme/theme_provider.dart';
 import '../../../../../core/widgets/themed_lottie_widget.dart';
 import '../../../../../core/utils/snackbar_utils.dart';
 import '../../../../../core/utils/logger.dart';
+import '../../../../../firebase/analytics/analytics_service.dart';
 
 class EventDetailPage extends StatefulWidget {
   final Event event;
@@ -41,6 +42,10 @@ class _EventDetailPageState extends State<EventDetailPage> {
   void initState() {
     super.initState();
     _currentEvent = widget.event;
+    AnalyticsService.instance.logScreenView(
+      screenName: 'EventDetail',
+      screenClass: 'EventDetailPage',
+    );
     _loadComments();
     _loadCurrentUserId();
     widget.provider.addListener(_updateEventFromProvider);

@@ -34,18 +34,19 @@ VIT Verse is a feature-rich Flutter application designed to enhance the academic
 - **CGPA/GPA Calculator** with predictor and estimator
 - **Grade History** with visual charts and insights
 - **Attendance Tracking** with alerts and predictions
-- **Performance Trends** across semesters
+- **Student Report Generation** - Generate comprehensive PDF reports
 
 ### 🎓 Community Features
-- **Faculty Ratings** - Anonymous faculty reviews and ratings
+- **Faculty Ratings** - Faculty reviews and ratings/comments
 - **Cab Share** - Find students for ride-sharing
 - **Lost & Found** - Report and find lost items on campus
+- **Events** - Post and discover campus events
 
 ### 🛠️ Utilities
 - **Mess Menu** - Daily meal schedules
 - **Laundry Tracking** - Track laundry status
 - **Exam Schedule** - Never miss an exam
-- **Announcements** - Stay updated with VTOP notifications
+- **Push Notifications** - Lost Found, Cab Share, Event updates/alerts
 
 ### 🎨 User Experience
 - **Dark/Light Mode** with customizable themes
@@ -87,14 +88,24 @@ cp .env.example .env
 
 Edit `.env` and add your configuration:
 ```env
+# Supabase - Main database for community features
 SUPABASE_URL=https://your-project.supabase.co
 SUPABASE_ANON_KEY=your_supabase_anon_key_here
+
+# Supabase Events - Separate database for events feature
+SUPABASE_EVENTS_URL=https://your-events-project.supabase.co
+SUPABASE_EVENTS_ANON_KEY=your_events_supabase_anon_key_here
+
+# GitHub Token - For version checking and updates
 GITHUB_VITCONNECT_TOKEN=your_github_token_here
-FACULTY_RATING_SCRIPT_URL=https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec
+
+# Security Headers
+PYQ_SECRET_HEADER=your_pyq_secret_header
+EVENTS_SECRET_HEADER=your_events_secret_header
 ```
 
 ### 3. Firebase Setup (Optional)
-- The app includes Firebase configuration for analytics and crashlytics
+- The app includes Firebase configuration for analytics, crashlytics, and messaging
 - `google-services.json` is already configured for the project
 - Firebase API keys are SHA-1 restricted for security
 

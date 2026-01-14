@@ -14,6 +14,7 @@ import '../../../../../core/theme/app_card_styles.dart';
 import '../../../../../core/utils/logger.dart';
 import '../../../../../core/utils/snackbar_utils.dart';
 import '../../../../../core/database/entities/student_profile.dart';
+import '../../../../../firebase/analytics/analytics_service.dart';
 import '../../../vtop_services/examination_schedule/data/examination_data_provider.dart';
 import '../../lost_and_found/widgets/verified_info_card.dart';
 import '../data/pyq_api.dart';
@@ -51,6 +52,10 @@ class _SubmitPapersPageState extends State<SubmitPapersPage> {
   @override
   void initState() {
     super.initState();
+    AnalyticsService.instance.logScreenView(
+      screenName: 'SubmitPapers',
+      screenClass: 'SubmitPapersPage',
+    );
     _loadSemesterData();
     _loadProfile();
   }

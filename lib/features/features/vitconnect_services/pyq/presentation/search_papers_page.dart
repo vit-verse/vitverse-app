@@ -4,6 +4,7 @@ import '../../../../../core/theme/theme_provider.dart';
 import '../../../../../core/theme/app_card_styles.dart';
 import '../../../../../core/utils/logger.dart';
 import '../../../../../core/database/daos/course_dao.dart';
+import '../../../../../firebase/analytics/analytics_service.dart';
 import '../controller/pyq_controller.dart';
 import 'course_detail_page.dart';
 
@@ -27,6 +28,10 @@ class _SearchPapersPageState extends State<SearchPapersPage> {
   @override
   void initState() {
     super.initState();
+    AnalyticsService.instance.logScreenView(
+      screenName: 'SearchPapers',
+      screenClass: 'SearchPapersPage',
+    );
     _searchController.addListener(() {
       _updateFilteredCourses();
     });

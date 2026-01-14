@@ -148,7 +148,7 @@ class _StudentCardState extends State<StudentCard> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: const [
-                      Text('Generate Report'),
+                      Text('Report'),
                       SizedBox(width: 4),
                       Icon(Icons.arrow_forward, size: 18),
                     ],

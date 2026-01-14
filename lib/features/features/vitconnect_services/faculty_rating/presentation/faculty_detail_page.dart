@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../../core/theme/theme_provider.dart';
 import '../../../../../core/utils/logger.dart';
+import '../../../../../firebase/analytics/analytics_service.dart';
 import '../models/faculty_with_rating.dart';
 import '../models/student_faculty_rating.dart';
 import '../data/faculty_rating_repository.dart';
@@ -27,6 +28,10 @@ class _FacultyDetailPageState extends State<FacultyDetailPage> {
   @override
   void initState() {
     super.initState();
+    AnalyticsService.instance.logScreenView(
+      screenName: 'FacultyDetail',
+      screenClass: 'FacultyDetailPage',
+    );
     _loadReviews();
   }
 

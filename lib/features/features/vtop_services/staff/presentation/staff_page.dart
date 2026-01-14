@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
 import '../../../../../core/theme/theme_provider.dart';
 import '../../../../../core/utils/logger.dart';
 import '../../../../../core/utils/snackbar_utils.dart';
 import '../../../../../core/loading/loading_messages.dart';
+import '../../../../../firebase/analytics/analytics_service.dart';
 import '../data/staff_data_provider.dart';
 import '../logic/staff_logic.dart';
 import '../widgets/staff_widgets.dart';
@@ -30,7 +30,7 @@ class _StaffPageState extends State<StaffPage> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
-    FirebaseAnalytics.instance.logScreenView(
+    AnalyticsService.instance.logScreenView(
       screenName: 'Staff',
       screenClass: 'StaffPage',
     );

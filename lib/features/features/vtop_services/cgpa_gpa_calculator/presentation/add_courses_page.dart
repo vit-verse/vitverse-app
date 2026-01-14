@@ -7,6 +7,7 @@ import '../../../../../core/utils/logger.dart';
 import '../../../../../core/utils/snackbar_utils.dart';
 import '../../../../../core/database/daos/course_dao.dart';
 import '../../../../../core/database/entities/course.dart';
+import '../../../../../firebase/analytics/analytics_service.dart';
 import '../models/grade_info.dart';
 
 class AddCoursesPage extends StatefulWidget {
@@ -39,6 +40,10 @@ class _AddCoursesPageState extends State<AddCoursesPage>
   @override
   void initState() {
     super.initState();
+    AnalyticsService.instance.logScreenView(
+      screenName: 'AddCourses',
+      screenClass: 'AddCoursesPage',
+    );
     _tabController = TabController(length: 2, vsync: this);
     _loadData();
   }

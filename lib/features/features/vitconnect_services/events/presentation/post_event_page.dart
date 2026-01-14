@@ -16,6 +16,7 @@ import '../../../../../core/database_vitverse/database.dart';
 import '../../../../../core/utils/logger.dart';
 import '../../../../../core/utils/snackbar_utils.dart';
 import '../../../../../supabase/core/supabase_events_client.dart';
+import '../../../../../firebase/analytics/analytics_service.dart';
 import '../data/events_repository.dart';
 import '../data/events_vitverse_service.dart';
 import '../models/event_model.dart';
@@ -65,6 +66,10 @@ class _PostEventPageState extends State<PostEventPage> {
   @override
   void initState() {
     super.initState();
+    AnalyticsService.instance.logScreenView(
+      screenName: 'PostEvent',
+      screenClass: 'PostEventPage',
+    );
     _repository = EventsRepository(
       SupabaseEventsClient.client,
       EventsVitverseService(VitVerseDatabase.instance),

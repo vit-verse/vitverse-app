@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
 import '../../../../../core/theme/theme_provider.dart';
 import '../../../../../core/database/daos/attendance_dao.dart';
 import '../../../../../core/utils/logger.dart';
 import '../../../../../core/utils/snackbar_utils.dart';
+import '../../../../../firebase/analytics/analytics_service.dart';
 import '../models/models.dart';
 import '../logic/attendance_logic.dart';
 import '../widgets/attendance_sections.dart';
@@ -31,9 +31,9 @@ class _AttendanceMatrixPageState extends State<AttendanceMatrixPage> {
   @override
   void initState() {
     super.initState();
-    FirebaseAnalytics.instance.logScreenView(
+    AnalyticsService.instance.logScreenView(
       screenName: 'Attendance Matrix',
-      screenClass: 'AttendenceMatrixPage',
+      screenClass: 'AttendanceMatrixPage',
     );
     _loadData();
   }

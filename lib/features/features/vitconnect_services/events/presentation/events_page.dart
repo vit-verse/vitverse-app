@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../../core/theme/theme_provider.dart';
+import '../../../../../firebase/analytics/analytics_service.dart';
 import '../logic/events_provider.dart';
 import '../models/event_model.dart';
 import '../widgets/event_card.dart';
@@ -28,6 +29,10 @@ class _EventsPageState extends State<EventsPage>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    AnalyticsService.instance.logScreenView(
+      screenName: 'Events',
+      screenClass: 'EventsPage',
+    );
     _searchController.addListener(() {
       setState(() => _searchQuery = _searchController.text);
       context.read<EventsProvider>().setSearchQuery(_searchQuery);

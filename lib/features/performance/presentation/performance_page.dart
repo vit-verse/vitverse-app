@@ -6,6 +6,7 @@ import '../../../core/theme/theme_provider.dart';
 import '../../../core/theme/app_card_styles.dart';
 import '../../../core/utils/logger.dart';
 import '../../../core/utils/snackbar_utils.dart';
+import '../../../firebase/analytics/analytics_service.dart';
 import '../logic/performance_logic.dart';
 import '../models/performance_models.dart';
 import '../widgets/course_performance_card.dart';
@@ -30,6 +31,10 @@ class _PerformancePageState extends State<PerformancePage> {
   @override
   void initState() {
     super.initState();
+    AnalyticsService.instance.logScreenView(
+      screenName: 'PerformancePage',
+      screenClass: 'PerformancePage',
+    );
     _performances = widget.initialPerformances;
     _loadSemesterName();
   }

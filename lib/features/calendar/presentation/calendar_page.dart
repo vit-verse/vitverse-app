@@ -14,6 +14,7 @@ import 'calendar_settings_page.dart';
 
 import '../../../core/loading/optimized_lazy_loader.dart';
 import '../../../core/utils/snackbar_utils.dart';
+import '../../../firebase/analytics/analytics_service.dart';
 
 class CalendarPage extends StatefulWidget {
   const CalendarPage({super.key});
@@ -30,6 +31,10 @@ class _CalendarPageState extends State<CalendarPage>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    AnalyticsService.instance.logScreenView(
+      screenName: 'Calendar',
+      screenClass: 'CalendarPage',
+    );
     _tabController.addListener(() {
       if (!_tabController.indexIsChanging) {
         // Update provider when tab changes via swipe
