@@ -164,6 +164,7 @@ class _FeaturesPageState extends State<FeaturesPage> {
                       featureProvider.pinnedFeatures,
                       featureProvider.viewMode,
                     ),
+                    const SizedBox(height: 12),
                   ],
                 )
               else if (featureProvider.hasCustomizedPins)
@@ -299,7 +300,10 @@ class _FeaturesPageState extends State<FeaturesPage> {
               _saveExpandedStates();
             },
           ),
-          if (_vtopAcademicExpanded) _buildFeatureGrid(academic, viewMode),
+          if (_vtopAcademicExpanded) ...[
+            _buildFeatureGrid(academic, viewMode),
+            const SizedBox(height: 8),
+          ],
         ],
 
         if (faculty.isNotEmpty) ...[
@@ -314,7 +318,10 @@ class _FeaturesPageState extends State<FeaturesPage> {
               _saveExpandedStates();
             },
           ),
-          if (_vtopFacultyExpanded) _buildFeatureGrid(faculty, viewMode),
+          if (_vtopFacultyExpanded) ...[
+            _buildFeatureGrid(faculty, viewMode),
+            const SizedBox(height: 8),
+          ],
         ],
 
         if (finance.isNotEmpty) ...[
@@ -329,7 +336,10 @@ class _FeaturesPageState extends State<FeaturesPage> {
               _saveExpandedStates();
             },
           ),
-          if (_vtopFinanceExpanded) _buildFeatureGrid(finance, viewMode),
+          if (_vtopFinanceExpanded) ...[
+            _buildFeatureGrid(finance, viewMode),
+            const SizedBox(height: 8),
+          ],
         ],
       ],
     );
@@ -366,7 +376,10 @@ class _FeaturesPageState extends State<FeaturesPage> {
               _saveExpandedStates();
             },
           ),
-          if (_vitconnectSocialExpanded) _buildFeatureGrid(social, viewMode),
+          if (_vitconnectSocialExpanded) ...[
+            _buildFeatureGrid(social, viewMode),
+            const SizedBox(height: 8),
+          ],
         ],
 
         if (academics.isNotEmpty) ...[
@@ -381,8 +394,10 @@ class _FeaturesPageState extends State<FeaturesPage> {
               _saveExpandedStates();
             },
           ),
-          if (_vitconnectAcademicsExpanded)
+          if (_vitconnectAcademicsExpanded) ...[
             _buildFeatureGrid(academics, viewMode),
+            const SizedBox(height: 8),
+          ],
         ],
 
         if (utilities.isNotEmpty) ...[
@@ -397,8 +412,9 @@ class _FeaturesPageState extends State<FeaturesPage> {
               _saveExpandedStates();
             },
           ),
-          if (_vitconnectUtilitiesExpanded)
+          if (_vitconnectUtilitiesExpanded) ...[
             _buildFeatureGrid(utilities, viewMode),
+          ],
         ],
         // Add bottom padding to prevent last item from hiding under navbar
         const SizedBox(height: 100),
@@ -408,31 +424,45 @@ class _FeaturesPageState extends State<FeaturesPage> {
 
   Widget _buildFeatureGrid(List<Feature> features, ViewMode viewMode) {
     if (viewMode == ViewMode.list) {
+      // List view - use Column with no extra spacing (tile handles margin)
       return Column(
         children:
-            features.map((feature) {
-              return FeatureTile(feature: feature, viewMode: viewMode);
-            }).toList(),
+            features
+                .map(
+                  (feature) =>
+                      FeatureTile(feature: feature, viewMode: viewMode),
+                )
+                .toList(),
       );
     }
 
-    final columnCount = viewMode == ViewMode.grid2Column ? 2 : 3;
-    final crossAxisSpacing = viewMode == ViewMode.grid2Column ? 12.0 : 8.0;
-    final mainAxisSpacing = viewMode == ViewMode.grid2Column ? 12.0 : 8.0;
-    final childAspectRatio = viewMode == ViewMode.grid2Column ? 2.3 : 1.0;
+    // Use Wrap for more natural grid layout without fixed height constraints
+    final is2Column = viewMode == ViewMode.grid2Column;
+    final spacing = is2Column ? 12.0 : 10.0;
 
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: columnCount,
-        crossAxisSpacing: crossAxisSpacing,
-        mainAxisSpacing: mainAxisSpacing,
-        childAspectRatio: childAspectRatio,
-      ),
-      itemCount: features.length,
-      itemBuilder: (context, index) {
-        return FeatureTile(feature: features[index], viewMode: viewMode);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Calculate item width based on available space
+        final columnCount = is2Column ? 2 : 3;
+        final totalSpacing = spacing * (columnCount - 1);
+        final itemWidth = (constraints.maxWidth - totalSpacing) / columnCount;
+
+        // For 2-column: horizontal layout (icon + text side by side)
+        // For 3-column: vertical compact layout (icon on top, text below)
+        final itemHeight = is2Column ? 68.0 : 90.0;
+
+        return Wrap(
+          spacing: spacing,
+          runSpacing: spacing,
+          children:
+              features.map((feature) {
+                return SizedBox(
+                  width: itemWidth,
+                  height: itemHeight,
+                  child: FeatureTile(feature: feature, viewMode: viewMode),
+                );
+              }).toList(),
+        );
       },
     );
   }
