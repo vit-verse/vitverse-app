@@ -252,7 +252,7 @@ class VTOPAuthHandler extends ChangeNotifier {
         'Scheduling notifications after Phase 2 complete',
       );
 
-      await _notificationService.forceScheduleImmediately();
+      await _notificationService.rescheduleOnSync();
 
       Logger.success('AuthHandler', 'Notifications scheduled successfully');
     } catch (e) {

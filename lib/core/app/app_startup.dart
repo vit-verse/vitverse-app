@@ -5,6 +5,7 @@ import '../config/env_config.dart';
 import '../config/app_version.dart';
 import '../database/database.dart';
 import '../database_vitverse/database.dart';
+import '../services/notification_service.dart';
 import '../../firebase/core/firebase_initializer.dart';
 import '../../features/profile/widget_customization/data/widget_preferences_service.dart';
 import '../../features/profile/widget_customization/data/calendar_home_service.dart';
@@ -55,11 +56,23 @@ class AppStartup {
 
         await _initializeApiServices();
         await _initializeCalendarServices();
+        await _initializeNotifications();
         _initializeFirebaseLazy();
       } catch (e) {
         Logger.e('AppStartup', 'Background init failed', e);
       }
     });
+  }
+
+  static Future<void> _initializeNotifications() async {
+    try {
+      final notificationService = NotificationService();
+      await notificationService.initialize();
+      await notificationService.scheduleTodayClassNotifications();
+      Logger.d('AppStartup', 'Notification service initialized');
+    } catch (e) {
+      Logger.e('AppStartup', 'Notification init failed', e);
+    }
   }
 
   static Future<void> initializeAuthService() async {
