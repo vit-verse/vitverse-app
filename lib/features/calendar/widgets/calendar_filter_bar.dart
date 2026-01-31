@@ -63,7 +63,7 @@ class CalendarFilterBar extends StatelessWidget {
                                         ? Theme.of(context)
                                             .colorScheme
                                             .onPrimaryContainer
-                                            .withOpacity(0.9)
+                                            .withValues(alpha: 0.9)
                                         : Theme.of(context).colorScheme.outline,
                               ),
                             ),
@@ -79,7 +79,7 @@ class CalendarFilterBar extends StatelessWidget {
                         Theme.of(context).colorScheme.primaryContainer,
                     backgroundColor: Theme.of(
                       context,
-                    ).colorScheme.surfaceVariant.withOpacity(0.3),
+                    ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
 
                     side: BorderSide(
                       color:
@@ -87,7 +87,7 @@ class CalendarFilterBar extends StatelessWidget {
                               ? Theme.of(context).colorScheme.primary
                               : Theme.of(
                                 context,
-                              ).colorScheme.outline.withOpacity(0.4),
+                              ).colorScheme.outline.withValues(alpha: 0.4),
                       width: 1,
                     ),
 

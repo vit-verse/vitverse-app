@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../../core/database/entities/all_semester_mark.dart';
 import '../../../../../core/theme/theme_provider.dart';
+import '../../../../../firebase/analytics/analytics_service.dart';
 import '../models/course_type.dart';
 import '../widgets/course_radar_chart.dart';
 
@@ -22,6 +23,15 @@ class SemesterDetailPage extends StatefulWidget {
 
 class _SemesterDetailPageState extends State<SemesterDetailPage> {
   final Map<String, bool> _expandedCourses = {};
+
+  @override
+  void initState() {
+    super.initState();
+    AnalyticsService.instance.logScreenView(
+      screenName: 'MarksSemesterDetail',
+      screenClass: 'SemesterDetailPage',
+    );
+  }
 
   Map<String, List<AllSemesterMark>> _groupByCourse() {
     final grouped = <String, List<AllSemesterMark>>{};

@@ -118,7 +118,7 @@ class OverallAttendanceSection extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
-                                color: status.color.withOpacity(0.8),
+                                color: status.color.withValues(alpha: 0.8),
                               ),
                             ),
                           ),
@@ -145,10 +145,10 @@ class OverallAttendanceSection extends StatelessWidget {
                     vertical: 8,
                   ),
                   decoration: BoxDecoration(
-                    color: status.color.withOpacity(0.15),
+                    color: status.color.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
-                      color: status.color.withOpacity(0.4),
+                      color: status.color.withValues(alpha: 0.4),
                       width: 1.5,
                     ),
                   ),
@@ -220,10 +220,10 @@ class OverallMatrixCard extends StatelessWidget {
                       vertical: 2,
                     ),
                     decoration: BoxDecoration(
-                      color: primaryColor.withOpacity(0.15),
+                      color: primaryColor.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(4),
                       border: Border.all(
-                        color: primaryColor.withOpacity(0.5),
+                        color: primaryColor.withValues(alpha: 0.5),
                         width: 1,
                       ),
                     ),
@@ -241,7 +241,7 @@ class OverallMatrixCard extends StatelessWidget {
                     '= Current',
                     style: TextStyle(
                       fontSize: 10,
-                      color: mutedColor.withOpacity(0.7),
+                      color: mutedColor.withValues(alpha: 0.7),
                       fontStyle: FontStyle.italic,
                     ),
                   ),
@@ -271,10 +271,10 @@ class OverallMatrixCard extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                color: primaryColor.withOpacity(0.1),
+                color: primaryColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: primaryColor.withOpacity(0.3),
+                  color: primaryColor.withValues(alpha: 0.3),
                   width: 1,
                 ),
               ),
@@ -338,7 +338,7 @@ class CourseSelectionCard extends StatelessWidget {
             Icon(
               Icons.inbox_outlined,
               size: 48,
-              color: mutedColor.withOpacity(0.5),
+              color: mutedColor.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 16),
             Text(
@@ -416,10 +416,10 @@ class CourseSelectionCard extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             decoration: BoxDecoration(
-              color: primaryColor.withOpacity(0.05),
+              color: primaryColor.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: primaryColor.withOpacity(0.2),
+                color: primaryColor.withValues(alpha: 0.2),
                 width: 1,
               ),
             ),
@@ -494,7 +494,7 @@ class CourseSelectionCard extends StatelessWidget {
                                   style: TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w600,
-                                    color: status.color.withOpacity(0.8),
+                                    color: status.color.withValues(alpha: 0.8),
                                   ),
                                 ),
                               ),
@@ -514,10 +514,10 @@ class CourseSelectionCard extends StatelessWidget {
                         vertical: 8,
                       ),
                       decoration: BoxDecoration(
-                        color: status.color.withOpacity(0.15),
+                        color: status.color.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
-                          color: status.color.withOpacity(0.4),
+                          color: status.color.withValues(alpha: 0.4),
                           width: 1.5,
                         ),
                       ),
@@ -591,10 +591,10 @@ class CourseMatrixCard extends StatelessWidget {
                       vertical: 2,
                     ),
                     decoration: BoxDecoration(
-                      color: primaryColor.withOpacity(0.15),
+                      color: primaryColor.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(4),
                       border: Border.all(
-                        color: primaryColor.withOpacity(0.5),
+                        color: primaryColor.withValues(alpha: 0.5),
                         width: 1,
                       ),
                     ),
@@ -612,7 +612,7 @@ class CourseMatrixCard extends StatelessWidget {
                     '= Current',
                     style: TextStyle(
                       fontSize: 10,
-                      color: mutedColor.withOpacity(0.7),
+                      color: mutedColor.withValues(alpha: 0.7),
                       fontStyle: FontStyle.italic,
                     ),
                   ),
@@ -642,10 +642,10 @@ class CourseMatrixCard extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                color: primaryColor.withOpacity(0.1),
+                color: primaryColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: primaryColor.withOpacity(0.3),
+                  color: primaryColor.withValues(alpha: 0.3),
                   width: 1,
                 ),
               ),

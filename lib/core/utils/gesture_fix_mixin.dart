@@ -57,14 +57,14 @@ class SafeGestureDetector extends StatelessWidget {
   final HitTestBehavior? behavior;
 
   const SafeGestureDetector({
-    Key? key,
+    super.key,
     required this.child,
     this.onTap,
     this.onTapDown,
     this.onTapUp,
     this.onTapCancel,
     this.behavior,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -91,13 +91,13 @@ class SafeInkWell extends StatelessWidget {
   final Color? highlightColor;
 
   const SafeInkWell({
-    Key? key,
+    super.key,
     required this.child,
     this.onTap,
     this.borderRadius,
     this.splashColor,
     this.highlightColor,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

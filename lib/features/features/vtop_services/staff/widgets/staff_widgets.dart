@@ -163,12 +163,12 @@ class StaffCard extends StatelessWidget {
         color: themeProvider.currentTheme.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: themeProvider.currentTheme.muted.withOpacity(0.2),
+          color: themeProvider.currentTheme.muted.withValues(alpha: 0.2),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -180,7 +180,7 @@ class StaffCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: themeProvider.currentTheme.primary.withOpacity(0.1),
+              color: themeProvider.currentTheme.primary.withValues(alpha: 0.1),
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(16),
                 topRight: Radius.circular(16),
@@ -279,7 +279,9 @@ class StaffCard extends StatelessWidget {
                 if (additionalDetails.isNotEmpty) ...[
                   const SizedBox(height: 8),
                   Divider(
-                    color: themeProvider.currentTheme.muted.withOpacity(0.2),
+                    color: themeProvider.currentTheme.muted.withValues(
+                      alpha: 0.2,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   ...additionalDetails.entries.map((entry) {
@@ -388,7 +390,9 @@ class StaffCard extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: themeProvider.currentTheme.primary.withOpacity(0.1),
+                  color: themeProvider.currentTheme.primary.withValues(
+                    alpha: 0.1,
+                  ),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
@@ -439,13 +443,13 @@ class EmptyStaffState extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: themeProvider.currentTheme.muted.withOpacity(0.1),
+                color: themeProvider.currentTheme.muted.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.person_off_outlined,
                 size: 64,
-                color: themeProvider.currentTheme.muted.withOpacity(0.5),
+                color: themeProvider.currentTheme.muted.withValues(alpha: 0.5),
               ),
             ),
             const SizedBox(height: 24),

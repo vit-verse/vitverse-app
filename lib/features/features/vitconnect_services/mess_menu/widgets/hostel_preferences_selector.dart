@@ -113,7 +113,7 @@ class _HostelPreferencesSelectorState extends State<HostelPreferencesSelector> {
       decoration: BoxDecoration(
         color: theme.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: theme.muted.withOpacity(0.1)),
+        border: Border.all(color: theme.muted.withValues(alpha: 0.1)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -225,11 +225,15 @@ class _HostelPreferencesSelectorState extends State<HostelPreferencesSelector> {
                 fillColor: theme.background,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: theme.muted.withOpacity(0.2)),
+                  borderSide: BorderSide(
+                    color: theme.muted.withValues(alpha: 0.2),
+                  ),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: theme.muted.withOpacity(0.2)),
+                  borderSide: BorderSide(
+                    color: theme.muted.withValues(alpha: 0.2),
+                  ),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -312,14 +316,14 @@ class _HostelPreferencesSelectorState extends State<HostelPreferencesSelector> {
                     decoration: BoxDecoration(
                       color:
                           isSelected
-                              ? theme.primary.withOpacity(0.1)
+                              ? theme.primary.withValues(alpha: 0.1)
                               : theme.background,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
                         color:
                             isSelected
                                 ? theme.primary
-                                : theme.muted.withOpacity(0.2),
+                                : theme.muted.withValues(alpha: 0.2),
                         width: isSelected ? 2 : 1,
                       ),
                     ),

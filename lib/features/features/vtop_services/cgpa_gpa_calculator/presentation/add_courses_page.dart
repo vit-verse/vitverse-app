@@ -7,6 +7,7 @@ import '../../../../../core/utils/logger.dart';
 import '../../../../../core/utils/snackbar_utils.dart';
 import '../../../../../core/database/daos/course_dao.dart';
 import '../../../../../core/database/entities/course.dart';
+import '../../../../../firebase/analytics/analytics_service.dart';
 import '../models/grade_info.dart';
 
 class AddCoursesPage extends StatefulWidget {
@@ -39,6 +40,10 @@ class _AddCoursesPageState extends State<AddCoursesPage>
   @override
   void initState() {
     super.initState();
+    AnalyticsService.instance.logScreenView(
+      screenName: 'AddCourses',
+      screenClass: 'AddCoursesPage',
+    );
     _tabController = TabController(length: 2, vsync: this);
     _loadData();
   }
@@ -436,7 +441,10 @@ class _AddCoursesPageState extends State<AddCoursesPage>
         return Container(
           margin: const EdgeInsets.only(bottom: 12),
           decoration: BoxDecoration(
-            color: isSelected ? theme.primary.withOpacity(0.1) : theme.surface,
+            color:
+                isSelected
+                    ? theme.primary.withValues(alpha: 0.1)
+                    : theme.surface,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: isSelected ? theme.primary : theme.border,
@@ -798,7 +806,9 @@ class _AddCoursesPageState extends State<AddCoursesPage>
                                       vertical: 2,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: theme.primary.withOpacity(0.15),
+                                      color: theme.primary.withValues(
+                                        alpha: 0.15,
+                                      ),
                                       borderRadius: BorderRadius.circular(4),
                                     ),
                                     child: Text(
@@ -922,10 +932,10 @@ class _AddCoursesPageState extends State<AddCoursesPage>
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: theme.primary.withOpacity(0.1),
+                  color: theme.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: theme.primary.withOpacity(0.3),
+                    color: theme.primary.withValues(alpha: 0.3),
                     width: 1,
                   ),
                 ),
@@ -1061,9 +1071,11 @@ class _AddCoursesPageState extends State<AddCoursesPage>
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: theme.primary.withOpacity(0.1),
+                    color: theme.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: theme.primary.withOpacity(0.3)),
+                    border: Border.all(
+                      color: theme.primary.withValues(alpha: 0.3),
+                    ),
                   ),
                   child: Column(
                     children: [

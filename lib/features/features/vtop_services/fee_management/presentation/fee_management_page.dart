@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
 import '../../../../../core/theme/theme_provider.dart';
 import '../../../../../core/database/entities/receipt.dart';
 import '../../../../../core/utils/logger.dart';
 import '../../../../../core/utils/snackbar_utils.dart';
 import '../../../../../core/loading/loading_messages.dart';
+import '../../../../../firebase/analytics/analytics_service.dart';
 import '../logic/fee_logic.dart';
 import '../widgets/fee_management_widgets.dart';
 
@@ -28,7 +28,7 @@ class _FeeManagementPageState extends State<FeeManagementPage> {
   @override
   void initState() {
     super.initState();
-    FirebaseAnalytics.instance.logScreenView(
+    AnalyticsService.instance.logScreenView(
       screenName: 'Fee Management',
       screenClass: 'FeeManagementPage',
     );
@@ -121,7 +121,7 @@ class _FeeManagementPageState extends State<FeeManagementPage> {
             Icon(
               Icons.error_outline_rounded,
               size: 64,
-              color: theme.muted.withOpacity(0.5),
+              color: theme.muted.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 16),
             Text(

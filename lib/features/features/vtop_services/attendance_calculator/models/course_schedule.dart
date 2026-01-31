@@ -103,6 +103,6 @@ class CourseSchedule {
 
   @override
   String toString() {
-    return 'CourseSchedule{$courseCode: ${scheduleText}, $totalSlotsPerWeek slots/week}';
+    return 'CourseSchedule{$courseCode: $scheduleText, $totalSlotsPerWeek slots/week}';
   }
 }

@@ -6,6 +6,7 @@ import '../../../core/utils/tap_debouncer.dart';
 import '../models/feature_model.dart';
 import '../logic/feature_provider.dart';
 import '../constants/feature_colors.dart';
+import '../data/feature_repository.dart';
 
 class FeatureTile extends StatelessWidget {
   final Feature feature;
@@ -32,60 +33,60 @@ class FeatureTile extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: () => TapDebouncer.throttle(() => _navigateToFeature(context)),
-        borderRadius: BorderRadius.circular(16),
-        splashColor: theme.primary.withOpacity(0.1),
-        highlightColor: theme.primary.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(14),
+        splashColor: theme.primary.withValues(alpha: 0.1),
+        highlightColor: theme.primary.withValues(alpha: 0.05),
         child: Container(
-          padding: const EdgeInsets.all(16),
-          margin: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          margin: const EdgeInsets.only(bottom: 10),
           decoration: BoxDecoration(
             color: theme.surface,
-            border: Border.all(color: theme.muted.withOpacity(0.2)),
-            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: theme.muted.withValues(alpha: 0.2)),
+            borderRadius: BorderRadius.circular(14),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 4,
-                offset: const Offset(0, 2),
+                color: Colors.black.withValues(alpha: 0.08),
+                blurRadius: 3,
+                offset: const Offset(0, 1),
               ),
             ],
           ),
-          child: Stack(
+          child: Row(
             children: [
-              // Main content
-              Row(
-                children: [
-                  // Gradient icon - LARGER SIZE
-                  _buildGradientIcon(40, 14, 24),
-                  const SizedBox(width: 16),
-
-                  // Title and description
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          feature.title,
-                          style: TextStyle(
-                            color: theme.text,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 4),
-                        // Description visible in list view
-                        Text(
-                          feature.description,
-                          style: TextStyle(color: theme.muted, fontSize: 12),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
+              // Gradient icon
+              _buildGradientIcon(40, 12, 22),
+              const SizedBox(width: 14),
+              // Title and description
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      feature.title,
+                      style: TextStyle(
+                        color: theme.text,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        height: 1.2,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 3),
+                    // Description visible in list view
+                    Text(
+                      feature.description,
+                      style: TextStyle(
+                        color: theme.muted,
+                        fontSize: 12,
+                        height: 1.2,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -94,7 +95,7 @@ class FeatureTile extends StatelessWidget {
     );
   }
 
-  /// Grid view tile - REDESIGNED FOR 2-COLUMN
+  /// Grid view tile - REDESIGNED FOR 2-COLUMN AND 3-COLUMN
   Widget _buildGridTile(BuildContext context, bool isPinned) {
     final themeProvider = Provider.of<ThemeProvider>(context);
     final theme = themeProvider.currentTheme;
@@ -104,69 +105,65 @@ class FeatureTile extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: () => TapDebouncer.throttle(() => _navigateToFeature(context)),
-        borderRadius: BorderRadius.circular(16),
-        splashColor: theme.primary.withOpacity(0.1),
-        highlightColor: theme.primary.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(14),
+        splashColor: theme.primary.withValues(alpha: 0.1),
+        highlightColor: theme.primary.withValues(alpha: 0.05),
         child: Container(
-          padding: const EdgeInsets.all(12),
+          padding: EdgeInsets.symmetric(
+            horizontal: is2Column ? 12 : 8,
+            vertical: is2Column ? 10 : 10,
+          ),
           decoration: BoxDecoration(
             color: theme.surface,
-            border: Border.all(color: theme.muted.withOpacity(0.2)),
-            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: theme.muted.withValues(alpha: 0.2)),
+            borderRadius: BorderRadius.circular(14),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 4,
-                offset: const Offset(0, 2),
+                color: Colors.black.withValues(alpha: 0.08),
+                blurRadius: 3,
+                offset: const Offset(0, 1),
               ),
             ],
           ),
-          child: Stack(
-            children: [
-              // Main content - HORIZONTAL LAYOUT FOR 2-COLUMN
-              if (is2Column)
-                Row(
-                  children: [
-                    // Large gradient icon on left
-                    _buildGradientIcon(44, 14, 26),
-                    const SizedBox(width: 12),
-
-                    // Title on right
-                    Expanded(
-                      child: Text(
-                        feature.title,
-                        style: TextStyle(
-                          color: theme.text,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                )
-              else
-                // 3-COLUMN VERTICAL LAYOUT - PERFECTLY CENTERED
-                Padding(
-                  padding: const EdgeInsets.only(top: 8, bottom: 8),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
+          child:
+              is2Column
+                  ? Row(
                     children: [
-                      // Larger icon - perfectly centered
-                      Center(child: _buildGradientIcon(36, 12, 20)),
-                      const SizedBox(height: 8),
-
-                      // Title - centered with proper padding
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                      // Large gradient icon on left
+                      _buildGradientIcon(44, 12, 24),
+                      const SizedBox(width: 12),
+                      // Title on right
+                      Expanded(
                         child: Text(
                           feature.title,
                           style: TextStyle(
                             color: theme.text,
-                            fontSize: 12,
+                            fontSize: 13,
                             fontWeight: FontWeight.w600,
+                            height: 1.2,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  )
+                  : Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      // Icon - compact size for 3-column
+                      _buildGradientIcon(34, 10, 18),
+                      const SizedBox(height: 6),
+                      // Title - centered, compact
+                      Flexible(
+                        child: Text(
+                          feature.title,
+                          style: TextStyle(
+                            color: theme.text,
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.w600,
+                            height: 1.15,
                           ),
                           textAlign: TextAlign.center,
                           maxLines: 2,
@@ -175,9 +172,6 @@ class FeatureTile extends StatelessWidget {
                       ),
                     ],
                   ),
-                ),
-            ],
-          ),
         ),
       ),
     );
@@ -196,7 +190,7 @@ class FeatureTile extends StatelessWidget {
           // Use theme-based gradient
           gradientColors = [
             themeProvider.currentTheme.primary,
-            themeProvider.currentTheme.primary.withOpacity(0.7),
+            themeProvider.currentTheme.primary.withValues(alpha: 0.7),
           ];
         } else {
           // Use default feature-specific colors

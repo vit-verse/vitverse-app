@@ -48,7 +48,7 @@ class _LazyPerformancePageState extends State<LazyPerformancePage> {
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: Theme.of(
                         context,
-                      ).colorScheme.onSurface.withOpacity(0.7),
+                      ).colorScheme.onSurface.withValues(alpha: 0.7),
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -206,7 +206,9 @@ class _EmptyPerformancePageWithAnalyticsState
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 14,
-                  color: themeProvider.currentTheme.muted.withOpacity(0.7),
+                  color: themeProvider.currentTheme.muted.withValues(
+                    alpha: 0.7,
+                  ),
                   height: 1.4,
                 ),
               ),

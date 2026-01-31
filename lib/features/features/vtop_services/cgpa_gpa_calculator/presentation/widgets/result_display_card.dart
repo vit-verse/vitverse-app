@@ -34,10 +34,13 @@ class ResultDisplayCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: theme.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: displayColor.withOpacity(0.3), width: 2),
+        border: Border.all(
+          color: displayColor.withValues(alpha: 0.3),
+          width: 2,
+        ),
         boxShadow: [
           BoxShadow(
-            color: displayColor.withOpacity(0.1),
+            color: displayColor.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -52,7 +55,7 @@ class ResultDisplayCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: displayColor.withOpacity(0.1),
+                  color: displayColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(icon, color: displayColor, size: 24),
@@ -272,9 +275,9 @@ class InfoBanner extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: bannerColor.withOpacity(0.1),
+        color: bannerColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: bannerColor.withOpacity(0.3), width: 1),
+        border: Border.all(color: bannerColor.withValues(alpha: 0.3), width: 1),
       ),
       child: Row(
         children: [

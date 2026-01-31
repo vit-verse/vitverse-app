@@ -89,47 +89,92 @@ class _StudentCardState extends State<StudentCard> {
         isDark: themeProvider.currentTheme.isDark,
         customBackgroundColor: themeProvider.currentTheme.surface,
       ),
-      child: Row(
+      child: Column(
         children: [
-          UserAvatar(
-            key: ValueKey(_avatarKey),
-            size: 84,
-            backgroundColor: themeProvider.currentTheme.primary.withOpacity(
-              0.12,
-            ),
-            iconColor: themeProvider.currentTheme.primary,
+          Row(
+            children: [
+              UserAvatar(
+                key: ValueKey(_avatarKey),
+                size: 84,
+                backgroundColor: themeProvider.currentTheme.primary.withOpacity(
+                  0.12,
+                ),
+                iconColor: themeProvider.currentTheme.primary,
+              ),
+              const SizedBox(width: ThemeConstants.spacingMd),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      displayName,
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: themeProvider.currentTheme.text,
+                        fontWeight: FontWeight.w700,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: ThemeConstants.spacingXs),
+                    Text(
+                      reg,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: themeProvider.currentTheme.muted,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: ThemeConstants.spacingMd),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  displayName,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: themeProvider.currentTheme.text,
-                    fontWeight: FontWeight.w700,
+          const SizedBox(height: ThemeConstants.spacingMd),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () {
+                    if (_profile != null) {
+                      Navigator.pushNamed(
+                        context,
+                        '/generate-report',
+                        arguments: _profile,
+                      );
+                    }
+                  },
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
                   ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: ThemeConstants.spacingXs),
-                Text(
-                  reg,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: themeProvider.currentTheme.muted,
-                    fontWeight: FontWeight.w600,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Text('Report'),
+                      SizedBox(width: 4),
+                      Icon(Icons.arrow_forward, size: 18),
+                    ],
                   ),
                 ),
-                const SizedBox(height: ThemeConstants.spacingSm),
-                FilledButton(
+              ),
+              const SizedBox(width: ThemeConstants.spacingSm),
+              Expanded(
+                child: OutlinedButton(
                   onPressed: () {
                     if (_profile != null) widget.onMoreDetails(_profile!);
                   },
-                  child: const Text('Details'),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Text('Details'),
+                      SizedBox(width: 4),
+                      Icon(Icons.arrow_forward, size: 18),
+                    ],
+                  ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ],
       ),

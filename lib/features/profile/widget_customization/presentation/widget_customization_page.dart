@@ -109,7 +109,10 @@ class _ClassCardDisplaySection extends StatelessWidget {
       decoration: BoxDecoration(
         color: theme.surface,
         borderRadius: BorderRadius.circular(ThemeConstants.radiusLg),
-        border: Border.all(color: theme.primary.withOpacity(0.2), width: 1),
+        border: Border.all(
+          color: theme.primary.withValues(alpha: 0.2),
+          width: 1,
+        ),
       ),
       padding: const EdgeInsets.all(ThemeConstants.spacingMd),
       child: Column(
@@ -157,7 +160,10 @@ class _HomeSecondaryWidgetSection extends StatelessWidget {
       decoration: BoxDecoration(
         color: theme.surface,
         borderRadius: BorderRadius.circular(ThemeConstants.radiusLg),
-        border: Border.all(color: theme.primary.withOpacity(0.2), width: 1),
+        border: Border.all(
+          color: theme.primary.withValues(alpha: 0.2),
+          width: 1,
+        ),
       ),
       padding: const EdgeInsets.all(ThemeConstants.spacingMd),
       child: Column(
@@ -168,7 +174,7 @@ class _HomeSecondaryWidgetSection extends StatelessWidget {
             padding: const EdgeInsets.all(8),
             margin: const EdgeInsets.only(bottom: 12),
             decoration: BoxDecoration(
-              color: theme.primary.withOpacity(0.05),
+              color: theme.primary.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Row(
@@ -200,7 +206,7 @@ class _HomeSecondaryWidgetSection extends StatelessWidget {
                 themeProvider: themeProvider,
               ),
             );
-          }).toList(),
+          }),
         ],
       ),
     );
@@ -235,7 +241,7 @@ class _ToggleOptionTile extends StatelessWidget {
       decoration: BoxDecoration(
         color: theme.surface,
         borderRadius: BorderRadius.circular(ThemeConstants.radiusMd),
-        border: Border.all(color: theme.muted.withOpacity(0.2), width: 1),
+        border: Border.all(color: theme.muted.withValues(alpha: 0.2), width: 1),
       ),
       child: Row(
         children: [
@@ -243,7 +249,7 @@ class _ToggleOptionTile extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: theme.muted.withOpacity(0.1),
+              color: theme.muted.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(icon, size: 20, color: theme.text),

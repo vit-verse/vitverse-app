@@ -6,9 +6,11 @@ import 'package:path_provider/path_provider.dart';
 
 import '../utils/logger.dart';
 
-/// Database class for VIT Connect app
-
+/// Database class for VIT Connect app.
 class VitConnectDatabase {
+  // ============================================================================
+  // INITIALIZATION
+  // ============================================================================
   static const String _databaseName = 'vit_student.db';
   static const int _databaseVersion = 2;
 
@@ -74,6 +76,10 @@ class VitConnectDatabase {
     }
   }
 
+  // ============================================================================
+  // SCHEMA LIFECYCLE
+  // ============================================================================
+
   Future<void> _onCreate(Database db, int version) async {
     await _createAllTables(db);
   }
@@ -102,6 +108,10 @@ class VitConnectDatabase {
     // 4. Modify foreign keys
     // 5. Change indexes
   }
+
+  // ============================================================================
+  // TABLE DEFINITIONS
+  // ============================================================================
 
   Future<void> _createAllTables(Database db) async {
     // Courses table (parent table)
@@ -313,6 +323,10 @@ class VitConnectDatabase {
     await _createIndexes(db);
   }
 
+  // ============================================================================
+  // INDEXES
+  // ============================================================================
+
   Future<void> _createIndexes(Database db) async {
     // Course indexes
     await db.execute(
@@ -378,7 +392,11 @@ class VitConnectDatabase {
     );
   }
 
-  /// Close database connection
+  // ============================================================================
+  // DATABASE OPERATIONS
+  // ============================================================================
+
+  /// Closes database connection.
   Future<void> close() async {
     final db = _database;
     if (db != null) {
@@ -427,7 +445,7 @@ class VitConnectDatabase {
     }
   }
 
-  /// Clear all data from database
+  /// Clears all data from database.
   Future<void> clearAllData() async {
     final db = await database;
     await db.transaction((txn) async {
@@ -457,6 +475,11 @@ class VitConnectDatabase {
     });
   }
 
+  // ============================================================================
+  // DEBUG UTILITIES
+  // ============================================================================
+
+  /// Returns row count for each table.
   Future<Map<String, int>> getTableCounts() async {
     final db = await database;
     final counts = <String, int>{};

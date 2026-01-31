@@ -134,7 +134,7 @@ class _AvatarPickerDialogState extends State<AvatarPickerDialog> {
                               isSelected
                                   ? Border.all(color: theme.primary, width: 3)
                                   : Border.all(
-                                    color: theme.muted.withOpacity(0.3),
+                                    color: theme.muted.withValues(alpha: 0.3),
                                   ),
                         ),
                         child: Center(

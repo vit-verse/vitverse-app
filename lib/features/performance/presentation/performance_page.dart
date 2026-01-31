@@ -6,6 +6,7 @@ import '../../../core/theme/theme_provider.dart';
 import '../../../core/theme/app_card_styles.dart';
 import '../../../core/utils/logger.dart';
 import '../../../core/utils/snackbar_utils.dart';
+import '../../../firebase/analytics/analytics_service.dart';
 import '../logic/performance_logic.dart';
 import '../models/performance_models.dart';
 import '../widgets/course_performance_card.dart';
@@ -30,6 +31,10 @@ class _PerformancePageState extends State<PerformancePage> {
   @override
   void initState() {
     super.initState();
+    AnalyticsService.instance.logScreenView(
+      screenName: 'PerformancePage',
+      screenClass: 'PerformancePage',
+    );
     _performances = widget.initialPerformances;
     _loadSemesterName();
   }
@@ -94,10 +99,10 @@ class _PerformancePageState extends State<PerformancePage> {
       child: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: themeProvider.currentTheme.surface.withOpacity(0.5),
+          color: themeProvider.currentTheme.surface.withValues(alpha: 0.5),
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: themeProvider.currentTheme.muted.withOpacity(0.2),
+            color: themeProvider.currentTheme.muted.withValues(alpha: 0.2),
           ),
         ),
         child: Icon(icon, size: 20, color: themeProvider.currentTheme.text),
@@ -142,7 +147,7 @@ class _PerformancePageState extends State<PerformancePage> {
                 forceExpanded: _expandAll,
                 onUpdateAverage: _handleUpdateAverage,
               );
-            }).toList(),
+            }),
           ],
         ),
       ),

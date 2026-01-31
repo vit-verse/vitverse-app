@@ -41,13 +41,13 @@ class DebouncedInkWell extends StatelessWidget {
   final Color? highlightColor;
 
   const DebouncedInkWell({
-    Key? key,
+    super.key,
     required this.child,
     this.onTap,
     this.borderRadius,
     this.splashColor,
     this.highlightColor,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -66,8 +66,7 @@ class DebouncedGestureDetector extends StatelessWidget {
   final Widget child;
   final VoidCallback? onTap;
 
-  const DebouncedGestureDetector({Key? key, required this.child, this.onTap})
-    : super(key: key);
+  const DebouncedGestureDetector({super.key, required this.child, this.onTap});
 
   @override
   Widget build(BuildContext context) {

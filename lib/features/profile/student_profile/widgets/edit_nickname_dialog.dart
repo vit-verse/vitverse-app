@@ -120,7 +120,7 @@ class _EditNicknameDialogState extends State<EditNicknameDialog> {
           Text(
             'Leave empty to clear nickname',
             style: TextStyle(
-              color: theme.muted.withOpacity(0.7),
+              color: theme.muted.withValues(alpha: 0.7),
               fontSize: 11,
               fontStyle: FontStyle.italic,
             ),

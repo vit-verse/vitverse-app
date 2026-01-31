@@ -17,7 +17,7 @@ class UpcomingEventsCard extends StatelessWidget {
         }
 
         return Container(
-          margin: const EdgeInsets.all(16.0),
+          margin: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 100.0),
           child: Card(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
@@ -74,7 +74,7 @@ class UpcomingEventsCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Date column
-          Container(
+          SizedBox(
             width: 50,
             child: Column(
               children: [
@@ -106,7 +106,7 @@ class UpcomingEventsCard extends StatelessWidget {
                 color: _getEventColor(
                   context,
                   primaryEvent,
-                ).withOpacity(0.15), // More visible background
+                ).withValues(alpha: 0.15), // More visible background
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
                   color: _getEventColor(context, primaryEvent),

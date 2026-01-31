@@ -185,7 +185,7 @@ class _MarkdownViewerPageState extends State<MarkdownViewerPage> {
         Container(
           padding: const EdgeInsets.all(12.0),
           decoration: BoxDecoration(
-            color: theme.primary.withOpacity(0.1),
+            color: theme.primary.withValues(alpha: 0.1),
             border: Border(bottom: BorderSide(color: theme.border, width: 1)),
           ),
           child: Row(

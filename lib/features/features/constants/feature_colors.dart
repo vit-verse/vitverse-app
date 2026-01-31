@@ -51,6 +51,7 @@ class FeatureColors {
     'friends_schedule': [Color(0xFF0ea5e9), Color(0xFF0284c7)], // Sky
     // VIT Connect - Academics
     'faculty_rating': [Color(0xFFf59e0b), Color(0xFFd97706)], // Amber
+    'pyq': [Color(0xFF8b5cf6), Color(0xFF7c3aed)], // Violet-500
     // VIT Connect - Utilities
     'lost_and_found': [Color(0xFFd946ef), Color(0xFFa21caf)], // Fuchsia
     'quick_links': [Color(0xFFe11d48), Color(0xFFbe185d)], // Rose-600
@@ -60,6 +61,3 @@ class FeatureColors {
     'default': [Color(0xFF3b82f6), Color(0xFF1d4ed8)], // Blue
   };
 }
-
-/// View mode for features page
-enum ViewMode { list, grid2Column, grid3Column }

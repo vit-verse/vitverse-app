@@ -172,9 +172,11 @@ class _LaundryPageState extends State<LaundryPage> {
                 child: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: theme.surface.withOpacity(0.5),
+                    color: theme.surface.withValues(alpha: 0.5),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: theme.muted.withOpacity(0.2)),
+                    border: Border.all(
+                      color: theme.muted.withValues(alpha: 0.2),
+                    ),
                   ),
                   child: Icon(
                     Icons.settings_outlined,
@@ -339,7 +341,7 @@ class _LaundryPageState extends State<LaundryPage> {
       padding: const EdgeInsets.all(20),
       decoration: AppCardStyles.largeCardDecoration(
         isDark: theme.isDark,
-        customBackgroundColor: theme.primary.withOpacity(0.05),
+        customBackgroundColor: theme.primary.withValues(alpha: 0.05),
       ),
       child: Stack(
         children: [
@@ -465,7 +467,9 @@ class _LaundryPageState extends State<LaundryPage> {
               decoration: AppCardStyles.listTileDecoration(
                 isDark: theme.isDark,
                 customBackgroundColor:
-                    isUserRoom ? theme.primary.withOpacity(0.1) : theme.surface,
+                    isUserRoom
+                        ? theme.primary.withValues(alpha: 0.1)
+                        : theme.surface,
               ),
               child: Stack(
                 children: [
@@ -498,7 +502,7 @@ class _LaundryPageState extends State<LaundryPage> {
                             color:
                                 isUserRoom
                                     ? theme.primary
-                                    : theme.muted.withOpacity(0.2),
+                                    : theme.muted.withValues(alpha: 0.2),
                             width: 2,
                           ),
                         ),
@@ -642,7 +646,7 @@ class _LaundryPageState extends State<LaundryPage> {
             'Last Updated: $formattedDate',
             style: TextStyle(
               fontSize: 11,
-              color: theme.muted.withOpacity(0.7),
+              color: theme.muted.withValues(alpha: 0.7),
               fontStyle: FontStyle.italic,
             ),
           ),
@@ -664,10 +668,10 @@ class _LaundryPageState extends State<LaundryPage> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
               decoration: BoxDecoration(
-                color: theme.primary.withOpacity(0.1),
+                color: theme.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: theme.primary.withOpacity(0.3),
+                  color: theme.primary.withValues(alpha: 0.3),
                   width: 1,
                 ),
               ),

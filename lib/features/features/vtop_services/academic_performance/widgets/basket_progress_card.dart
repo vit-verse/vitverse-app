@@ -102,8 +102,8 @@ class BasketProgressCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     color:
                         basket.isExceeding
-                            ? Colors.red.shade400.withOpacity(0.4)
-                            : theme.primary.withOpacity(0.4),
+                            ? Colors.red.shade400.withValues(alpha: 0.4)
+                            : theme.primary.withValues(alpha: 0.4),
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),

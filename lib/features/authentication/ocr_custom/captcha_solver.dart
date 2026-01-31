@@ -107,7 +107,7 @@ class CustomCaptchaSolver {
       double avgConfidence = 0.0;
       if (confidences.isNotEmpty) {
         final sum = confidences.reduce((a, b) => a + b);
-        if (sum.isFinite && confidences.length > 0) {
+        if (sum.isFinite && confidences.isNotEmpty) {
           avgConfidence = sum / confidences.length;
         }
       }

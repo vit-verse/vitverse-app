@@ -65,8 +65,8 @@ class CalendarPreview extends StatelessWidget {
       padding: const EdgeInsets.all(ThemeConstants.spacingMd),
       decoration: AppCardStyles.smallWidgetDecoration(
         isDark: theme.isDark,
-        customBackgroundColor: theme.primary.withOpacity(0.1),
-        customBorderColor: theme.primary.withOpacity(0.3),
+        customBackgroundColor: theme.primary.withValues(alpha: 0.1),
+        customBorderColor: theme.primary.withValues(alpha: 0.3),
       ),
       child: Row(
         children: [

@@ -505,13 +505,16 @@ class CalendarCacheService {
     }
   }
 
-  /// Clear all cache (for logout)
+  /// Clear all cache (for user-initiated cache clearing only)
   Future<void> clearAllCache() async {
     try {
-      await _database.clearAllData();
-      Logger.i('CalendarCacheService', 'All cache cleared');
+      // Clear only calendar-related cache, not entire VitVerse database
+      await _database.calendarDao.clearCacheByType('all');
+      await _database.calendarDao.clearExpiredCache();
+
+      Logger.i('CalendarCacheService', 'Calendar cache cleared');
     } catch (e) {
-      Logger.e('CalendarCacheService', 'Error clearing all cache', e);
+      Logger.e('CalendarCacheService', 'Error clearing calendar cache', e);
     }
   }
 }

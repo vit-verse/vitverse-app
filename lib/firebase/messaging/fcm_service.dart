@@ -9,6 +9,9 @@ class FCMService {
   static FirebaseMessaging? _messaging;
   static FlutterLocalNotificationsPlugin? _localNotifications;
 
+  // Callback for handling notification navigation
+  static Function(Map<String, dynamic>)? onNotificationTap;
+
   FCMService._();
 
   static FCMService get instance => _instance ??= FCMService._();
@@ -67,6 +70,18 @@ class FCMService {
         Logger.d(_tag, 'Skipped cab_share_updates (disabled by user)');
       }
 
+      // Subscribe to "events_update" topic - Events notifications (check preference)
+      final eventsEnabled = await _getNotificationPreference(
+        'events_notifications',
+        true,
+      );
+      if (eventsEnabled) {
+        await _messaging?.subscribeToTopic('events_update');
+        Logger.success(_tag, 'Subscribed to: events_update');
+      } else {
+        Logger.d(_tag, 'Skipped events_update (disabled by user)');
+      }
+
       Logger.d(_tag, 'Topic subscription complete');
     } catch (e, stack) {
       Logger.e(_tag, 'Failed to subscribe to topics', e, stack);
@@ -84,7 +99,67 @@ class FCMService {
 
       const initSettings = InitializationSettings(android: androidSettings);
 
-      await _localNotifications?.initialize(initSettings);
+      await _localNotifications?.initialize(
+        initSettings,
+        onDidReceiveNotificationResponse: (NotificationResponse response) {
+          // Handle notification tap from system tray
+          if (response.payload != null) {
+            Logger.d(
+              _tag,
+              'Local notification tapped: action=${response.actionId}',
+            );
+
+            // Handle action button clicks
+            if (response.actionId == 'visit_link') {
+              // Extract eventLink from payload and open it
+              final payload = response.payload!;
+              final linkMatch = RegExp(
+                r'eventLink[:\s]+([^,\s}]+)',
+              ).firstMatch(payload);
+              if (linkMatch != null) {
+                final link = linkMatch.group(1)?.trim() ?? '';
+                if (link.isNotEmpty) {
+                  Logger.d(_tag, 'Opening event link: $link');
+                  // Import url_launcher and open the link
+                  // launchUrl will be handled by the app
+                  if (onNotificationTap != null) {
+                    onNotificationTap!({'action': 'open_link', 'url': link});
+                  }
+                }
+              }
+              return;
+            }
+
+            // The payload contains the notification data as string
+            // Parse and handle it similar to remote notification tap
+            if (onNotificationTap != null) {
+              try {
+                // Extract eventId from payload if it's an event notification
+                final payload = response.payload!;
+                if (payload.contains('eventId')) {
+                  // Simple parsing - extract eventId
+                  final eventIdMatch = RegExp(
+                    r'eventId[:\s]+([^,\s}]+)',
+                  ).firstMatch(payload);
+                  final typeMatch = RegExp(
+                    r'type[:\s]+([^,\s}]+)',
+                  ).firstMatch(payload);
+
+                  if (eventIdMatch != null) {
+                    final data = {
+                      'type': typeMatch?.group(1) ?? 'event',
+                      'eventId': eventIdMatch.group(1) ?? '',
+                    };
+                    onNotificationTap!(data);
+                  }
+                }
+              } catch (e) {
+                Logger.e(_tag, 'Failed to parse notification payload', e);
+              }
+            }
+          }
+        },
+      );
       await _createFCMNotificationChannel();
 
       Logger.d(_tag, 'Local notifications initialized');
@@ -140,6 +215,15 @@ class FCMService {
     try {
       // Handle foreground messages
       FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
+
+      // Handle notification opened from background/terminated state
+      FirebaseMessaging.onMessageOpenedApp.listen(_handleNotificationTap);
+
+      // Handle notification that opened the app from terminated state
+      final initialMessage = await _messaging?.getInitialMessage();
+      if (initialMessage != null) {
+        _handleNotificationTap(initialMessage);
+      }
     } catch (e) {
       Logger.e(_tag, 'Message handlers setup failed', e);
     }
@@ -175,9 +259,16 @@ class FCMService {
       final notification = message.notification;
       if (notification == null) return;
 
-      // Check if notification has an image (for Lost & Found)
+      // Check notification type
+      final notificationType = message.data['type'] as String?;
+
+      // Event notifications don't show poster image (removed for performance)
+      // Lost & Found notifications can still show images
       final imageUrl = message.data['imageUrl'] as String?;
-      final hasImage = imageUrl != null && imageUrl.isNotEmpty;
+      final hasImage =
+          notificationType != 'event' &&
+          imageUrl != null &&
+          imageUrl.isNotEmpty;
 
       AndroidNotificationDetails androidDetails;
 
@@ -221,18 +312,70 @@ class FCMService {
           );
         }
       } else {
-        // Regular notification without image
-        androidDetails = const AndroidNotificationDetails(
-          'vit_connect_default_channel',
-          'VIT Verse Notifications',
-          channelDescription: 'General notifications from VIT Verse',
-          importance: Importance.high,
-          priority: Priority.high,
-          playSound: true,
-          enableVibration: true,
-          enableLights: true,
-          icon: '@mipmap/ic_launcher',
-        );
+        // Regular notification without image (used for events and fallback)
+        // For event notifications, show expandable description and action buttons
+        if (notificationType == 'event') {
+          final description = message.data['description'] as String? ?? '';
+          final eventLink = message.data['eventLink'] as String? ?? '';
+          final eventId = message.data['eventId'] as String? ?? '';
+
+          // Build big text with all details
+          final bigText = '${notification.body}\n\n$description';
+
+          // Add action buttons if event link exists
+          final actions = <AndroidNotificationAction>[];
+          if (eventLink.isNotEmpty) {
+            actions.add(
+              const AndroidNotificationAction(
+                'visit_link',
+                'Visit Link',
+                showsUserInterface: true,
+              ),
+            );
+          }
+          // Always add "Open Event" button
+          actions.add(
+            const AndroidNotificationAction(
+              'open_event',
+              'Open Event',
+              showsUserInterface: true,
+            ),
+          );
+
+          androidDetails = AndroidNotificationDetails(
+            'vit_connect_default_channel',
+            'VIT Verse Notifications',
+            channelDescription: 'General notifications from VIT Verse',
+            importance: Importance.high,
+            priority: Priority.high,
+            playSound: true,
+            enableVibration: true,
+            enableLights: true,
+            icon: '@mipmap/ic_launcher',
+            styleInformation: BigTextStyleInformation(
+              bigText,
+              htmlFormatBigText: true,
+              contentTitle: notification.title,
+              htmlFormatContentTitle: true,
+              summaryText: 'Tap to view details',
+              htmlFormatSummaryText: true,
+            ),
+            actions: actions,
+          );
+        } else {
+          // Non-event regular notification
+          androidDetails = const AndroidNotificationDetails(
+            'vit_connect_default_channel',
+            'VIT Verse Notifications',
+            channelDescription: 'General notifications from VIT Verse',
+            importance: Importance.high,
+            priority: Priority.high,
+            playSound: true,
+            enableVibration: true,
+            enableLights: true,
+            icon: '@mipmap/ic_launcher',
+          );
+        }
       }
 
       final details = NotificationDetails(android: androidDetails);
@@ -289,6 +432,26 @@ class FCMService {
     }
   }
 
+  /// Subscribe to Events topic
+  static Future<void> subscribeEventsTopic() async {
+    try {
+      await _messaging?.subscribeToTopic('events_update');
+      Logger.success(_tag, 'Subscribed to: events_update');
+    } catch (e) {
+      Logger.e(_tag, 'Subscribe failed: events_update', e);
+    }
+  }
+
+  /// Unsubscribe from Events topic
+  static Future<void> unsubscribeEventsTopic() async {
+    try {
+      await _messaging?.unsubscribeFromTopic('events_update');
+      Logger.d(_tag, 'Unsubscribed from: events_update');
+    } catch (e) {
+      Logger.e(_tag, 'Unsubscribe failed: events_update', e);
+    }
+  }
+
   /// Get current FCM token
   static Future<String?> getCurrentToken() async {
     try {
@@ -325,5 +488,60 @@ class FCMService {
     } catch (e) {
       Logger.e(_tag, 'Failed to delete token', e);
     }
+  }
+
+  /// Handle notification tap (from background or terminated state)
+  static void _handleNotificationTap(RemoteMessage message) {
+    try {
+      Logger.d(_tag, 'Notification tapped: ${message.messageId}');
+
+      final data = message.data;
+      if (data.isEmpty) {
+        Logger.w(_tag, 'No data in notification');
+        return;
+      }
+
+      // Call the navigation callback if set
+      if (onNotificationTap != null) {
+        onNotificationTap!(data);
+      } else {
+        Logger.w(_tag, 'onNotificationTap callback not set, storing for later');
+        // Store the notification data to handle after app initializes
+        _storePendingNotification(data);
+      }
+    } catch (e) {
+      Logger.e(_tag, 'Failed to handle notification tap', e);
+    }
+  }
+
+  /// Store pending notification for handling after app initialization
+  static Future<void> _storePendingNotification(
+    Map<String, dynamic> data,
+  ) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('pending_notification', data.toString());
+      Logger.d(_tag, 'Stored pending notification');
+    } catch (e) {
+      Logger.e(_tag, 'Failed to store pending notification', e);
+    }
+  }
+
+  /// Get and clear pending notification
+  static Future<Map<String, dynamic>?> getPendingNotification() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final dataString = prefs.getString('pending_notification');
+      if (dataString != null) {
+        await prefs.remove('pending_notification');
+        Logger.d(_tag, 'Retrieved pending notification');
+        // Parse the stored string back to Map
+        // Note: This is a simple implementation, might need improvement for complex data
+        return {'data': dataString};
+      }
+    } catch (e) {
+      Logger.e(_tag, 'Failed to get pending notification', e);
+    }
+    return null;
   }
 }

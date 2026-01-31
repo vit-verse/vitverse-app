@@ -23,8 +23,7 @@ class SnackbarItem {
 class StackedSnackbarManager extends StatefulWidget {
   final Widget child;
 
-  const StackedSnackbarManager({Key? key, required this.child})
-    : super(key: key);
+  const StackedSnackbarManager({super.key, required this.child});
 
   @override
   State<StackedSnackbarManager> createState() => _StackedSnackbarManagerState();
@@ -100,7 +99,7 @@ class _StackedSnackbarManagerState extends State<StackedSnackbarManager>
     // Check if we're on a screen with bottom navigation
     // Look for a Scaffold with bottomNavigationBar in the widget tree
     bool hasBottomNav = false;
-    
+
     // Try to find a Scaffold ancestor with bottomNavigationBar
     context.visitAncestorElements((element) {
       if (element.widget is Scaffold) {
@@ -115,13 +114,13 @@ class _StackedSnackbarManagerState extends State<StackedSnackbarManager>
 
     // Calculate bottom offset:
     // - If keyboard is open: position above keyboard
-    // - If bottom nav exists: 70px (nav height) + 16px spacing
+    // - If bottom nav exists: 85px (nav height + margin) + 16px spacing
     // - Otherwise: just safe area padding + 16px
     final snackbarBottom =
         viewInsets > 0
             ? viewInsets + 16.0
             : (hasBottomNav
-                ? 86.0
+                ? 101.0
                 : (bottomPadding > 0 ? bottomPadding + 16.0 : 16.0));
 
     return Stack(
@@ -212,7 +211,7 @@ class _SnackbarCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.08),
+                color: Colors.black.withValues(alpha: 0.08),
                 blurRadius: 4,
                 offset: const Offset(0, 1),
               ),

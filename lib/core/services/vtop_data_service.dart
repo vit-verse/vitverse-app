@@ -45,12 +45,12 @@ class VTOPDataService {
   final int _totalSteps = 14;
   String _currentStepName = '';
 
-  Map<String, Slot> _theorySlots = {};
-  Map<String, Slot> _labSlots = {};
-  Map<String, Slot> _projectSlots = {};
-  Map<int, Course> _theoryCourses = {};
-  Map<int, Course> _labCourses = {};
-  Map<int, Course> _projectCourses = {};
+  final Map<String, Slot> _theorySlots = {};
+  final Map<String, Slot> _labSlots = {};
+  final Map<String, Slot> _projectSlots = {};
+  final Map<int, Course> _theoryCourses = {};
+  final Map<int, Course> _labCourses = {};
+  final Map<int, Course> _projectCourses = {};
 
   // Progress callbacks
   Function(int current, int total, String stepName)? onProgress;
@@ -195,18 +195,21 @@ class VTOPDataService {
         DataServiceConstants.step12Name,
       ];
 
-      // Track completed steps for logging
       int completedSteps = 0;
+      List<String> failedSteps = [];
 
       for (int i = 0; i < steps.length; i++) {
         try {
           await _executeStep(steps[i], stepNumbers[i], stepNames[i]);
           completedSteps++;
         } catch (e) {
-          Logger.w(
-            'VTOPData',
-            'Step ${stepNames[i]} failed (non-critical): $e',
-          );
+          Logger.e('VTOPData', 'Step ${stepNames[i]} failed: $e', e);
+          failedSteps.add(stepNames[i]);
+          if (stepNames[i].contains('marks')) {
+            onError?.call(
+              'Failed to sync marks data. Some information may be incomplete.',
+            );
+          }
         }
         await Future.delayed(
           Duration(milliseconds: DataServiceConstants.stepDelayMs),
@@ -215,7 +218,7 @@ class VTOPDataService {
 
       Logger.success(
         DataServiceConstants.logTag,
-        'Phase 2 complete: $completedSteps/${steps.length} steps successful',
+        'Phase 2 complete: $completedSteps/${steps.length} steps successful${failedSteps.isNotEmpty ? " (Failed: ${failedSteps.join(", ")})" : ""}',
       );
       onStatusUpdate?.call(DataServiceConstants.phase2CompleteMessage);
       onComplete?.call();
@@ -1654,9 +1657,9 @@ class VTOPDataService {
       deanHodData.forEach((staffType, staffList) async {
         if (staffList is List) {
           String type = staffType.toString().toLowerCase();
-          if (type.contains('dean'))
+          if (type.contains('dean')) {
             type = 'dean';
-          else if (type.contains('hod'))
+          } else if (type.contains('hod'))
             type = 'hod';
 
           for (var staffItem in staffList) {
@@ -1807,7 +1810,7 @@ class VTOPDataService {
                   }
                   
                   if (!response.gpa) {
-                    var gpaMatch = lastCellText.match(/GPA\s*:?\s*([\d.]+)/i);
+                    var gpaMatch = lastCellText.match(/GPAs*:?s*([d.]+)/i);
                     if (gpaMatch && gpaMatch[1]) {
                       response.gpa = parseFloat(gpaMatch[1]);
                     }
@@ -2033,31 +2036,38 @@ class VTOPDataService {
     List<AllSemesterMark> savedMarks = [];
 
     for (var markData in marksList) {
-      final signature =
-          '${semesterId}_${markData['course_code']}_${markData['title']}_${markData['score']}'
-              .hashCode;
-      final existing = await _allSemesterMarkDao.getBySignature(signature);
+      try {
+        final signature =
+            '${semesterId}_${markData['course_code']}_${markData['title']}'
+                .hashCode;
+        final existing = await _allSemesterMarkDao.getBySignature(signature);
 
-      if (existing == null) {
-        final mark = AllSemesterMark(
-          semesterId: semesterId,
-          semesterName: semesterName,
-          courseCode: markData['course_code']?.toString() ?? '',
-          courseTitle: markData['course_title']?.toString() ?? '',
-          courseType: markData['course_type']?.toString() ?? '',
-          slot: markData['slot']?.toString() ?? '',
-          title: markData['title']?.toString() ?? '',
-          score: (markData['score'] ?? 0).toDouble(),
-          maxScore: (markData['max_score'] ?? 0).toDouble(),
-          weightage: (markData['weightage'] ?? 0).toDouble(),
-          maxWeightage: (markData['max_weightage'] ?? 0).toDouble(),
-          average: (markData['average'] ?? 0).toDouble(),
-          status: markData['status']?.toString() ?? '',
-          signature: signature,
+        if (existing == null) {
+          final mark = AllSemesterMark(
+            semesterId: semesterId,
+            semesterName: semesterName,
+            courseCode: markData['course_code']?.toString() ?? '',
+            courseTitle: markData['course_title']?.toString() ?? '',
+            courseType: markData['course_type']?.toString() ?? '',
+            slot: markData['slot']?.toString() ?? '',
+            title: markData['title']?.toString() ?? '',
+            score: (markData['score'] ?? 0).toDouble(),
+            maxScore: (markData['max_score'] ?? 0).toDouble(),
+            weightage: (markData['weightage'] ?? 0).toDouble(),
+            maxWeightage: (markData['max_weightage'] ?? 0).toDouble(),
+            average: (markData['average'] ?? 0).toDouble(),
+            status: markData['status']?.toString() ?? '',
+            signature: signature,
+          );
+
+          await _allSemesterMarkDao.insert(mark);
+          savedMarks.add(mark);
+        }
+      } catch (e) {
+        Logger.w(
+          'VTOP',
+          'Failed to save mark: ${markData['course_code']} - ${markData['title']}: $e',
         );
-
-        await _allSemesterMarkDao.insert(mark);
-        savedMarks.add(mark);
       }
     }
     return savedMarks;
@@ -2140,9 +2150,9 @@ class VTOPDataService {
             int hour = int.parse(hourMinute[0]);
             final minute = int.parse(hourMinute[1]);
 
-            if (amPm.toUpperCase() == 'PM' && hour != 12)
+            if (amPm.toUpperCase() == 'PM' && hour != 12) {
               hour += 12;
-            else if (amPm.toUpperCase() == 'AM' && hour == 12)
+            } else if (amPm.toUpperCase() == 'AM' && hour == 12)
               hour = 0;
 
             return DateTime(year, month, day, hour, minute);

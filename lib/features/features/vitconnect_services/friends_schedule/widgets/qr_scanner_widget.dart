@@ -116,7 +116,7 @@ class _QRScannerWidgetState extends State<QRScannerWidget> {
               child: Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.red.withOpacity(0.9),
+                  color: Colors.red.withValues(alpha: 0.9),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
@@ -149,7 +149,7 @@ class _QRScannerWidgetState extends State<QRScannerWidget> {
               child: Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.7),
+                  color: Colors.black.withValues(alpha: 0.7),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Column(
@@ -174,7 +174,7 @@ class _QRScannerWidgetState extends State<QRScannerWidget> {
                       'ZXing Decoder (v7)',
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.7),
+                        color: Colors.white.withValues(alpha: 0.7),
                         fontSize: 12,
                         height: 1.5,
                       ),
@@ -186,7 +186,7 @@ class _QRScannerWidgetState extends State<QRScannerWidget> {
           ),
           if (_isProcessing)
             Container(
-              color: Colors.black.withOpacity(0.7),
+              color: Colors.black.withValues(alpha: 0.7),
               child: Center(
                 child: Container(
                   padding: const EdgeInsets.all(24),
@@ -240,7 +240,7 @@ class ScannerOverlayPainter extends CustomPainter {
 
     final overlayPaint =
         Paint()
-          ..color = Colors.black.withOpacity(0.5)
+          ..color = Colors.black.withValues(alpha: 0.5)
           ..style = PaintingStyle.fill;
 
     final overlayPath =

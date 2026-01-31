@@ -17,10 +17,11 @@ class CabShareHomePage extends StatefulWidget {
   State<CabShareHomePage> createState() => _CabShareHomePageState();
 }
 
-class _CabShareHomePageState extends State<CabShareHomePage> {
+class _CabShareHomePageState extends State<CabShareHomePage>
+    with SingleTickerProviderStateMixin {
   CabRideProvider? _provider;
   bool _isSupabaseConfigured = false;
-  int _selectedTabIndex = 0;
+  late TabController _tabController;
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   Map<String, String> _filters = {};
@@ -28,6 +29,7 @@ class _CabShareHomePageState extends State<CabShareHomePage> {
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 2, vsync: this);
     _searchController.addListener(() {
       setState(() => _searchQuery = _searchController.text.toLowerCase());
     });
@@ -68,6 +70,7 @@ class _CabShareHomePageState extends State<CabShareHomePage> {
 
   @override
   void dispose() {
+    _tabController.dispose();
     _searchController.dispose();
     super.dispose();
   }
@@ -80,9 +83,17 @@ class _CabShareHomePageState extends State<CabShareHomePage> {
       return Scaffold(
         backgroundColor: theme.background,
         appBar: AppBar(
-          title: const Text('Cab Share'),
-          backgroundColor: theme.primary,
-          foregroundColor: Colors.white,
+          title: Text(
+            'Cab Share',
+            style: TextStyle(
+              color: theme.text,
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          backgroundColor: theme.surface,
+          elevation: 0,
+          iconTheme: IconThemeData(color: theme.text),
         ),
         body: _buildSupabaseNotConfiguredUI(theme),
       );
@@ -113,7 +124,14 @@ class _CabShareHomePageState extends State<CabShareHomePage> {
               child: RefreshIndicator(
                 onRefresh: _onRefresh,
                 color: theme.primary,
-                child: _buildCurrentTab(),
+                child: TabBarView(
+                  controller: _tabController,
+                  physics: const BouncingScrollPhysics(),
+                  children: [
+                    ExploreTab(searchQuery: _searchQuery, filters: _filters),
+                    const MyRidesTab(),
+                  ],
+                ),
               ),
             ),
           ],
@@ -546,60 +564,62 @@ class _CabShareHomePageState extends State<CabShareHomePage> {
     required int index,
     required dynamic theme,
   }) {
-    final isSelected = _selectedTabIndex == index;
+    return AnimatedBuilder(
+      animation: _tabController,
+      builder: (context, child) {
+        final isSelected = _tabController.index == index;
+        final animValue = _tabController.animation?.value ?? 0.0;
+        final progress = (animValue - index).abs().clamp(0.0, 1.0);
+        final colorValue = 1.0 - progress;
 
-    return InkWell(
-      onTap: () => setState(() => _selectedTabIndex = index),
-      borderRadius: BorderRadius.circular(8),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? theme.primary : Colors.transparent,
+        return InkWell(
+          onTap: () {
+            _tabController.animateTo(
+              index,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+            );
+          },
           borderRadius: BorderRadius.circular(8),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 18,
-              color:
-                  isSelected ? Colors.white : theme.text.withValues(alpha: 0.6),
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+            decoration: BoxDecoration(
+              color: Color.lerp(Colors.transparent, theme.primary, colorValue),
+              borderRadius: BorderRadius.circular(8),
             ),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                color:
-                    isSelected
-                        ? Colors.white
-                        : theme.text.withValues(alpha: 0.6),
-              ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  icon,
+                  size: 18,
+                  color: Color.lerp(
+                    theme.text.withValues(alpha: 0.6),
+                    Colors.white,
+                    colorValue,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight:
+                        isSelected ? FontWeight.w600 : FontWeight.normal,
+                    color: Color.lerp(
+                      theme.text.withValues(alpha: 0.6),
+                      Colors.white,
+                      colorValue,
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
-  }
-
-  Widget _buildCurrentTab() {
-    switch (_selectedTabIndex) {
-      case 0:
-        return ExploreTab(
-          searchQuery: _searchQuery,
-          filters: _filters.isNotEmpty ? _filters : null,
-        );
-      case 1:
-        return const MyRidesTab();
-      default:
-        return ExploreTab(
-          searchQuery: _searchQuery,
-          filters: _filters.isNotEmpty ? _filters : null,
-        );
-    }
   }
 
   void _openAddPage() async {
@@ -633,49 +653,15 @@ class _CabShareHomePageState extends State<CabShareHomePage> {
                 color: theme.primary,
               ),
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 24),
             Text(
-              'Service Unavailable',
+              'Configuration Incomplete',
               style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
                 color: theme.text,
               ),
               textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Cab Share service is currently unavailable. The server configuration is missing or incomplete.',
-              style: TextStyle(
-                fontSize: 16,
-                color: theme.text.withValues(alpha: 0.7),
-                height: 1.5,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: theme.surface,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: theme.primary.withValues(alpha: 0.2)),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.info_outline, color: theme.primary, size: 24),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      'This feature requires backend services to be configured by the app administrator.',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: theme.text.withValues(alpha: 0.8),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
             ),
           ],
         ),

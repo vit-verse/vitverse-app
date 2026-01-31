@@ -127,7 +127,7 @@ class AttendanceCalculatorRepository {
 
       Logger.i(
         'AttendanceCalculatorRepository',
-        'Found ${belowThreshold.length} courses below ${threshold}%',
+        'Found ${belowThreshold.length} courses below $threshold%',
       );
 
       return belowThreshold;

@@ -26,7 +26,7 @@ class AssessmentMarkTile extends StatelessWidget {
         color: themeProvider.currentTheme.surface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: themeProvider.currentTheme.muted.withOpacity(0.2),
+          color: themeProvider.currentTheme.muted.withValues(alpha: 0.2),
           width: 1,
         ),
       ),
@@ -211,15 +211,15 @@ class AssessmentMarkTile extends StatelessWidget {
     String text;
 
     if (assessment.isPresent) {
-      bgColor = Colors.green.withOpacity(0.1);
+      bgColor = Colors.green.withValues(alpha: 0.1);
       textColor = Colors.green;
       text = 'Present';
     } else if (assessment.isAbsent) {
-      bgColor = Colors.red.withOpacity(0.1);
+      bgColor = Colors.red.withValues(alpha: 0.1);
       textColor = Colors.red;
       text = 'Absent';
     } else {
-      bgColor = themeProvider.currentTheme.muted.withOpacity(0.1);
+      bgColor = themeProvider.currentTheme.muted.withValues(alpha: 0.1);
       textColor = themeProvider.currentTheme.muted;
       text = assessment.status ?? 'Unknown';
     }

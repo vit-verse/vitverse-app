@@ -26,23 +26,19 @@ class TimelineCalendarView extends StatelessWidget {
         final sortedDates = eventsMap.keys.toList()..sort();
 
         return Column(
-          mainAxisSize: MainAxisSize.min,
           children: [
             _buildMonthNavigationBar(context, provider),
-
-            Padding(
-              padding: EdgeInsets.only(
-                left: 16,
-                right: 16,
-                bottom: MediaQuery.of(context).padding.bottom + 24,
-              ),
+            Expanded(
               child:
                   sortedDates.isEmpty
                       ? _buildEmptyTimeline(context)
                       : ListView.builder(
-                        shrinkWrap: true, 
-                        physics:
-                            NeverScrollableScrollPhysics(),
+                        padding: EdgeInsets.only(
+                          left: 16,
+                          right: 16,
+                          bottom: MediaQuery.of(context).padding.bottom + 24,
+                        ),
+                        physics: const BouncingScrollPhysics(),
                         itemCount: sortedDates.length,
                         itemBuilder: (context, index) {
                           final date = sortedDates[index];
@@ -172,7 +168,9 @@ class TimelineCalendarView extends StatelessWidget {
             height: events.length * 45.0 + 15,
             margin: const EdgeInsets.symmetric(horizontal: 12.0),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
+              color: Theme.of(
+                context,
+              ).colorScheme.outline.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(1),
             ),
             child: Stack(

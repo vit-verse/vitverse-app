@@ -6,6 +6,7 @@ import '../../../../../core/theme/theme_provider.dart';
 import '../../../../../core/database/entities/student_profile.dart';
 import '../../../../../core/utils/logger.dart';
 import '../../../../../core/utils/snackbar_utils.dart';
+import '../../../../../firebase/analytics/analytics_service.dart';
 import '../config/cab_share_config.dart';
 import '../data/cab_ride_repository.dart';
 import '../widgets/cab_verified_info_card.dart';
@@ -45,6 +46,10 @@ class _AddCabRidePageState extends State<AddCabRidePage> {
   @override
   void initState() {
     super.initState();
+    AnalyticsService.instance.logScreenView(
+      screenName: 'AddCabRide',
+      screenClass: 'AddCabRidePage',
+    );
     _loadProfile();
   }
 

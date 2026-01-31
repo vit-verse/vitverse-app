@@ -26,6 +26,7 @@ class CalendarHomeService {
   bool get isInitialized => _isInitialized;
   bool get isEnabled => _prefs?.getBool(_keyEnabled) ?? false;
   String? get calendarName => _prefs?.getString(_keyCalendarName);
+  CalendarData? get calendarData => _calendarData;
 
   Future<void> init() async {
     try {
@@ -100,26 +101,33 @@ class CalendarHomeService {
       return null;
     }
 
+    // Get event from calendar for this specific date
     final event = _getEventForDate(date);
     if (event == null) return null;
 
-    if (date.weekday == 6) {
-      final combinedText = '${event.text} ${event.description}'.toLowerCase();
-      final dayOrderMatch = RegExp(
-        r'(Monday|Tuesday|Wednesday|Thursday|Friday)\s+(day\s+)?order',
-        caseSensitive: false,
-      ).firstMatch(combinedText);
+    // Extract day order from event text (e.g., "Thursday Day Order")
+    final combinedText = '${event.text} ${event.description}'.toLowerCase();
+    final dayOrderMatch = RegExp(
+      r'(monday|tuesday|wednesday|thursday|friday)\s+(day\s+)?order',
+      caseSensitive: false,
+    ).firstMatch(combinedText);
 
-      if (dayOrderMatch != null) {
-        final dayName = dayOrderMatch.group(1)!.toLowerCase();
-        final mappedDay = [
-          'monday',
-          'tuesday',
-          'wednesday',
-          'thursday',
-          'friday',
-        ].indexOf(dayName);
-        return mappedDay >= 0 ? mappedDay : null;
+    if (dayOrderMatch != null) {
+      final dayName = dayOrderMatch.group(1)!.toLowerCase();
+      final mappedDay = [
+        'monday',
+        'tuesday',
+        'wednesday',
+        'thursday',
+        'friday',
+      ].indexOf(dayName);
+
+      if (mappedDay >= 0) {
+        Logger.d(
+          'CalendarHomeService',
+          'Date $date has day order: ${dayName.toUpperCase()} (index: $mappedDay)',
+        );
+        return mappedDay;
       }
     }
 

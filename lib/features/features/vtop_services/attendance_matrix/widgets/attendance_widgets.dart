@@ -140,7 +140,7 @@ class AttendanceMatrixGrid extends StatelessWidget {
           color: backgroundColor,
           borderRadius: BorderRadius.circular(6),
           border: Border.all(
-            color: cell.status.color.withOpacity(0.3),
+            color: cell.status.color.withValues(alpha: 0.3),
             width: 1.0,
           ),
         ),
@@ -191,7 +191,7 @@ class AttendanceMatrixGrid extends StatelessWidget {
                     style: TextStyle(
                       fontSize: cellSize > 45 ? 8 : 7,
                       fontWeight: FontWeight.w500,
-                      color: textColor.withOpacity(0.8),
+                      color: textColor.withValues(alpha: 0.8),
                       height: 1.0,
                     ),
                     textAlign: TextAlign.center,
@@ -224,9 +224,9 @@ class ColorLegendWidget extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: mutedColor.withOpacity(0.05),
+        color: mutedColor.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: mutedColor.withOpacity(0.1), width: 1),
+        border: Border.all(color: mutedColor.withValues(alpha: 0.1), width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -290,9 +290,9 @@ class ColorLegendWidget extends StatelessWidget {
           width: 16,
           height: 16,
           decoration: BoxDecoration(
-            color: color.withOpacity(0.2),
+            color: color.withValues(alpha: 0.2),
             borderRadius: BorderRadius.circular(4),
-            border: Border.all(color: color.withOpacity(0.5), width: 1.5),
+            border: Border.all(color: color.withValues(alpha: 0.5), width: 1.5),
           ),
         ),
         const SizedBox(width: 8),
@@ -358,7 +358,7 @@ class AttendanceCellDetailModal extends StatelessWidget {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: mutedColor.withOpacity(0.3),
+                color: mutedColor.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -384,7 +384,7 @@ class AttendanceCellDetailModal extends StatelessWidget {
               color: backgroundColor,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: cell.status.color.withOpacity(0.3),
+                color: cell.status.color.withValues(alpha: 0.3),
                 width: 2,
               ),
             ),
@@ -416,7 +416,7 @@ class AttendanceCellDetailModal extends StatelessWidget {
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: cell.status.color.withOpacity(0.15),
+                    color: cell.status.color.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
@@ -515,10 +515,10 @@ class AttendanceCellDetailModal extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: cell.status.color.withOpacity(0.1),
+              color: cell.status.color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: cell.status.color.withOpacity(0.2),
+                color: cell.status.color.withValues(alpha: 0.2),
                 width: 1,
               ),
             ),
@@ -589,7 +589,7 @@ class AttendanceCellDetailModal extends StatelessWidget {
       decoration: BoxDecoration(
         color: backgroundColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3), width: 1.5),
+        border: Border.all(color: color.withValues(alpha: 0.3), width: 1.5),
       ),
       child: Column(
         children: [

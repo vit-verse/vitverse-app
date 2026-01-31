@@ -3,10 +3,10 @@ import 'package:provider/provider.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/theme/theme_constants.dart';
 import '../../../firebase/analytics/analytics_service.dart';
-import '../constants/feature_colors.dart';
 import '../logic/feature_provider.dart';
 import '../models/feature_model.dart';
 import '../data/feature_catalogue.dart';
+import '../data/feature_repository.dart';
 
 class FeaturesSettingsPage extends StatefulWidget {
   const FeaturesSettingsPage({super.key});
@@ -81,7 +81,7 @@ class _FeaturesSettingsPageState extends State<FeaturesSettingsPage> {
           decoration: BoxDecoration(
             color: theme.surface,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: theme.muted.withOpacity(0.2)),
+            border: Border.all(color: theme.muted.withValues(alpha: 0.2)),
           ),
           child: Column(
             children: [
@@ -94,7 +94,7 @@ class _FeaturesSettingsPageState extends State<FeaturesSettingsPage> {
                 isSelected: provider.viewMode == ViewMode.list,
                 theme: theme,
               ),
-              Divider(height: 1, color: theme.muted.withOpacity(0.1)),
+              Divider(height: 1, color: theme.muted.withValues(alpha: 0.1)),
               _buildGridOption(
                 context,
                 viewMode: ViewMode.grid2Column,
@@ -104,7 +104,7 @@ class _FeaturesSettingsPageState extends State<FeaturesSettingsPage> {
                 isSelected: provider.viewMode == ViewMode.grid2Column,
                 theme: theme,
               ),
-              Divider(height: 1, color: theme.muted.withOpacity(0.1)),
+              Divider(height: 1, color: theme.muted.withValues(alpha: 0.1)),
               _buildGridOption(
                 context,
                 viewMode: ViewMode.grid3Column,
@@ -143,13 +143,13 @@ class _FeaturesSettingsPageState extends State<FeaturesSettingsPage> {
               decoration: BoxDecoration(
                 color:
                     isSelected
-                        ? theme.primary.withOpacity(0.15)
-                        : theme.muted.withOpacity(0.1),
+                        ? theme.primary.withValues(alpha: 0.15)
+                        : theme.muted.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color:
                       isSelected
-                          ? theme.primary.withOpacity(0.3)
+                          ? theme.primary.withValues(alpha: 0.3)
                           : Colors.transparent,
                   width: 2,
                 ),
@@ -186,7 +186,7 @@ class _FeaturesSettingsPageState extends State<FeaturesSettingsPage> {
             else
               Icon(
                 Icons.circle_outlined,
-                color: theme.muted.withOpacity(0.3),
+                color: theme.muted.withValues(alpha: 0.3),
                 size: 24,
               ),
           ],
@@ -210,15 +210,17 @@ class _FeaturesSettingsPageState extends State<FeaturesSettingsPage> {
           decoration: BoxDecoration(
             color: theme.surface,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: theme.muted.withOpacity(0.2)),
+            border: Border.all(color: theme.muted.withValues(alpha: 0.2)),
           ),
           child: ListView.separated(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: allFeatures.length,
             separatorBuilder:
-                (context, index) =>
-                    Divider(height: 1, color: theme.muted.withOpacity(0.1)),
+                (context, index) => Divider(
+                  height: 1,
+                  color: theme.muted.withValues(alpha: 0.1),
+                ),
             itemBuilder: (context, index) {
               final feature = allFeatures[index];
               final isPinned = provider.pinnedFeatures.any(
@@ -261,7 +263,7 @@ class _FeaturesSettingsPageState extends State<FeaturesSettingsPage> {
               height: 40,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [theme.primary, theme.primary.withOpacity(0.7)],
+                  colors: [theme.primary, theme.primary.withValues(alpha: 0.7)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),

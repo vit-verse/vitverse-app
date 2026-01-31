@@ -1,26 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/theme/theme_provider.dart';
-import '../../../../core/loading/skeleton_widgets.dart';
-import '../../../../core/utils/logger.dart';
 import '../../../../core/widgets/themed_lottie_widget.dart';
+import '../../../profile/widget_customization/data/calendar_home_service.dart';
 import '../../logic/home_logic.dart';
 import 'class_card.dart';
 
-/// Widget displaying the list of classes for a specific day
 class ClassScheduleList extends StatefulWidget {
-  static const String _tag = 'ClassScheduleList';
-
   final int dayIndex;
   final HomeLogic homeLogic;
   final bool isDataLoading;
+  final DateTime?
+  actualDate; // Actual date for this day (considering week navigation)
 
   const ClassScheduleList({
     super.key,
     required this.dayIndex,
     required this.homeLogic,
     required this.isDataLoading,
+    this.actualDate,
   });
 
   @override
@@ -28,30 +26,24 @@ class ClassScheduleList extends StatefulWidget {
 }
 
 class _ClassScheduleListState extends State<ClassScheduleList> {
-  static const String _tag = 'ClassScheduleList';
-  Set<int> _holidayDays = {};
+  final _calendarService = CalendarHomeService.instance;
 
-  @override
-  void initState() {
-    super.initState();
-    _loadHolidays();
-  }
-
-  Future<void> _loadHolidays() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final holidayList = prefs.getStringList('holiday_days') ?? [];
-
-      if (mounted) {
-        setState(() {
-          _holidayDays = holidayList.map((day) => int.parse(day)).toSet();
-        });
-      }
-
-      Logger.d(_tag, 'Loaded holidays: $_holidayDays');
-    } catch (e) {
-      Logger.e(_tag, 'Failed to load holidays', e);
+  bool _isHoliday(int dayIndex) {
+    final DateTime targetDate;
+    if (widget.actualDate != null) {
+      targetDate = widget.actualDate!;
+    } else {
+      final now = DateTime.now();
+      final currentDayIndex = now.weekday - 1;
+      final daysOffset = dayIndex - currentDayIndex;
+      targetDate = DateTime(
+        now.year,
+        now.month,
+        now.day,
+      ).add(Duration(days: daysOffset));
     }
+
+    return _calendarService.isHolidayDate(targetDate);
   }
 
   Widget _buildEmptyState(
@@ -62,12 +54,7 @@ class _ClassScheduleListState extends State<ClassScheduleList> {
     return Stack(
       fit: StackFit.expand,
       children: [
-        // Full screen Lottie animation
         const Positioned.fill(
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
           child: ThemedLottieWidget(
             assetPath: 'assets/lottie/SpaceCat.lottie',
             fallbackIcon: Icons.celebration_rounded,
@@ -75,13 +62,14 @@ class _ClassScheduleListState extends State<ClassScheduleList> {
             showContainer: false,
           ),
         ),
-        // Text overlay in the center
         Center(
           child: Container(
             margin: const EdgeInsets.symmetric(horizontal: 16),
             padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
             decoration: BoxDecoration(
-              color: themeProvider.currentTheme.background.withOpacity(0.8),
+              color: themeProvider.currentTheme.background.withValues(
+                alpha: 0.8,
+              ),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Column(
@@ -120,45 +108,31 @@ class _ClassScheduleListState extends State<ClassScheduleList> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ThemeProvider>(
-      builder: (context, themeProvider, child) {
-        // Show skeleton loading while data is loading
-        if (widget.isDataLoading) {
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: List.generate(
-                3,
-                (index) => Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: SkeletonWidgets.classCard(themeProvider),
-                ),
+    final themeProvider = context.read<ThemeProvider>();
+    final isHoliday = _isHoliday(widget.dayIndex);
+
+    if (isHoliday) {
+      return _buildEmptyState(themeProvider, 'Holiday', 'No classes scheduled');
+    }
+
+    return FutureBuilder<List<Map<String, dynamic>>>(
+      future: widget.homeLogic.getCombinedClassesForDay(
+        widget.dayIndex,
+        actualDate: widget.actualDate,
+      ),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(32),
+              child: CircularProgressIndicator(
+                color: themeProvider.currentTheme.primary,
               ),
             ),
           );
         }
 
-        // Check if this day is marked as holiday
-        final isHoliday = _holidayDays.contains(widget.dayIndex);
-
-        // If it's a holiday, show holiday message with full screen animation
-        if (isHoliday) {
-          return _buildEmptyState(
-            themeProvider,
-            'Holiday',
-            'No classes scheduled',
-          );
-        }
-
-        // Get classes for the day
-        final dayClasses = widget.homeLogic.getClassesForDay(widget.dayIndex);
-
-        // Sort classes by start time
-        dayClasses.sort((a, b) {
-          final timeA = a['start_time']?.toString() ?? '';
-          final timeB = b['start_time']?.toString() ?? '';
-          return timeA.compareTo(timeB);
-        });
+        final dayClasses = snapshot.data ?? [];
 
         if (dayClasses.isEmpty) {
           return _buildEmptyState(
@@ -168,9 +142,8 @@ class _ClassScheduleListState extends State<ClassScheduleList> {
           );
         }
 
-        // Return scrollable ListView to show all classes
         return ListView.builder(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
           itemCount: dayClasses.length,
           itemBuilder: (context, index) {
             final classData = dayClasses[index];
@@ -178,6 +151,7 @@ class _ClassScheduleListState extends State<ClassScheduleList> {
               classData: classData,
               dayIndex: widget.dayIndex,
               homeLogic: widget.homeLogic,
+              actualDate: widget.actualDate,
             );
           },
         );

@@ -74,7 +74,7 @@ class AttendanceColorScheme {
         baseColor = primaryColor ?? const Color(0xFF6366F1);
       }
       return Color.lerp(baseColor, Colors.white, 0.3) ??
-          baseColor.withOpacity(0.8);
+          baseColor.withValues(alpha: 0.8);
     }
 
     for (final range in ranges) {
@@ -148,7 +148,7 @@ class MarksColorScheme {
     this.autoMatchTheme = false,
   });
 
-  /// Create default scheme 
+  /// Create default scheme
   static MarksColorScheme get defaultScheme => MarksColorScheme(
     name: 'Default',
     useRanges: true,
@@ -205,7 +205,7 @@ class MarksColorScheme {
         baseColor = primaryColor ?? const Color(0xFF6366F1);
       }
       return Color.lerp(baseColor, Colors.white, 0.3) ??
-          baseColor.withOpacity(0.8);
+          baseColor.withValues(alpha: 0.8);
     }
 
     for (final range in ranges) {

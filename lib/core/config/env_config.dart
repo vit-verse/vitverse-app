@@ -9,13 +9,29 @@ class EnvConfig {
     defaultValue: '',
   );
 
-  static const String githubVitconnectToken = String.fromEnvironment(
-    'GITHUB_VITCONNECT_TOKEN',
+  static const String supabaseEventsUrl = String.fromEnvironment(
+    'SUPABASE_EVENTS_URL',
     defaultValue: '',
   );
 
-  static const String facultyRatingScriptUrl = String.fromEnvironment(
-    'FACULTY_RATING_SCRIPT_URL',
+  static const String supabaseEventsAnonKey = String.fromEnvironment(
+    'SUPABASE_EVENTS_ANON_KEY',
+    defaultValue: '',
+  );
+
+  static const String githubVitconnectToken = String.fromEnvironment(
+    'GITHUB_VITCONNECT_TOKEN',
+    defaultValue:
+        '',
+  );
+
+  static const String pyqSecretHeader = String.fromEnvironment(
+    'PYQ_SECRET_HEADER',
+    defaultValue: '',
+  );
+
+  static const String eventsSecretHeader = String.fromEnvironment(
+    'EVENTS_SECRET_HEADER',
     defaultValue: '',
   );
 
@@ -23,7 +39,16 @@ class EnvConfig {
     return supabaseUrl.isNotEmpty &&
         supabaseAnonKey.isNotEmpty &&
         githubVitconnectToken.isNotEmpty &&
-        facultyRatingScriptUrl.isNotEmpty;
+        pyqSecretHeader.isNotEmpty &&
+        supabaseEventsUrl.isNotEmpty &&
+        supabaseEventsAnonKey.isNotEmpty &&
+        eventsSecretHeader.isNotEmpty;
+  }
+
+  static bool get isEventsConfigured {
+    return supabaseEventsUrl.isNotEmpty && 
+        supabaseEventsAnonKey.isNotEmpty &&
+        eventsSecretHeader.isNotEmpty;
   }
 
   static List<String> getMissingVars() {
@@ -31,8 +56,10 @@ class EnvConfig {
     if (supabaseUrl.isEmpty) missing.add('SUPABASE_URL');
     if (supabaseAnonKey.isEmpty) missing.add('SUPABASE_ANON_KEY');
     if (githubVitconnectToken.isEmpty) missing.add('GITHUB_VITCONNECT_TOKEN');
-    if (facultyRatingScriptUrl.isEmpty)
-      missing.add('FACULTY_RATING_SCRIPT_URL');
+    if (pyqSecretHeader.isEmpty) missing.add('PYQ_SECRET_HEADER');
+    if (supabaseEventsUrl.isEmpty) missing.add('SUPABASE_EVENTS_URL');
+    if (supabaseEventsAnonKey.isEmpty) missing.add('SUPABASE_EVENTS_ANON_KEY');
+    if (eventsSecretHeader.isEmpty) missing.add('EVENTS_SECRET_HEADER');
     return missing;
   }
 

@@ -38,7 +38,7 @@ class AppCard extends StatelessWidget {
               isDark: themeProvider.currentTheme.isDark,
               customBorderColor:
                   borderColor ??
-                  themeProvider.currentTheme.muted.withOpacity(0.2),
+                  themeProvider.currentTheme.muted.withValues(alpha: 0.2),
               customBackgroundColor:
                   backgroundColor ?? themeProvider.currentTheme.surface,
               borderRadius: borderRadius,

@@ -60,7 +60,7 @@ class _QRCodeShareWidgetState extends State<QRCodeShareWidget> {
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.08),
+                        color: Colors.black.withValues(alpha: 0.08),
                         blurRadius: 16,
                         spreadRadius: 2,
                       ),
@@ -169,7 +169,7 @@ class _QRCodeShareWidgetState extends State<QRCodeShareWidget> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: theme.primary.withOpacity(0.1),
+                  color: theme.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(

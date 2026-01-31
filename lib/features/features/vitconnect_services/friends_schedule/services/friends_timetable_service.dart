@@ -12,33 +12,29 @@ import '../models/timetable_constants.dart';
 /// Handles loading, saving, and combining schedules
 class FriendsScheduleService {
   static const String _friendsKey = 'friends_schedule_list';
-  static const String _selectedFriendsKey = 'selected_friends_ids';
-  static const String _initializedKey = 'friends_schedule_initialized';
 
   List<Friend> _friends = [];
-  List<String> _selectedFriendIds = [];
-
-  /// Default ImBot timetable data for first-time users
-  static const String _defaultImBotQRData =
-      'ImBot|99BOT9876|Wednesday|08:00-08:50|BCSE999P|AI-Powered Napping Lab|FUN1 - 007|L13||Tuesday|08:00-08:50|BCSE888L|Quantum Meme Theory|LOL2 - 404|B1||Thursday|08:00-08:50|BMAT777L|Discrete Pizza Graphs|YUM3 - 666|D1||Wednesday|08:50-09:45|BCSE999P|AI-Powered Napping Lab|FUN1 - 007|L14||Monday|08:50-09:45|BCSE555L|Software for Robots that Compliment You|GIG3 - 101|F1||Thursday|08:50-09:45|BCSE888L|Quantum Meme Theory|LOL2 - 404|B1||Monday|09:50-10:40|BMAT777L|Discrete Pizza Graphs|YUM3 - 666|D1||Wednesday|09:50-10:40|BCSE555L|Software for Robots that Compliment You|GIG3 - 101|F1||Monday|10:40-11:35|BCSE888L|Quantum Meme Theory|LOL2 - 404|TB1||Wednesday|10:40-11:35|BMAT777L|Discrete Pizza Graphs|YUM3 - 666|TD1||Friday|10:40-11:35|BCSE555L|Software for Robots that Compliment You|GIG3 - 101|TF1||Friday|11:40-12:30|BMAT777L|Discrete Pizza Graphs|YUM3 - 666|TDD1||Monday|14:00-14:50|BMAT123L|Advanced Procrastination Techniques|NAP3 - 909|A2||Tuesday|14:00-14:50|BCSE321L|Clouds: The Musical|SKY3 - 808|B2||Thursday|14:00-14:50|BSTS999P|Competitive Gaming for Cats|MEOW3 - 505|D2||Tuesday|14:50-15:45|BCSE999L|AI-Powered Napping Lab|FUN1 - 007|G2||Wednesday|14:50-15:45|BMAT123L|Advanced Procrastination Techniques|NAP3 - 909|A2||Thursday|14:50-15:45|BCSE321L|Clouds: The Musical|SKY3 - 808|B2||Tuesday|15:50-16:40|BCSE555P|Software for Robots that Compliment You Lab|GIG3 - 101|L39||Monday|15:50-16:40|BSTS999P|Competitive Gaming for Cats|MEOW3 - 505|D2||Thursday|15:50-16:40|BCSE999L|AI-Powered Napping Lab|FUN1 - 007|G2||Friday|15:50-16:40|BMAT123L|Advanced Procrastination Techniques|NAP3 - 909|TA2||Tuesday|16:45-17:35|BCSE555P|Software for Robots that Compliment You Lab|GIG3 - 101|L40||Monday|16:45-17:35|BCSE321L|Clouds: The Musical|SKY3 - 808|TB2||Wednesday|16:45-17:35|BSTS999P|Competitive Gaming for Cats|MEOW3 - 505|TD2||Monday|17:40-18:30|BCSE999L|AI-Powered Napping Lab|FUN1 - 007|TG2||Tuesday|17:40-18:30|BMAT123L|Advanced Procrastination Techniques|NAP3 - 909|TAA2';
 
   /// Get all friends
   List<Friend> get friends => List.unmodifiable(_friends);
 
-  /// Get selected friends
-  List<Friend> get selectedFriends {
-    return _friends.where((f) => _selectedFriendIds.contains(f.id)).toList();
+  /// Get friends for Friends Schedule page
+  List<Friend> get friendsForSchedulePage {
+    return _friends.where((f) => f.showInFriendsSchedule).toList();
   }
+
+  /// Get friends for Home page
+  List<Friend> get friendsForHomePage {
+    return _friends.where((f) => f.showInHomePage).toList();
+  }
+
+  /// Default ImBot timetable data for first-time users (removed - no longer needed)
 
   /// Load friends from shared preferences
   Future<void> loadFriends() async {
     try {
-      Logger.d('FriendsSchedule', 'Loading friends from storage...');
-
       final prefs = await SharedPreferences.getInstance();
       final friendsJson = prefs.getString(_friendsKey);
-      final selectedIds = prefs.getStringList(_selectedFriendsKey) ?? [];
-      final isInitialized = prefs.getBool(_initializedKey) ?? false;
 
       if (friendsJson != null) {
         final List<dynamic> decoded = jsonDecode(friendsJson);
@@ -46,62 +42,49 @@ class FriendsScheduleService {
             decoded
                 .map((e) => Friend.fromJson(e as Map<String, dynamic>))
                 .toList();
-        _selectedFriendIds = selectedIds;
-
-        Logger.success('FriendsSchedule', 'Loaded ${_friends.length} friends');
-      } else if (!isInitialized) {
-        Logger.d(
-          'FriendsSchedule',
-          'First launch detected - adding default ImBot friend',
-        );
-        await _initializeDefaultFriend();
-        await prefs.setBool(_initializedKey, true);
       } else {
-        Logger.d('FriendsSchedule', 'No friends found in storage');
+        // First time - add default student
+        _friends = [];
+        await _addDefaultStudent();
       }
     } catch (e) {
-      Logger.e('FriendsSchedule', 'Failed to load friends', e);
       _friends = [];
-      _selectedFriendIds = [];
     }
   }
 
-  /// Initialize default ImBot friend for first-time users
-  Future<void> _initializeDefaultFriend() async {
+  /// Add default student for demonstration
+  Future<void> _addDefaultStudent() async {
     try {
-      final imBotFriend = Friend.fromQRString(
-        _defaultImBotQRData,
-        color: const Color(0xFFFFB800),
+      const defaultQRData =
+          'Student|99REG0011|Monday|08:00-08:50|BCSE101L|Breaking Bad|AB1 - 101|L1||Wednesday|08:00-08:50|BCSE202L|Stranger Things|AB1 - 209|L13||Monday|08:50-09:45|BCSE101L|Breaking Bad|AB1 - 101|L2||Wednesday|08:50-09:45|BCSE202L|Stranger Things|AB1 - 209|L14||Monday|09:50-10:40|BCSE303P|Friends|AB1 - 614|L3||Monday|10:40-11:35|BCSE303P|Friends|AB1 - 614|L4||Monday|14:00-14:50|BCSE303L|Westworld|AB3 - 503|A2||Tuesday|14:00-14:50|BSTS404P|Squid Game|AB3 - 509|B2||Wednesday|14:00-14:50|BCSE111L|Money Heist|AB3 - 513|C2||Thursday|14:00-14:50|BCSE202L|Stranger Things|AB3 - 505|D2||Friday|14:00-14:50|BHUM999L|Black Mirror|AB3 - 709|E2||Monday|14:50-15:45|BCSE404L|Dark|AB3 - 504|F2||Tuesday|14:50-15:45|BCSE505L|Sherlock|AB3 - 506|G2||Wednesday|14:50-15:45|BCSE303L|Westworld|AB3 - 503|A2||Thursday|14:50-15:45|BSTS404P|Squid Game|AB3 - 509|B2||Friday|14:50-15:45|BCSE111L|Money Heist|AB3 - 513|C2||Monday|15:50-16:40|BCSE202L|Stranger Things|AB3 - 505|D2||Tuesday|15:50-16:40|BHUM999L|Black Mirror|AB3 - 709|E2||Wednesday|15:50-16:40|BCSE404L|Dark|AB3 - 504|F2||Thursday|15:50-16:40|BCSE505L|Sherlock|AB3 - 506|G2||Friday|15:50-16:40|BCSE303L|Westworld|AB3 - 503|TA2||Monday|16:45-17:35|BSTS404P|Squid Game|AB3 - 509|TB2||Tuesday|16:45-17:35|BCSE111L|Money Heist|AB3 - 513|TC2||Wednesday|16:45-17:35|BCSE202L|Stranger Things|AB3 - 505|TD2||Thursday|16:45-17:35|BHUM999L|Black Mirror|AB3 - 709|TE2||Friday|16:45-17:35|BCSE404L|Dark|AB3 - 504|TF2||Tuesday|17:40-18:30|BCSE404P|Breaking Bad|AB1 - 205A|L41||Tuesday|18:35-19:25|BCSE404P|Breaking Bad|AB1 - 205A|L42';
+
+      final defaultFriend = Friend.fromQRString(defaultQRData);
+
+      // Set showInFriendsSchedule to true, showInHomePage to false by default
+      final friendWithToggles = defaultFriend.copyWith(
+        showInFriendsSchedule: true,
+        showInHomePage: false,
       );
 
-      _friends.add(imBotFriend);
-      _selectedFriendIds.add(imBotFriend.id);
-
+      _friends.add(friendWithToggles);
       await saveFriends();
 
       Logger.success(
         'FriendsSchedule',
-        'Default ImBot friend added successfully',
+        'Added default student: ${friendWithToggles.name}',
       );
     } catch (e) {
-      Logger.e('FriendsSchedule', 'Failed to add default ImBot friend', e);
+      Logger.e('FriendsSchedule', 'Failed to add default student', e);
     }
   }
 
   /// Save friends to shared preferences
   Future<void> saveFriends() async {
     try {
-      Logger.d('FriendsSchedule', 'Saving ${_friends.length} friends...');
-
       final prefs = await SharedPreferences.getInstance();
       final friendsJson = jsonEncode(_friends.map((f) => f.toJson()).toList());
-
       await prefs.setString(_friendsKey, friendsJson);
-      await prefs.setStringList(_selectedFriendsKey, _selectedFriendIds);
-
-      Logger.success('FriendsSchedule', 'Friends saved successfully');
     } catch (e) {
-      Logger.e('FriendsSchedule', 'Failed to save friends', e);
       rethrow;
     }
   }
@@ -113,16 +96,12 @@ class FriendsScheduleService {
 
       if (existingIndex >= 0) {
         _friends[existingIndex] = friend;
-        Logger.d('FriendsSchedule', 'Updated friend: ${friend.name}');
       } else {
         _friends.add(friend);
-        _selectedFriendIds.add(friend.id);
-        Logger.success('FriendsSchedule', 'Added friend: ${friend.name}');
       }
 
       await saveFriends();
     } catch (e) {
-      Logger.e('FriendsSchedule', 'Failed to add friend', e);
       rethrow;
     }
   }
@@ -131,29 +110,57 @@ class FriendsScheduleService {
   Future<void> removeFriend(String friendId) async {
     try {
       _friends.removeWhere((f) => f.id == friendId);
-      _selectedFriendIds.remove(friendId);
       await saveFriends();
-
-      Logger.success('FriendsSchedule', 'Removed friend: $friendId');
     } catch (e) {
-      Logger.e('FriendsSchedule', 'Failed to remove friend', e);
       rethrow;
     }
   }
 
-  /// Toggle friend selection
-  Future<void> toggleFriendSelection(String friendId) async {
+  /// Toggle Friends Schedule visibility
+  Future<void> toggleFriendsScheduleVisibility(String friendId) async {
     try {
-      if (_selectedFriendIds.contains(friendId)) {
-        _selectedFriendIds.remove(friendId);
-      } else {
-        _selectedFriendIds.add(friendId);
-      }
-      await saveFriends();
+      final friendIndex = _friends.indexWhere((f) => f.id == friendId);
+      if (friendIndex < 0) return;
 
-      Logger.d('FriendsSchedule', 'Toggled selection for: $friendId');
+      final friend = _friends[friendIndex];
+      _friends[friendIndex] = friend.copyWith(
+        showInFriendsSchedule: !friend.showInFriendsSchedule,
+      );
+
+      await saveFriends();
     } catch (e) {
-      Logger.e('FriendsSchedule', 'Failed to toggle friend selection', e);
+      rethrow;
+    }
+  }
+
+  /// Toggle Home Page visibility
+  Future<void> toggleHomePageVisibility(String friendId) async {
+    try {
+      final friendIndex = _friends.indexWhere((f) => f.id == friendId);
+      if (friendIndex < 0) return;
+
+      final friend = _friends[friendIndex];
+      _friends[friendIndex] = friend.copyWith(
+        showInHomePage: !friend.showInHomePage,
+      );
+
+      await saveFriends();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// Update friend's nickname
+  Future<void> updateFriendNickname(String friendId, String nickname) async {
+    try {
+      final friendIndex = _friends.indexWhere((f) => f.id == friendId);
+      if (friendIndex < 0) return;
+
+      final friend = _friends[friendIndex];
+      _friends[friendIndex] = friend.copyWith(nickname: nickname);
+
+      await saveFriends();
+    } catch (e) {
       rethrow;
     }
   }
@@ -162,39 +169,22 @@ class FriendsScheduleService {
   Future<void> updateFriendColor(String friendId, Color newColor) async {
     try {
       final friendIndex = _friends.indexWhere((f) => f.id == friendId);
-      if (friendIndex < 0) {
-        Logger.w('FriendsSchedule', 'Friend not found: $friendId');
-        return;
-      }
+      if (friendIndex < 0) return;
 
       final friend = _friends[friendIndex];
-      final updatedFriend = Friend(
-        id: friend.id,
-        name: friend.name,
-        regNumber: friend.regNumber,
-        classSlots: friend.classSlots,
-        color: newColor,
-        addedAt: friend.addedAt,
-      );
+      _friends[friendIndex] = friend.copyWith(color: newColor);
 
-      _friends[friendIndex] = updatedFriend;
       await saveFriends();
-
-      Logger.success(
-        'FriendsSchedule',
-        'Updated color for ${friend.name}: ${newColor.value}',
-      );
     } catch (e) {
-      Logger.e('FriendsSchedule', 'Failed to update friend color', e);
       rethrow;
     }
   }
 
   /// Get overlap count for a specific slot
-  /// Returns number of selected friends who have class at this time
+  /// Returns number of friends who have class at this time
   int getOverlapCount(String day, String timeSlot) {
     int count = 0;
-    for (final friend in selectedFriends) {
+    for (final friend in friendsForSchedulePage) {
       if (friend.hasClassAt(day, timeSlot)) {
         count++;
       }
@@ -204,19 +194,23 @@ class FriendsScheduleService {
 
   /// Get friends who have class at specific slot
   List<Friend> getFriendsWithClassAt(String day, String timeSlot) {
-    return selectedFriends.where((f) => f.hasClassAt(day, timeSlot)).toList();
+    return friendsForSchedulePage
+        .where((f) => f.hasClassAt(day, timeSlot))
+        .toList();
   }
 
   /// Get friends who are free at specific slot
   List<Friend> getFriendsFreeAt(String day, String timeSlot) {
-    return selectedFriends.where((f) => !f.hasClassAt(day, timeSlot)).toList();
+    return friendsForSchedulePage
+        .where((f) => !f.hasClassAt(day, timeSlot))
+        .toList();
   }
 
   /// Get friends with same venue at specific slot
   Map<String, List<Friend>> getFriendsByVenueAt(String day, String timeSlot) {
     final Map<String, List<Friend>> venueMap = {};
 
-    for (final friend in selectedFriends) {
+    for (final friend in friendsForSchedulePage) {
       final slot = friend.getSlotForCell(day, timeSlot);
       if (slot != null && slot.venue.isNotEmpty) {
         venueMap.putIfAbsent(slot.venue, () => []);
@@ -357,10 +351,13 @@ class FriendsScheduleService {
       return Friend(
         id: studentReg.isNotEmpty ? studentReg : 'me',
         name: studentName,
+        nickname: studentName, // Default nickname is the name
         regNumber: studentReg,
         classSlots: classSlots,
         color: const Color(0xFF6366F1), // Primary app color
         addedAt: DateTime.now(),
+        showInFriendsSchedule: false, // Not applicable for own schedule
+        showInHomePage: false, // Not applicable for own schedule
       );
     } catch (e) {
       Logger.e('FriendsSchedule', 'Failed to load own schedule', e);
@@ -378,12 +375,8 @@ class FriendsScheduleService {
   Future<void> clearAllFriends() async {
     try {
       _friends.clear();
-      _selectedFriendIds.clear();
       await saveFriends();
-
-      Logger.success('FriendsSchedule', 'Cleared all friends');
     } catch (e) {
-      Logger.e('FriendsSchedule', 'Failed to clear friends', e);
       rethrow;
     }
   }

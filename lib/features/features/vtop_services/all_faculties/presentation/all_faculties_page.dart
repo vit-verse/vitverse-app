@@ -30,7 +30,7 @@ class _AllFacultiesPageState extends State<AllFacultiesPage> {
     super.initState();
     AnalyticsService.instance.logScreenView(
       screenName: 'AllFaculities',
-      screenClass: 'AllFaculitiesPage'
+      screenClass: 'AllFaculitiesPage',
     );
     _loadFacultyData();
     _searchController.addListener(_performSearch);
@@ -187,10 +187,12 @@ class _AllFacultiesPageState extends State<AllFacultiesPage> {
                 decoration: BoxDecoration(
                   color: Theme.of(
                     context,
-                  ).colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                  ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
                   border: Border(
-                    top: BorderSide(color: Colors.grey.withOpacity(0.2)),
-                    bottom: BorderSide(color: Colors.grey.withOpacity(0.2)),
+                    top: BorderSide(color: Colors.grey.withValues(alpha: 0.2)),
+                    bottom: BorderSide(
+                      color: Colors.grey.withValues(alpha: 0.2),
+                    ),
                   ),
                 ),
                 child: Column(

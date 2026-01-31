@@ -45,7 +45,7 @@ class CourseProjectionCard extends StatelessWidget {
         decoration: AppCardStyles.compactCardDecoration(
           isDark: theme.isDark,
           customBackgroundColor: theme.surface,
-          customBorderColor: _getStatusColor(theme).withOpacity(0.3),
+          customBorderColor: _getStatusColor(theme).withValues(alpha: 0.3),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -91,7 +91,7 @@ class CourseProjectionCard extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(ThemeConstants.spacingSm),
           decoration: BoxDecoration(
-            color: theme.primary.withOpacity(0.1),
+            color: theme.primary.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(ThemeConstants.radiusSm),
           ),
           child: Icon(Icons.book_outlined, color: theme.primary, size: 20),
@@ -143,7 +143,11 @@ class CourseProjectionCard extends StatelessWidget {
           ),
         ),
         const SizedBox(width: ThemeConstants.spacingMd),
-        Container(width: 1, height: 40, color: theme.muted.withOpacity(0.2)),
+        Container(
+          width: 1,
+          height: 40,
+          color: theme.muted.withValues(alpha: 0.2),
+        ),
         const SizedBox(width: ThemeConstants.spacingMd),
         Expanded(
           child: _buildStatItem(
@@ -198,7 +202,7 @@ class CourseProjectionCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(ThemeConstants.spacingMd),
       decoration: BoxDecoration(
-        color: theme.background.withOpacity(0.5),
+        color: theme.background.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(ThemeConstants.radiusSm),
       ),
       child: Column(
@@ -270,9 +274,9 @@ class CourseProjectionCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(ThemeConstants.spacingMd),
       decoration: BoxDecoration(
-        color: theme.primary.withOpacity(0.05),
+        color: theme.primary.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(ThemeConstants.radiusSm),
-        border: Border.all(color: theme.primary.withOpacity(0.2)),
+        border: Border.all(color: theme.primary.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -325,7 +329,7 @@ class CourseProjectionCard extends StatelessWidget {
                       vertical: 2,
                     ),
                     decoration: BoxDecoration(
-                      color: theme.primary.withOpacity(0.15),
+                      color: theme.primary.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
@@ -352,10 +356,10 @@ class CourseProjectionCard extends StatelessWidget {
                                   vertical: 2,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: theme.muted.withOpacity(0.1),
+                                  color: theme.muted.withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(3),
                                   border: Border.all(
-                                    color: theme.muted.withOpacity(0.3),
+                                    color: theme.muted.withValues(alpha: 0.3),
                                     width: 0.5,
                                   ),
                                 ),

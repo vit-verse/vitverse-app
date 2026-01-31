@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../data/widget_preferences_service.dart';
 import '../../../../core/utils/logger.dart';

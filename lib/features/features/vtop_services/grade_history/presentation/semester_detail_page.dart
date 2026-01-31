@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../../core/database/entities/cumulative_mark.dart';
 import '../../../../../core/theme/theme_provider.dart';
+import '../../../../../firebase/analytics/analytics_service.dart';
 import '../logic/grade_history_logic.dart';
 import '../widgets/grade_radar_chart.dart';
 
 /// Semester detail page showing radar chart and course list
-class SemesterDetailPage extends StatelessWidget {
+class SemesterDetailPage extends StatefulWidget {
   final String semesterName;
   final List<CumulativeMark> grades;
 
@@ -16,10 +17,24 @@ class SemesterDetailPage extends StatelessWidget {
     required this.grades,
   });
 
+  @override
+  State<SemesterDetailPage> createState() => _SemesterDetailPageState();
+}
+
+class _SemesterDetailPageState extends State<SemesterDetailPage> {
+  @override
+  void initState() {
+    super.initState();
+    AnalyticsService.instance.logScreenView(
+      screenName: 'GradesSemesterDetail',
+      screenClass: 'SemesterDetailPage',
+    );
+  }
+
   Map<String, double> _calculateCoursePerformance() {
     final performance = <String, double>{};
 
-    for (final grade in grades) {
+    for (final grade in widget.grades) {
       final percentage = (grade.gradePoints / 10.0) * 100.0;
       performance[grade.courseCode] = percentage;
     }
@@ -29,7 +44,7 @@ class SemesterDetailPage extends StatelessWidget {
 
   Map<String, String> _getCourseTitles() {
     final titles = <String, String>{};
-    for (final grade in grades) {
+    for (final grade in widget.grades) {
       titles[grade.courseCode] = grade.courseTitle;
     }
     return titles;
@@ -37,7 +52,7 @@ class SemesterDetailPage extends StatelessWidget {
 
   Map<String, String> _getCourseGrades() {
     final gradeMap = <String, String>{};
-    for (final grade in grades) {
+    for (final grade in widget.grades) {
       gradeMap[grade.courseCode] = grade.grade;
     }
     return gradeMap;
@@ -56,7 +71,7 @@ class SemesterDetailPage extends StatelessWidget {
       backgroundColor: theme.background,
       appBar: AppBar(
         title: Text(
-          semesterName,
+          widget.semesterName,
           style: TextStyle(
             color: theme.text,
             fontSize: 18,
@@ -132,7 +147,7 @@ class SemesterDetailPage extends StatelessWidget {
           const SizedBox(height: 12),
 
           // Course Cards
-          ...grades.map((grade) {
+          ...widget.grades.map((grade) {
             final gradeColor = logic.getGradeColorFromProvider(
               themeProvider,
               grade.grade,

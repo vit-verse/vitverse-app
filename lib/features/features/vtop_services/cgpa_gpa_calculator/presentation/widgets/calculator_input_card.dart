@@ -102,7 +102,9 @@ class CalculatorInputCard extends StatelessWidget {
               ),
               disabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide(color: theme.border.withOpacity(0.5)),
+                borderSide: BorderSide(
+                  color: theme.border.withValues(alpha: 0.5),
+                ),
               ),
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 16,

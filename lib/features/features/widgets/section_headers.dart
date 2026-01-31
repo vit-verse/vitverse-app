@@ -28,7 +28,7 @@ class MainSectionHeader extends StatelessWidget {
           // Use professional theme-based gradient
           headerColors = [
             themeProvider.currentTheme.primary,
-            themeProvider.currentTheme.primary.withOpacity(0.8),
+            themeProvider.currentTheme.primary.withValues(alpha: 0.8),
           ];
         } else {
           // Use default colors
@@ -37,7 +37,6 @@ class MainSectionHeader extends StatelessWidget {
 
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          margin: const EdgeInsets.only(bottom: 12),
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: headerColors,
@@ -107,8 +106,7 @@ class SubSectionHeader extends StatelessWidget {
       onTap: onTap,
       behavior: HitTestBehavior.opaque, // Full area touchable
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
-        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -135,7 +133,7 @@ class SubSectionHeader extends StatelessWidget {
                       vertical: 2,
                     ),
                     decoration: BoxDecoration(
-                      color: theme.muted.withOpacity(0.15),
+                      color: theme.muted.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
@@ -175,7 +173,7 @@ class SimpleSectionHeader extends StatelessWidget {
     final theme = themeProvider.currentTheme;
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
           Text(
@@ -192,7 +190,7 @@ class SimpleSectionHeader extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(
-                color: theme.muted.withOpacity(0.15),
+                color: theme.muted.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(

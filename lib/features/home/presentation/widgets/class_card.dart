@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/theme/theme_provider.dart';
 import '../../../../core/theme/color_utils.dart';
-import '../../../../core/utils/logger.dart';
 import '../../../profile/widget_customization/provider/widget_customization_provider.dart';
 import '../../../profile/widget_customization/data/widget_preferences_service.dart';
 import '../../logic/home_logic.dart';
@@ -10,17 +9,18 @@ import 'class_details_dialog.dart';
 
 /// Individual class card widget
 class ClassCard extends StatelessWidget {
-  static const String _tag = 'ClassCard';
-
   final Map<String, dynamic> classData;
   final int dayIndex;
   final HomeLogic homeLogic;
+  final DateTime?
+  actualDate; // Actual date for this class (considering week navigation)
 
   const ClassCard({
     super.key,
     required this.classData,
     required this.dayIndex,
     required this.homeLogic,
+    this.actualDate,
   });
 
   @override
@@ -35,359 +35,342 @@ class ClassCard extends StatelessWidget {
   }
 
   Widget _buildFriendClassCard(BuildContext context) {
-    return Consumer<ThemeProvider>(
-      builder: (context, themeProvider, child) {
-        final friendName = classData['friendName'] as String? ?? 'Friend';
-        final friendColor =
-            classData['friendColor'] as Color? ??
-            themeProvider.currentTheme.primary;
-        final courseTitle =
-            classData['courseTitle'] as String? ?? 'Unknown Course';
-        final venue = classData['venue'] as String? ?? '--';
-        final timeSlot = classData['timeSlot'] as String? ?? '--:-- to --:--';
+    final themeProvider = context.read<ThemeProvider>();
+    final friendNickname = classData['friendNickname'] as String? ?? 'Friend';
+    final friendColor =
+        classData['friendColor'] as Color? ??
+        themeProvider.currentTheme.primary;
+    final course = classData['course'] as Map<String, dynamic>? ?? {};
+    final courseTitle = course['title'] as String? ?? 'Unknown Course';
+    final venue = course['venue'] as String? ?? '--';
+    final startTime = classData['start_time'] as String? ?? '';
+    final endTime = classData['end_time'] as String? ?? '';
 
-        // Parse time slot
-        String displayTime = timeSlot;
-        if (timeSlot.contains('-') && !timeSlot.contains(' ')) {
-          final parts = timeSlot.split('-');
-          if (parts.length == 2) {
-            displayTime =
-                '${_convertTo12HourFormat(parts[0])} - ${_convertTo12HourFormat(parts[1])}';
-          }
-        }
+    // Check if class has passed (for any day in the current week)
+    final hasPassed = _hasClassPassedInWeek(dayIndex, endTime);
 
-        return Container(
-          margin: const EdgeInsets.only(bottom: 8),
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: friendColor.withOpacity(0.05),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: friendColor.withOpacity(0.3), width: 1.5),
+    // Format time display
+    String displayTime = '--:-- to --:--';
+    if (startTime.isNotEmpty && endTime.isNotEmpty) {
+      displayTime =
+          '${_convertTo12HourFormat(startTime)} - ${_convertTo12HourFormat(endTime)}';
+    }
+
+    return Opacity(
+      opacity: hasPassed ? 0.4 : 1.0,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: friendColor.withValues(alpha: 0.05),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: friendColor.withValues(alpha: 0.3),
+            width: 1.5,
           ),
-          child: Row(
-            children: [
-              // Friend name tag
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: friendColor,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  friendName,
-                  style: const TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
+        ),
+        child: Row(
+          children: [
+            // Friend nickname tag
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: friendColor,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                friendNickname,
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
               ),
-              const SizedBox(width: 10),
+            ),
+            const SizedBox(width: 10),
 
-              // Course details
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      courseTitle,
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
-                        color: themeProvider.currentTheme.text,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+            // Course details
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    courseTitle,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: themeProvider.currentTheme.text,
                     ),
-                    const SizedBox(height: 4),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
 
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.access_time_rounded,
-                          size: 11,
-                          color: friendColor,
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.access_time_rounded,
+                        size: 11,
+                        color: friendColor,
+                      ),
+                      const SizedBox(width: 3),
+                      Text(
+                        displayTime,
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: themeProvider.currentTheme.muted,
+                          fontWeight: FontWeight.w600,
                         ),
-                        const SizedBox(width: 3),
-                        Text(
-                          displayTime,
+                      ),
+                      const SizedBox(width: 8),
+                      Icon(
+                        Icons.location_on_rounded,
+                        size: 11,
+                        color: friendColor,
+                      ),
+                      const SizedBox(width: 3),
+                      Expanded(
+                        child: Text(
+                          venue,
                           style: TextStyle(
                             fontSize: 10,
                             color: themeProvider.currentTheme.muted,
                             fontWeight: FontWeight.w600,
                           ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(width: 8),
-                        Icon(
-                          Icons.location_on_rounded,
-                          size: 11,
-                          color: friendColor,
-                        ),
-                        const SizedBox(width: 3),
-                        Expanded(
-                          child: Text(
-                            venue,
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: themeProvider.currentTheme.muted,
-                              fontWeight: FontWeight.w600,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-            ],
-          ),
-        );
-      },
+            ),
+          ],
+        ),
+      ),
     );
   }
 
   Widget _buildUserClassCard(BuildContext context) {
-    return Consumer2<ThemeProvider, WidgetCustomizationProvider>(
-      builder: (context, themeProvider, widgetProvider, child) {
-        final course = classData['course'] as Map<String, dynamic>?;
-        final courseCode = course?['code']?.toString() ?? 'Unknown';
-        final courseTitle = course?['title']?.toString() ?? 'Unknown Course';
-        final courseType = course?['type']?.toString().toLowerCase() ?? '';
-        final startTime = classData['start_time']?.toString() ?? '--:--';
-        final endTime = classData['end_time']?.toString() ?? '--:--';
+    final themeProvider = context.read<ThemeProvider>();
+    final widgetProvider = context.read<WidgetCustomizationProvider>();
+    final course = classData['course'] as Map<String, dynamic>?;
+    final courseCode = course?['code']?.toString() ?? 'Unknown';
+    final courseTitle = course?['title']?.toString() ?? 'Unknown Course';
+    final courseType = course?['type']?.toString().toLowerCase() ?? '';
+    final startTime = classData['start_time']?.toString() ?? '--:--';
+    final endTime = classData['end_time']?.toString() ?? '--:--';
 
-        // Determine if it's lab
-        final isLab =
-            courseType.contains('lab') || courseType.contains('embedded lab');
+    // Determine if it's lab
+    final isLab =
+        courseType.contains('lab') || courseType.contains('embedded lab');
 
-        // Check if class is currently ongoing
-        final now = DateTime.now();
-        final isToday = dayIndex == (now.weekday - 1);
-        final currentTime =
-            '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
-        final isOngoing =
-            isToday && _isClassOngoing(startTime, endTime, currentTime);
-        final classProgress =
-            isToday ? _getClassProgress(startTime, endTime, currentTime) : 0.0;
+    // Check if class is currently ongoing or has passed
+    final now = DateTime.now();
+    final isToday = dayIndex == (now.weekday - 1);
+    final currentTime =
+        '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
+    final isOngoing =
+        isToday && _isClassOngoing(startTime, endTime, currentTime);
+    final hasPassed = _hasClassPassedInWeek(dayIndex, endTime);
+    final classProgress =
+        isToday ? _getClassProgress(startTime, endTime, currentTime) : 0.0;
 
-        // Get attendance data for this course
-        // For embedded courses, pass the course type to get the correct attendance (theory vs lab)
-        final courseAttendance = homeLogic.getCourseAttendance(
-          courseCode,
-          courseType: courseType,
+    // Get attendance data for this course
+    // For embedded courses, pass the course type to get the correct attendance (theory vs lab)
+    final courseAttendance = homeLogic.getCourseAttendance(
+      courseCode,
+      courseType: courseType,
+    );
+
+    // Get slot name(s) for the dialog - handle merged slots
+    String slotName = 'Unknown';
+    final slotNames = classData['slotNames'] as List?;
+    if (slotNames != null && slotNames.isNotEmpty) {
+      // Multiple slots merged - join with " + "
+      slotName = slotNames.join(' + ');
+    } else {
+      // Single slot - backward compatibility
+      final slotId = classData['slotId'] as int?;
+      if (slotId != null) {
+        final slot = homeLogic.slotsData.firstWhere(
+          (slot) => slot['id'] == slotId,
+          orElse: () => {'slot': 'Unknown'},
         );
+        slotName = slot['slot']?.toString() ?? 'Slot $slotId';
+      }
+    }
 
-        // Get slot name(s) for the dialog - handle merged slots
-        String slotName = 'Unknown';
-        final slotNames = classData['slotNames'] as List?;
-        if (slotNames != null && slotNames.isNotEmpty) {
-          // Multiple slots merged - join with " + "
-          slotName = slotNames.join(' + ');
-        } else {
-          // Single slot - backward compatibility
-          final slotId = classData['slotId'] as int?;
-          if (slotId != null) {
-            final slot = homeLogic.slotsData.firstWhere(
-              (slot) => slot['id'] == slotId,
-              orElse: () => {'slot': 'Unknown'},
-            );
-            slotName = slot['slot']?.toString() ?? 'Slot $slotId';
-          }
-        }
-
-        return GestureDetector(
-          behavior: HitTestBehavior.translucent,
-          onTap: () {
-            showModalBottomSheet(
-              context: context,
-              isScrollControlled: true,
-              backgroundColor: Colors.transparent,
-              builder:
-                  (context) => ClassDetailsDialog(
-                    classData: classData,
-                    courseAttendance: courseAttendance,
-                    slotName: slotName,
-                  ),
-            );
-          },
-          child: Container(
-            margin: const EdgeInsets.only(bottom: 10),
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: themeProvider.currentTheme.surface,
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(
-                color: themeProvider.currentTheme.muted.withOpacity(0.2),
-                width: 1.5,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: themeProvider.currentTheme.text.withOpacity(0.02),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
+    return Opacity(
+      opacity: hasPassed ? 0.4 : 1.0,
+      child: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTap: () {
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            backgroundColor: Colors.transparent,
+            builder:
+                (context) => ClassDetailsDialog(
+                  classData: classData,
+                  courseAttendance: courseAttendance,
+                  slotName: slotName,
                 ),
-              ],
+          );
+        },
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 10),
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: themeProvider.currentTheme.surface,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: themeProvider.currentTheme.muted.withValues(alpha: 0.2),
+              width: 1.5,
             ),
-            child: Stack(
-              children: [
-                // Progress indicator for ongoing class
-                if (isOngoing && classProgress > 0)
-                  Positioned.fill(
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Container(
-                        width:
-                            MediaQuery.of(context).size.width * classProgress,
-                        decoration: BoxDecoration(
-                          color: themeProvider.currentTheme.primary.withOpacity(
-                            0.08,
-                          ),
-                          borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: themeProvider.currentTheme.text.withValues(alpha: 0.02),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Stack(
+            children: [
+              // Progress indicator for ongoing class
+              if (isOngoing && classProgress > 0)
+                Positioned.fill(
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Container(
+                      width: MediaQuery.of(context).size.width * classProgress,
+                      decoration: BoxDecoration(
+                        color: themeProvider.currentTheme.primary.withValues(
+                          alpha: 0.08,
                         ),
+                        borderRadius: BorderRadius.circular(20),
                       ),
                     ),
                   ),
+                ),
 
-                Row(
-                  children: [
-                    // Theory/Lab Icon
-                    Stack(
-                      children: [
-                        Container(
-                          width: 44,
-                          height: 44,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                themeProvider.currentTheme.primary.withOpacity(
-                                  0.15,
-                                ),
-                                themeProvider.currentTheme.primary.withOpacity(
-                                  0.05,
-                                ),
-                              ],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Image.asset(
+              Row(
+                children: [
+                  Stack(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(2.0),
+                        child: Image.asset(
+                          isLab
+                              ? 'assets/icons/lab.png'
+                              : 'assets/icons/theory.png',
+                          width: 40,
+                          height: 40,
+                          color: themeProvider.currentTheme.primary,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Icon(
                               isLab
-                                  ? 'assets/icons/lab.png'
-                                  : 'assets/icons/theory.png',
-                              width: 28,
-                              height: 28,
+                                  ? Icons.science_rounded
+                                  : Icons.book_rounded,
                               color: themeProvider.currentTheme.primary,
-                              errorBuilder: (context, error, stackTrace) {
-                                // Fallback to Material icons if asset not found
-                                return Icon(
-                                  isLab
-                                      ? Icons.science_rounded
-                                      : Icons.book_rounded,
-                                  color: themeProvider.currentTheme.primary,
-                                  size: 24,
-                                );
-                              },
+                              size: 36,
+                            );
+                          },
+                        ),
+                      ),
+
+                      if (isOngoing)
+                        Positioned(
+                          right: -2,
+                          top: -2,
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: themeProvider.currentTheme.primary,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: themeProvider.currentTheme.surface,
+                                width: 2,
+                              ),
+                            ),
+                            child: Icon(
+                              Icons.play_arrow_rounded,
+                              color: themeProvider.currentTheme.background,
+                              size: 12,
                             ),
                           ),
                         ),
+                    ],
+                  ),
+                  const SizedBox(width: 12),
 
-                        // Running indicator badge
-                        if (isOngoing)
-                          Positioned(
-                            right: -2,
-                            top: -2,
-                            child: Container(
-                              padding: const EdgeInsets.all(4),
-                              decoration: BoxDecoration(
-                                color: themeProvider.currentTheme.primary,
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: themeProvider.currentTheme.surface,
-                                  width: 2,
-                                ),
-                              ),
-                              child: Icon(
-                                Icons.play_arrow_rounded,
-                                color: themeProvider.currentTheme.background,
-                                size: 12,
-                              ),
-                            ),
+                  // Class details
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          courseTitle,
+                          style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.bold,
+                            color: themeProvider.currentTheme.text,
                           ),
-                      ],
-                    ),
-                    const SizedBox(width: 12),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 8),
 
-                    // Class details
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            courseTitle,
-                            style: TextStyle(
-                              fontSize: 17,
-                              fontWeight: FontWeight.bold,
-                              color: themeProvider.currentTheme.text,
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.access_time_rounded,
+                              size: 15,
+                              color:
+                                  isOngoing
+                                      ? themeProvider.currentTheme.primary
+                                      : themeProvider.currentTheme.muted,
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 8),
-
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.access_time_rounded,
-                                size: 15,
+                            const SizedBox(width: 4),
+                            Text(
+                              '${_convertTo12HourFormat(startTime)} - ${_convertTo12HourFormat(endTime)}',
+                              style: TextStyle(
+                                fontSize: 13,
                                 color:
                                     isOngoing
                                         ? themeProvider.currentTheme.primary
-                                        : themeProvider.currentTheme.muted,
+                                        : themeProvider.currentTheme.text,
+                                fontWeight:
+                                    isOngoing
+                                        ? FontWeight.w700
+                                        : FontWeight.w600,
                               ),
-                              const SizedBox(width: 4),
-                              Text(
-                                '${_convertTo12HourFormat(startTime)} - ${_convertTo12HourFormat(endTime)}',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color:
-                                      isOngoing
-                                          ? themeProvider.currentTheme.primary
-                                          : themeProvider.currentTheme.text,
-                                  fontWeight:
-                                      isOngoing
-                                          ? FontWeight.w700
-                                          : FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 12),
+                  ),
+                  const SizedBox(width: 12),
 
-                    // Dynamic widget based on user preference
-                    _buildClassCardWidget(
-                      context,
-                      themeProvider,
-                      widgetProvider,
-                      classData,
-                      courseCode,
-                      slotName,
-                      courseAttendance,
-                    ),
-                  ],
-                ),
-              ],
-            ),
+                  // Dynamic widget based on user preference
+                  _buildClassCardWidget(
+                    context,
+                    themeProvider,
+                    widgetProvider,
+                    classData,
+                    courseCode,
+                    slotName,
+                    courseAttendance,
+                  ),
+                ],
+              ),
+            ],
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 
@@ -420,10 +403,10 @@ class ClassCard extends StatelessWidget {
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
-            color: attendanceColor.withOpacity(0.1),
+            color: attendanceColor.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: attendanceColor.withOpacity(0.3),
+              color: attendanceColor.withValues(alpha: 0.3),
               width: 2,
             ),
           ),
@@ -445,10 +428,10 @@ class ClassCard extends StatelessWidget {
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
-            color: themeProvider.currentTheme.primary.withOpacity(0.1),
+            color: themeProvider.currentTheme.primary.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: themeProvider.currentTheme.primary.withOpacity(0.3),
+              color: themeProvider.currentTheme.primary.withValues(alpha: 0.3),
               width: 2,
             ),
           ),
@@ -477,10 +460,10 @@ class ClassCard extends StatelessWidget {
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
-            color: themeProvider.currentTheme.primary.withOpacity(0.1),
+            color: themeProvider.currentTheme.primary.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: themeProvider.currentTheme.primary.withOpacity(0.3),
+              color: themeProvider.currentTheme.primary.withValues(alpha: 0.3),
               width: 2,
             ),
           ),
@@ -517,10 +500,10 @@ class ClassCard extends StatelessWidget {
           return Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
-              color: const Color(0xFF10B981).withOpacity(0.1),
+              color: const Color(0xFF10B981).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: const Color(0xFF10B981).withOpacity(0.3),
+                color: const Color(0xFF10B981).withValues(alpha: 0.3),
                 width: 2,
               ),
             ),
@@ -548,10 +531,10 @@ class ClassCard extends StatelessWidget {
           return Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
-              color: themeProvider.currentTheme.error.withOpacity(0.1),
+              color: themeProvider.currentTheme.error.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: themeProvider.currentTheme.error.withOpacity(0.3),
+                color: themeProvider.currentTheme.error.withValues(alpha: 0.3),
                 width: 2,
               ),
             ),
@@ -579,10 +562,12 @@ class ClassCard extends StatelessWidget {
           return Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
-              color: themeProvider.currentTheme.primary.withOpacity(0.1),
+              color: themeProvider.currentTheme.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: themeProvider.currentTheme.primary.withOpacity(0.3),
+                color: themeProvider.currentTheme.primary.withValues(
+                  alpha: 0.3,
+                ),
                 width: 2,
               ),
             ),
@@ -659,6 +644,43 @@ class ClassCard extends StatelessWidget {
     try {
       return currentTime.compareTo(startTime) >= 0 &&
           currentTime.compareTo(endTime) < 0;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  bool _hasClassPassedInWeek(int classDayIndex, String endTime) {
+    try {
+      final now = DateTime.now();
+      final currentTime =
+          '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
+
+      final DateTime classDate;
+      if (actualDate != null) {
+        classDate = actualDate!;
+      } else {
+        final currentDayIndex = now.weekday - 1;
+        final daysOffset = classDayIndex - currentDayIndex;
+        classDate = DateTime(
+          now.year,
+          now.month,
+          now.day,
+        ).add(Duration(days: daysOffset));
+      }
+
+      final today = DateTime(now.year, now.month, now.day);
+
+      if (classDate.isBefore(today)) {
+        return true;
+      }
+
+      if (classDate.year == today.year &&
+          classDate.month == today.month &&
+          classDate.day == today.day) {
+        return currentTime.compareTo(endTime) > 0;
+      }
+
+      return false;
     } catch (e) {
       return false;
     }

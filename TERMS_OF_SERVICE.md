@@ -1,6 +1,6 @@
 # Terms of Service
 
-**Last Updated:** December 17, 2025
+**Last Updated:** January 14, 2026
 
 By using VIT Verse (also referred to as "VIT Connect"), you agree to these Terms of Service and our Privacy Policy. If you do not agree, please do not use or uninstall the app.
 
@@ -16,9 +16,10 @@ VIT Verse is an unofficial, student-developed mobile application for VIT Chennai
 
 VIT Verse provides features including but not limited to:
 - VTOP data visualization (attendance, marks, timetable, grades)
-- Community features (Cab Share, Lost & Found, Faculty Ratings)
-- Campus utilities (mess menu, laundry tracking)
-- Academic performance analytics
+- Community features (Cab Share, Lost & Found, Faculty Ratings, Events)
+- Campus utilities (mess menu, laundry tracking, PYQ)
+- Academic performance analytics and report generation
+- Push notifications for community features (Cab Share, Lost & Found, Events)
 
 **This app is NOT officially affiliated with, endorsed by, or connected to VIT Chennai or VIT University.**
 
@@ -33,6 +34,7 @@ You agree to:
 - Not reverse-engineer, decompile, or attempt to extract source code
 - Maintain respectful and honest behavior in community features
 - Not post spam, offensive content, or false information
+- Not misuse the events feature to spread misinformation
 - Comply with all applicable laws and VIT institutional policies
 
 ---
@@ -41,7 +43,9 @@ You agree to:
 
 Your VTOP credentials are encrypted (AES-256) and stored locally on your device. The app fetches academic data directly from VTOP servers and stores it locally. **We do not collect, store, or transmit your credentials to our servers.**
 
-Community feature participation (Cab Share, Lost & Found) may display your name and registration number to other users. Faculty ratings are anonymous.
+Community feature participation (Cab Share, Lost & Found, Events) may display your name and registration number to other users. Faculty ratings do not display personal details with ratings, but comments show "Commented by" to prevent spam.
+
+Push notifications are delivered via Firebase Cloud Messaging using topic-based subscriptions (no tokens stored). You can unsubscribe from notification topics in the Notification Settings page.
 
 For complete data handling details, see our [Privacy Policy](PRIVACY_POLICY.md).
 
@@ -56,10 +60,11 @@ We are NOT responsible for:
 - **Service Availability**: The app may experience downtime, errors, or disruptions
 - **VTOP Issues**: Problems with VIT's official VTOP portal, including login failures, data inconsistencies, or access restrictions
 - **Data Loss**: Loss of locally stored data due to app uninstallation, device failure, or other technical issues
-- **Third-Party Services**: Actions or policies of Firebase, Supabase, Google Apps Script API, or other integrated services
+- **Third-Party Services**: Actions or policies of Firebase, Supabase, Google Cloud, or other integrated services
 - **Data Scraping or Misuse**: Unauthorized access, data breaches, or misuse by third parties
 - **Academic Consequences**: Any academic, disciplinary, or administrative actions resulting from app usage
-- **Community Content**: Posts, ratings, or information shared by other users
+- **Community Content**: Posts, ratings, events, or information shared by other users
+- **Notification Failures**: Missed reminders or alerts due to system limitations
 
 ---
 
@@ -73,7 +78,7 @@ VIT, VIT Chennai, VTOP, and related trademarks belong to VIT University and are 
 
 ## 7. Third-Party Services
 
-This app integrates with third-party services including Firebase (Google), Supabase (cloud database), and Google Apps Script API (Google Sheets). Each service operates under its own terms and privacy policies. **We are not responsible for third-party service policies, data handling, or service disruptions.**
+This app integrates with third-party services including Firebase (Google), Supabase (cloud database), and Google Cloud Storage (PYQ files). Each service operates under its own terms and privacy policies. **We are not responsible for third-party service policies, data handling, or service disruptions.**
 
 ---
 

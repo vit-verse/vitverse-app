@@ -208,7 +208,7 @@ class CGPAOverviewCard extends StatelessWidget {
               child: Stack(
                 children: [
                   // Background
-                  Container(color: theme.muted.withOpacity(0.2)),
+                  Container(color: theme.muted.withValues(alpha: 0.2)),
                   // Light gradient for total (earned + added)
                   if (totalAddedCredits > 0)
                     FractionallySizedBox(
@@ -224,7 +224,7 @@ class CGPAOverviewCard extends StatelessWidget {
                           color:
                               (cgpaSummary.creditsEarned + totalAddedCredits) >
                                       totalCreditsRequired
-                                  ? Colors.red.shade400.withOpacity(0.4)
+                                  ? Colors.red.shade400.withValues(alpha: 0.4)
                                   : cgpaColor.withOpacity(
                                     0.4,
                                   ), // Use marks color
@@ -307,7 +307,7 @@ class CGPAOverviewCard extends StatelessWidget {
                   isExceeding
                       ? Colors.red.shade400
                       : cgpaColor, // Use marks color
-              backgroundColor: theme.muted.withOpacity(0.2),
+              backgroundColor: theme.muted.withValues(alpha: 0.2),
             ),
             child: const SizedBox(width: 110, height: 110),
           ),
@@ -318,8 +318,8 @@ class CGPAOverviewCard extends StatelessWidget {
                 percentage: totalPercent,
                 primaryColor:
                     isExceeding
-                        ? Colors.red.shade400.withOpacity(0.4)
-                        : cgpaColor.withOpacity(0.4), // Use marks color
+                        ? Colors.red.shade400.withValues(alpha: 0.4)
+                        : cgpaColor.withValues(alpha: 0.4), // Use marks color
                 backgroundColor: Colors.transparent,
               ),
               child: const SizedBox(width: 110, height: 110),

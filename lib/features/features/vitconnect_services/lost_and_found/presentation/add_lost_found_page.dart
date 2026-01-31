@@ -9,6 +9,7 @@ import '../../../../../core/theme/theme_provider.dart';
 import '../../../../../core/database/entities/student_profile.dart';
 import '../../../../../core/utils/logger.dart';
 import '../../../../../core/utils/snackbar_utils.dart';
+import '../../../../../firebase/analytics/analytics_service.dart';
 import '../data/lost_found_repository.dart';
 import '../widgets/verified_info_card.dart';
 
@@ -42,6 +43,10 @@ class _AddLostFoundPageState extends State<AddLostFoundPage> {
   @override
   void initState() {
     super.initState();
+    AnalyticsService.instance.logScreenView(
+      screenName: 'AddLostFound',
+      screenClass: 'AddLostFoundPage',
+    );
     _loadProfile();
   }
 

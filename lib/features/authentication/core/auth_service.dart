@@ -62,7 +62,7 @@ class VTOPAuthService extends ChangeNotifier {
   String? _username;
   String? _password;
   String? _semesterID;
-  Map<String, String> _semesters = {};
+  final Map<String, String> _semesters = {};
 
   CaptchaType _captchaType = CaptchaType.defaultCaptcha;
   Uint8List? _captchaImage;
@@ -212,7 +212,7 @@ class VTOPAuthService extends ChangeNotifier {
       if (daysSinceSync > 30) {
         Logger.d(
           'Auth',
-          'Cached data too old (${daysSinceSync} days), clearing session',
+          'Cached data too old ($daysSinceSync days), clearing session',
         );
         await prefs.setBool(AuthConstants.keyIsSignedIn, false);
         return;
@@ -221,7 +221,7 @@ class VTOPAuthService extends ChangeNotifier {
       // Show last synced data (user can refresh manually if needed)
       Logger.i(
         'Auth',
-        'Previous session found - showing last synced data (${daysSinceSync} days old)',
+        'Previous session found - showing last synced data ($daysSinceSync days old)',
       );
       _setState(AuthState.complete);
     } catch (e) {
@@ -409,7 +409,7 @@ class VTOPAuthService extends ChangeNotifier {
   Future<void> _onPageFinished(String url) async {
     Logger.d(
       'Auth',
-      ' Page loaded: ${url.length > 100 ? url.substring(0, 100) + "..." : url}',
+      ' Page loaded: ${url.length > 100 ? "${url.substring(0, 100)}..." : url}',
     );
     await _detectPageState();
   }
@@ -1357,40 +1357,51 @@ class VTOPAuthService extends ChangeNotifier {
       _authHandler.cancelAllOperations();
 
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool(AuthConstants.keyIsSignedIn, false);
-      await prefs.remove('user_session');
 
+      // 1. Clear authentication flag immediately
+      await prefs.setBool(AuthConstants.keyIsSignedIn, false);
+
+      // 2. Clear secure storage (credentials)
+      await _secureStorage.deleteAll();
+
+      // 3. Clear ONLY student-specific SharedPreferences keys
+      final studentSpecificKeys = {
+        'user_session',
+        'student_profile',
+        'semester',
+        'available_semesters',
+        'semester_map',
+        'cgpa_summary',
+        'manual_courses',
+        'course_classifications',
+        'current_semester_grades',
+        'lastSyncTimestamp',
+        'preserved_nickname',
+        'duePayments',
+        'user_agent_cache',
+      };
+
+      for (final key in studentSpecificKeys) {
+        await prefs.remove(key);
+      }
+
+      // 4. Clear VIT Connect Database (all student academic data)
+      final db = VitConnectDatabase.instance;
+      await db.clearAllData();
+
+      // 5. VitVerse Database - KEEP ALL (no clearing needed)
+      // All VitVerse tables contain app-level data that should persist
+      // including: calendar_cache, personal_events, selected_calendars,
+      // app_preferences, lost_found_cache, cab_ride_cache, custom_themes, events_cache
+
+      // 6. Reset authentication state
       _resetState();
       _setState(AuthState.idle);
 
-      Future.delayed(const Duration(milliseconds: 100), () async {
-        try {
-          await _secureStorage.deleteAll();
-
-          final allKeys = prefs.getKeys();
-          final keysToKeep = {
-            'theme_mode',
-            'language_code',
-            'onboarding_completed',
-            'app_version',
-          };
-
-          for (final key in allKeys) {
-            if (!keysToKeep.contains(key)) {
-              await prefs.remove(key);
-            }
-          }
-
-          final db = VitConnectDatabase.instance;
-          await db.clearAllData();
-
-          Logger.success('Auth', 'Cleanup completed');
-        } catch (e) {
-          Logger.e('Auth', 'Cleanup failed', e);
-        }
-      });
+      Logger.success('Auth', 'Logout completed successfully');
     } catch (e) {
       Logger.e('Auth', 'Sign out failed', e);
+      rethrow;
     }
   }
 

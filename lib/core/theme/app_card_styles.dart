@@ -37,8 +37,8 @@ class AppCardStyles {
                 BoxShadow(
                   color:
                       isDark
-                          ? Colors.black.withOpacity(0.3)
-                          : Colors.black.withOpacity(0.04),
+                          ? Colors.black.withValues(alpha: 0.3)
+                          : Colors.black.withValues(alpha: 0.04),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -48,10 +48,17 @@ class AppCardStyles {
   }
 
   /// Compact card decoration (like in Academic Performance)
+  ///
+  /// ⚠️ IMPORTANT: Always provide customBackgroundColor parameter!
+  /// Use theme.surface for consistent theming across the app.
+  /// Example: AppCardStyles.compactCardDecoration(
+  ///   isDark: theme.isDark,
+  ///   customBackgroundColor: theme.surface,
+  /// )
   static BoxDecoration compactCardDecoration({
     bool isDark = false,
     Color? customBorderColor,
-    Color? customBackgroundColor,
+    required Color? customBackgroundColor,
   }) {
     return cardDecoration(
       isDark: isDark,
@@ -160,8 +167,8 @@ class AppCardStyles {
         BoxShadow(
           color:
               isDark
-                  ? Colors.black.withOpacity(0.3)
-                  : Colors.black.withOpacity(0.04),
+                  ? Colors.black.withValues(alpha: 0.3)
+                  : Colors.black.withValues(alpha: 0.04),
           blurRadius: 8,
           offset: const Offset(0, 2),
         ),

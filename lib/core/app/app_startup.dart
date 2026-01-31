@@ -5,10 +5,10 @@ import '../config/env_config.dart';
 import '../config/app_version.dart';
 import '../database/database.dart';
 import '../database_vitverse/database.dart';
+import '../services/notification_service.dart';
 import '../../firebase/core/firebase_initializer.dart';
 import '../../features/profile/widget_customization/data/widget_preferences_service.dart';
 import '../../features/profile/widget_customization/data/calendar_home_service.dart';
-import '../../features/features/vitconnect_services/faculty_rating/services/faculty_rating_api_service.dart';
 import '../../features/authentication/core/auth_service.dart';
 
 /// App startup initialization service
@@ -56,11 +56,23 @@ class AppStartup {
 
         await _initializeApiServices();
         await _initializeCalendarServices();
+        await _initializeNotifications();
         _initializeFirebaseLazy();
       } catch (e) {
         Logger.e('AppStartup', 'Background init failed', e);
       }
     });
+  }
+
+  static Future<void> _initializeNotifications() async {
+    try {
+      final notificationService = NotificationService();
+      await notificationService.initialize();
+      await notificationService.scheduleTodayClassNotifications();
+      Logger.d('AppStartup', 'Notification service initialized');
+    } catch (e) {
+      Logger.e('AppStartup', 'Notification init failed', e);
+    }
   }
 
   static Future<void> initializeAuthService() async {
@@ -105,29 +117,10 @@ class AppStartup {
 
   static Future<void> _initializeApiServices() async {
     try {
-      await Future.wait([_initCabShare(), _initFacultyRating()]);
+      // Cab Share and Faculty Rating now use Supabase directly
+      Logger.d('AppStartup', 'VITConnect services use Supabase integration');
     } catch (e) {
       Logger.e('AppStartup', 'API services init failed', e);
-    }
-  }
-
-  static Future<void> _initCabShare() async {
-    try {
-      // Cab Share uses Supabase directly, no separate API service needed
-      Logger.d('AppStartup', 'Cab Share uses Supabase integration');
-    } catch (e) {
-      Logger.w('AppStartup', 'CabShare init failed: $e');
-    }
-  }
-
-  static Future<void> _initFacultyRating() async {
-    try {
-      final url = EnvConfig.facultyRatingScriptUrl;
-      if (url.isNotEmpty) {
-        FacultyRatingApiService.initialize(url);
-      }
-    } catch (e) {
-      Logger.w('AppStartup', 'Faculty Rating init failed: $e');
     }
   }
 

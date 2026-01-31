@@ -82,11 +82,11 @@ class CabRide {
     ];
     return '${travelDate.day} ${months[travelDate.month - 1]} ${travelDate.year}';
   }
+
   /// Get formatted time string
   String get formattedTime {
     return travelTime;
   }
-
 
   /// Get date key for grouping (YYYY-MM-DD)
   String get dateKey {

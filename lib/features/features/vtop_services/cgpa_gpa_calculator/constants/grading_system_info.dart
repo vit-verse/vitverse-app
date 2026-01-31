@@ -1,5 +1,6 @@
 /// Grading System Information
 /// Contains official VIT grading policies, formulas, and academic regulations
+library;
 
 class GradingSystemInfo {
   // Prevent instantiation

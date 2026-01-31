@@ -5,25 +5,25 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/timezone.dart' as tz;
 import '../database/database.dart';
 import '../utils/logger.dart';
+import 'class_notification_scheduler.dart';
+import 'notification_worker.dart';
 
 /// Notification service for VIT Connect app
+/// Architecture: AlarmManager for precision, WorkManager for recovery
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
   factory NotificationService() => _instance;
   NotificationService._internal();
 
+  static const String _tag = 'NotificationService';
+
   final FlutterLocalNotificationsPlugin _notifications =
       FlutterLocalNotificationsPlugin();
 
-  bool _isInitialized = false;
-  Timer? _schedulingDebounceTimer;
-  Timer? _dailyCheckTimer;
-  bool _isCurrentlyScheduling = false;
-  DateTime? _lastSchedulingTime;
-  DateTime? _lastAutoCheckTime;
-  void Function()? _onCancelSyncRequested;
+  ClassNotificationScheduler? _classScheduler;
 
-  // Cached preferences
+  bool _isInitialized = false;
+  void Function()? _onCancelSyncRequested;
   NotificationSettings? _cachedSettings;
 
   // Notification channels
@@ -39,36 +39,36 @@ class NotificationService {
     'class': _ChannelConfig(
       id: 'vit_connect_class_reminders',
       name: 'Class Reminders',
-      description: 'Notifications for ongoing and upcoming classes',
+      description: 'Notifications for class reminders',
       importance: Importance.high,
       ledColor: Color(0xFF4CAF50),
     ),
     'exam': _ChannelConfig(
       id: 'vit_connect_exam_reminders',
       name: 'Exam Reminders',
-      description: 'Notifications for upcoming exams',
+      description: 'Notifications for exam reminders',
       importance: Importance.max,
       ledColor: Color(0xFFFF9800),
     ),
     'laundry': _ChannelConfig(
       id: 'vit_connect_laundry_reminders',
       name: 'Laundry Reminders',
-      description: 'Notifications for laundry schedule reminders',
+      description: 'Notifications for laundry reminders',
       importance: Importance.high,
       ledColor: Color(0xFF2196F3),
     ),
   };
 
   // Notification ID ranges
+  // Class: 3000-3999 (reminder), 4000-4999 (start) - managed by ClassNotificationScheduler
+  // Exam: 5000-5999 (reminder), 5000+ (start)
+  // Laundry: 6000-6999
   static const _notificationIds = {
     'login': 1001,
-    'classStarted': 2001, // 2001-3000
-    'classReminder': 3000, // 3000-4000
-    'examStarted': 4000, // 4000-5000
-    'examReminder': 5000, // 5000-6000
-    'laundry': 6000, // 6000-6999
+    'examStarted': 5000,
+    'examReminder': 5500,
+    'laundry': 6000,
     'test': 9999,
-    // VIT Verse general notification channel is in fcm dir
   };
 
   // Preference keys
@@ -79,7 +79,10 @@ class NotificationService {
     'examMinutes': 'exam_reminder_minutes',
   };
 
-  /// Initialize the notification service
+  // ============================================================================
+  // INITIALIZATION
+  // ============================================================================
+
   Future<void> initialize() async {
     if (_isInitialized) return;
 
@@ -95,84 +98,22 @@ class NotificationService {
       );
 
       await _createNotificationChannels();
+
+      // Initialize class scheduler (only if not already initialized)
+      _classScheduler ??= ClassNotificationScheduler(_notifications);
+
+      // Initialize WorkManager for background recovery
+      await NotificationWorker.initialize();
+      await NotificationWorker.registerDailyTask();
+
       _isInitialized = true;
-      _startDailyAutoCheck();
+      Logger.i(_tag, 'NotificationService initialized');
     } catch (e, stack) {
-      Logger.e('NotificationService', 'Initialization failed', e, stack);
+      Logger.e(_tag, 'Initialization failed', e, stack);
       rethrow;
     }
   }
 
-  /// Start daily auto-check for notifications
-  void _startDailyAutoCheck() {
-    _dailyCheckTimer?.cancel();
-    _dailyCheckTimer = Timer.periodic(const Duration(hours: 6), (timer) {
-      _performAutoCheck();
-    });
-    // Run initial check after 1 minute
-    Future.delayed(const Duration(minutes: 1), () {
-      _performAutoCheck();
-    });
-  }
-
-  /// Perform automatic check and reschedule if needed
-  Future<void> _performAutoCheck() async {
-    try {
-      // Prevent too frequent checks
-      if (_lastAutoCheckTime != null) {
-        final timeSince = DateTime.now().difference(_lastAutoCheckTime!);
-        if (timeSince.inHours < 4) return;
-      }
-
-      _lastAutoCheckTime = DateTime.now();
-      final settings = await getSettings();
-
-      if (!settings.classEnabled && !settings.examEnabled) return;
-
-      final pending = await _notifications.pendingNotificationRequests();
-
-      // Check if class notifications are missing
-      final hasClassReminder = pending.any(
-        (n) =>
-            n.id >= _notificationIds['classReminder']! &&
-            n.id < _notificationIds['classReminder']! + 1000,
-      );
-      final hasClassStarted = pending.any(
-        (n) =>
-            n.id >= _notificationIds['classStarted']! &&
-            n.id < _notificationIds['classStarted']! + 1000,
-      );
-
-      // If notifications are missing, reschedule
-      if (settings.classEnabled && (!hasClassReminder || !hasClassStarted)) {
-        Logger.i(
-          'NotificationService',
-          'Auto-check: Missing class notifications, rescheduling...',
-        );
-        await scheduleClassNotifications();
-      }
-
-      // Check exam notifications
-      if (settings.examEnabled) {
-        final hasExamNotif = pending.any(
-          (n) =>
-              n.id >= _notificationIds['examStarted']! &&
-              n.id < _notificationIds['examReminder']! + 1000,
-        );
-        if (!hasExamNotif) {
-          Logger.i(
-            'NotificationService',
-            'Auto-check: Missing exam notifications, rescheduling...',
-          );
-          await scheduleExamNotifications();
-        }
-      }
-    } catch (e) {
-      Logger.e('NotificationService', 'Auto-check failed', e);
-    }
-  }
-
-  /// Create notification channels
   Future<void> _createNotificationChannels() async {
     final android =
         _notifications
@@ -186,294 +127,104 @@ class NotificationService {
     }
   }
 
-  /// Handle notification responses
   void _handleNotificationResponse(NotificationResponse response) {
     if (response.actionId == 'cancel_sync') {
       _onCancelSyncRequested?.call();
-    } else if (response.payload?.startsWith('class_notification:') == true) {
-      _handleClassAlarmFired(response.payload!);
-    }
-  }
-
-  /// Handle class alarm fired - reschedule next notifications
-  void _handleClassAlarmFired(String payload) {
-    try {
-      Logger.i('NotificationService', 'Class alarm fired, rescheduling...');
-      // Reschedule notifications to get the next class
-      forceScheduleImmediately();
-    } catch (e) {
-      Logger.e('NotificationService', 'Failed to handle alarm fired', e);
+    } else if (response.payload?.startsWith('class_') == true) {
+      // Reschedule after notification fires to get next class
+      scheduleTodayClassNotifications();
     }
   }
 
   // ============================================================================
-  // PUBLIC API - SCHEDULING
+  // CLASS NOTIFICATIONS (Core - uses AlarmManager)
   // ============================================================================
 
-  /// Schedule class notifications (next class reminder + class starting)
-  Future<void> scheduleClassNotifications() async {
+  /// Schedule today's class notifications (with duplicate guard)
+  /// Returns early if already scheduled today (Fix 3: prevent duplicate calls)
+  Future<ScheduleResult> scheduleTodayClassNotifications({
+    bool skipGuard = false,
+  }) async {
     if (!_isInitialized) await initialize();
-    if (!await _ensurePermissions()) return;
 
     final settings = await getSettings();
-    if (!settings.classEnabled) return;
-
-    final startTime = DateTime.now();
-    await _cancelAll();
-
-    try {
-      final db = VitConnectDatabase.instance;
-      final database = await db.database;
-
-      // Get all timetable, courses, and slots data
-      final timetableData = await database.query('timetable');
-      final coursesData = await database.query('courses');
-      final slotsData = await database.query('slots');
-
-      if (timetableData.isEmpty) {
-        Logger.w('NotificationService', 'No timetable data found');
-        return;
-      }
-
-      // Create lookup maps (same as home_logic)
-      final courseMap = <int, Map<String, dynamic>>{};
-      for (var course in coursesData) {
-        if (course['id'] != null) {
-          courseMap[course['id'] as int] = course;
-        }
-      }
-
-      final slotMap = <int, Map<String, dynamic>>{};
-      for (var slot in slotsData) {
-        if (slot['id'] != null) {
-          slotMap[slot['id'] as int] = slot;
-        }
-      }
-
-      // Find next class from today's schedule
-      final now = DateTime.now();
-      final currentTimeMinutes = now.hour * 60 + now.minute;
-
-      // Try today first
-      ClassNotificationData? nextClass = _findNextClassForDay(
-        now.weekday - 1,
-        currentTimeMinutes,
-        timetableData,
-        courseMap,
-        slotMap,
-      );
-
-      // If no class today, try tomorrow
-      if (nextClass == null) {
-        final tomorrow = now.add(const Duration(days: 1));
-        nextClass = _findNextClassForDay(
-          tomorrow.weekday - 1,
-          0, // Start from beginning of day
-          timetableData,
-          courseMap,
-          slotMap,
-        );
-      }
-
-      // If still no class, try the rest of the week
-      if (nextClass == null) {
-        for (int daysAhead = 2; daysAhead < 7; daysAhead++) {
-          final futureDay = now.add(Duration(days: daysAhead));
-          nextClass = _findNextClassForDay(
-            futureDay.weekday - 1,
-            0,
-            timetableData,
-            courseMap,
-            slotMap,
-          );
-          if (nextClass != null) break;
-        }
-      }
-
-      int scheduledCount = 0;
-
-      if (nextClass != null) {
-        // Schedule reminder notification (30 minutes before)
-        final reminderTime = nextClass.time.subtract(
-          Duration(minutes: settings.classReminderMinutes),
-        );
-
-        if (reminderTime.isAfter(now)) {
-          await _scheduleClassAlarm(
-            nextOccurrence: reminderTime,
-            courseCode: nextClass.courseCode,
-            courseTitle: nextClass.courseTitle,
-            venue: nextClass.venue,
-            slotId: nextClass.slotId,
-            reminderMinutes: settings.classReminderMinutes,
-            isReminder: true,
-            startTime: nextClass.startTime,
-            endTime: nextClass.endTime,
-          );
-          scheduledCount++;
-        }
-
-        // Schedule "class starting now" notification
-        if (nextClass.time.isAfter(now)) {
-          await _scheduleClassAlarm(
-            nextOccurrence: nextClass.time,
-            courseCode: nextClass.courseCode,
-            courseTitle: nextClass.courseTitle,
-            venue: nextClass.venue,
-            slotId: nextClass.slotId,
-            reminderMinutes: 0,
-            isReminder: false,
-            startTime: nextClass.startTime,
-            endTime: nextClass.endTime,
-          );
-          scheduledCount++;
-        }
-      }
-
-      final duration = DateTime.now().difference(startTime);
-      Logger.i(
-        'NotificationService',
-        'Scheduled $scheduledCount class alarms in ${duration.inMilliseconds}ms',
-      );
-    } catch (e, stack) {
-      Logger.e(
-        'NotificationService',
-        'Failed to schedule class notifications',
-        e,
-        stack,
-      );
-    }
-  }
-
-  /// Find next class for a specific day (like home_logic approach)
-  ClassNotificationData? _findNextClassForDay(
-    int dayIndex,
-    int currentTimeMinutes,
-    List<Map<String, dynamic>> timetableData,
-    Map<int, Map<String, dynamic>> courseMap,
-    Map<int, Map<String, dynamic>> slotMap,
-  ) {
-    // Convert dayIndex to database day format (0=Monday → 'monday')
-    final dayColumn =
-        [
-          'monday',
-          'tuesday',
-          'wednesday',
-          'thursday',
-          'friday',
-          'saturday',
-          'sunday',
-        ][dayIndex];
-
-    final now = DateTime.now();
-    final targetDate = now.add(Duration(days: dayIndex - (now.weekday - 1)));
-
-    // Get classes for this day
-    for (var timetableEntry in timetableData) {
-      final slotId = timetableEntry[dayColumn];
-      if (slotId == null) continue;
-
-      final startTime = timetableEntry['start_time']?.toString();
-      final endTime = timetableEntry['end_time']?.toString();
-      if (startTime == null || endTime == null) continue;
-
-      // Parse start time
-      final timeParts = startTime.split(':');
-      if (timeParts.length != 2) continue;
-
-      final hour = int.tryParse(timeParts[0]);
-      final minute = int.tryParse(timeParts[1]);
-      if (hour == null || minute == null) continue;
-
-      final startMinutes = hour * 60 + minute;
-
-      // Skip if this class has already started or passed
-      if (startMinutes <= currentTimeMinutes) continue;
-
-      // Get course details
-      final slot = slotMap[slotId];
-      final courseId = slot?['course_id'] as int?;
-      final course = courseId != null ? courseMap[courseId] : null;
-
-      if (course == null) continue;
-
-      // Create class notification data
-      return ClassNotificationData(
-        courseCode: course['code']?.toString() ?? 'Unknown',
-        courseTitle: course['title']?.toString() ?? 'Unknown',
-        venue: course['venue']?.toString() ?? 'TBA',
-        slotId: slotId is int ? slotId : int.tryParse(slotId.toString()) ?? 0,
-        time: DateTime(
-          targetDate.year,
-          targetDate.month,
-          targetDate.day,
-          hour,
-          minute,
-        ),
-        startTime: startTime,
-        endTime: endTime,
+    if (!settings.classEnabled) {
+      return ScheduleResult(
+        success: true,
+        scheduledCount: 0,
+        message: 'Class notifications disabled',
       );
     }
 
-    return null;
+    // Fix 3: Prevent duplicate scheduling (unless explicitly skipping guard)
+    if (!skipGuard && await _classScheduler!.isScheduledToday()) {
+      Logger.d(_tag, 'Already scheduled today - skipping');
+      return ScheduleResult(
+        success: true,
+        scheduledCount: 0,
+        message: 'Already scheduled',
+      );
+    }
+
+    return _classScheduler!.scheduleTodayClasses();
   }
 
-  /// Schedule exam notifications (finds next exam only)
+  /// Force reschedule (clears old, schedules fresh) - skips duplicate guard
+  Future<ScheduleResult> forceRescheduleClassNotifications() async {
+    if (!_isInitialized) await initialize();
+    await _classScheduler!.clearAllClassNotifications();
+    return scheduleTodayClassNotifications(skipGuard: true);
+  }
+
+  /// Get real pending class notifications (no fake data)
+  Future<List<PendingNotificationRequest>>
+  getPendingClassNotifications() async {
+    if (!_isInitialized) await initialize();
+    return _classScheduler!.getPendingClassNotifications();
+  }
+
+  // ============================================================================
+  // EXAM NOTIFICATIONS
+  // ============================================================================
+
   Future<void> scheduleExamNotifications() async {
     if (!_isInitialized) await initialize();
-    if (!await _ensurePermissions()) return;
 
     final settings = await getSettings();
     if (!settings.examEnabled) return;
 
-    await _cancelAll();
-
     try {
       final db = VitConnectDatabase.instance;
       final database = await db.database;
 
-      // Optimized JOIN query
       final results = await database.rawQuery('''
-        SELECT 
-          e.*,
-          c.code as course_code,
-          c.title as course_title
+        SELECT e.*, c.code as course_code, c.title as course_title
         FROM exams e
         LEFT JOIN courses c ON c.id = e.course_id
         ORDER BY e.start_time ASC
       ''');
 
       final now = DateTime.now();
-      ExamNotificationData? nextExam;
+      ExamData? nextExam;
 
-      // Find next upcoming exam
       for (var row in results) {
         final examDateTime = _parseExamDateTime(row);
         if (examDateTime == null || examDateTime.isBefore(now)) continue;
 
-        nextExam = ExamNotificationData(
+        nextExam = ExamData(
           id: row['id'] as int? ?? 0,
-          courseCode:
-              row['course_code']?.toString() ??
-              row['course_code']?.toString() ??
-              'Unknown',
+          courseCode: row['course_code']?.toString() ?? 'Unknown',
           courseTitle: row['course_title']?.toString() ?? '',
-          examTitle:
-              row['title']?.toString() ??
-              row['exam_type']?.toString() ??
-              'Exam',
-          venue:
-              row['venue']?.toString() ?? row['location']?.toString() ?? 'TBA',
-          slot: row['slot']?.toString() ?? row['time_slot']?.toString(),
+          examTitle: row['title']?.toString() ?? 'Exam',
+          venue: row['venue']?.toString() ?? 'TBA',
+          slot: row['slot']?.toString(),
           dateTime: examDateTime,
         );
-        break; // Only need the next exam
+        break;
       }
 
-      int scheduledCount = 0;
-
       if (nextExam != null) {
-        // Schedule exam started notification (0 minutes)
+        // Schedule exam start notification
         await _scheduleExamNotification(
           notificationId: _notificationIds['examStarted']! + nextExam.id,
           title: '🎓 Exam Started',
@@ -481,9 +232,8 @@ class NotificationService {
           scheduledTime: nextExam.dateTime,
           reminderMinutes: 0,
         );
-        scheduledCount++;
 
-        // Schedule exam reminder notification
+        // Schedule reminder
         final reminderTime = nextExam.dateTime.subtract(
           Duration(minutes: settings.examReminderMinutes),
         );
@@ -495,38 +245,66 @@ class NotificationService {
             scheduledTime: reminderTime,
             reminderMinutes: settings.examReminderMinutes,
           );
-          scheduledCount++;
         }
       }
 
-      Logger.i(
-        'NotificationService',
-        'Scheduled $scheduledCount exam notifications',
-      );
+      Logger.i(_tag, 'Exam notifications scheduled');
     } catch (e) {
-      Logger.e(
-        'NotificationService',
-        'Failed to schedule exam notifications',
-        e,
-      );
+      Logger.e(_tag, 'Failed to schedule exam notifications', e);
     }
   }
 
-  /// Schedule laundry notifications
+  Future<void> _scheduleExamNotification({
+    required int notificationId,
+    required String title,
+    required ExamData exam,
+    required DateTime scheduledTime,
+    required int reminderMinutes,
+  }) async {
+    final slotInfo = exam.slot != null ? '\n🎫 Slot: ${exam.slot}' : '';
+    final timeInfo =
+        reminderMinutes > 0
+            ? '\n⏰ Starts in $reminderMinutes minutes'
+            : '\n⏰ Exam is starting now';
+    final body =
+        '${exam.courseCode} • ${exam.examTitle}\n📍 ${exam.venue}$slotInfo$timeInfo';
+
+    final androidDetails = AndroidNotificationDetails(
+      _channels['exam']!.id,
+      _channels['exam']!.name,
+      channelDescription: _channels['exam']!.description,
+      importance: Importance.max,
+      priority: Priority.max,
+      playSound: true,
+      enableVibration: true,
+      styleInformation: BigTextStyleInformation(body, contentTitle: title),
+    );
+
+    await _notifications.zonedSchedule(
+      notificationId,
+      title,
+      body,
+      tz.TZDateTime.from(scheduledTime, tz.local),
+      NotificationDetails(android: androidDetails),
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
+    );
+  }
+
+  // ============================================================================
+  // LAUNDRY NOTIFICATIONS
+  // ============================================================================
+
   Future<void> scheduleLaundryNotifications({
     int? roomNumber,
     DateTime? laundryDate,
   }) async {
     if (!_isInitialized) await initialize();
-    if (!await _ensurePermissions()) return;
     if (roomNumber == null || laundryDate == null) return;
-
-    await _cancelAll();
 
     final now = DateTime.now();
     if (laundryDate.isBefore(now)) return;
-
-    int scheduledCount = 0;
 
     try {
       // Day before reminder (8 PM)
@@ -545,7 +323,6 @@ class NotificationService {
           body: 'Your laundry is scheduled for tomorrow (Room $roomNumber)',
           scheduledTime: dayBeforeTime,
         );
-        scheduledCount++;
       }
 
       // Same day reminder (8 AM)
@@ -562,78 +339,50 @@ class NotificationService {
           notificationId: _notificationIds['laundry']! + 2,
           title: '🧺 Laundry Day!',
           body:
-              'Today is your laundry (Room $roomNumber). Don\'t forget to prepare your clothes!',
+              'Today is your laundry (Room $roomNumber). Prepare your clothes!',
           scheduledTime: sameDayTime,
         );
-        scheduledCount++;
       }
 
-      Logger.i(
-        'NotificationService',
-        'Scheduled $scheduledCount laundry notifications',
-      );
+      Logger.i(_tag, 'Laundry notifications scheduled');
     } catch (e) {
-      Logger.e(
-        'NotificationService',
-        'Failed to schedule laundry notifications',
-        e,
-      );
+      Logger.e(_tag, 'Failed to schedule laundry notifications', e);
     }
   }
 
-  /// Debounced scheduling (waits 2 seconds before executing)
-  void scheduleNotificationsDeferred() {
-    _schedulingDebounceTimer?.cancel();
+  Future<void> _scheduleLaundryNotification({
+    required int notificationId,
+    required String title,
+    required String body,
+    required DateTime scheduledTime,
+  }) async {
+    final androidDetails = AndroidNotificationDetails(
+      _channels['laundry']!.id,
+      _channels['laundry']!.name,
+      channelDescription: _channels['laundry']!.description,
+      importance: Importance.high,
+      priority: Priority.high,
+      playSound: true,
+      enableVibration: true,
+      styleInformation: BigTextStyleInformation(body, contentTitle: title),
+    );
 
-    // Throttle: prevent scheduling if done recently
-    if (_lastSchedulingTime != null) {
-      final timeSince = DateTime.now().difference(_lastSchedulingTime!);
-      if (timeSince.inSeconds < 30) return;
-    }
-
-    if (_isCurrentlyScheduling) return;
-
-    _schedulingDebounceTimer = Timer(const Duration(seconds: 2), () {
-      _executeSchedulingInBackground();
-    });
-  }
-
-  /// Force immediate scheduling (bypasses debouncing)
-  Future<void> forceScheduleImmediately() async {
-    _schedulingDebounceTimer?.cancel();
-    await _executeSchedulingInBackground();
-  }
-
-  /// Execute scheduling in background
-  Future<void> _executeSchedulingInBackground() async {
-    if (_isCurrentlyScheduling) return;
-
-    _isCurrentlyScheduling = true;
-    _lastSchedulingTime = DateTime.now();
-
-    try {
-      final startTime = DateTime.now();
-      await Future.wait([
-        scheduleClassNotifications(),
-        scheduleExamNotifications(),
-      ]);
-      final duration = DateTime.now().difference(startTime);
-      Logger.i(
-        'NotificationService',
-        'Background scheduling complete in ${duration.inMilliseconds}ms',
-      );
-    } catch (e, stack) {
-      Logger.e('NotificationService', 'Background scheduling failed', e, stack);
-    } finally {
-      _isCurrentlyScheduling = false;
-    }
+    await _notifications.zonedSchedule(
+      notificationId,
+      title,
+      body,
+      tz.TZDateTime.from(scheduledTime, tz.local),
+      NotificationDetails(android: androidDetails),
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
+    );
   }
 
   // ============================================================================
-  // PUBLIC API - PROGRESS & COMPLETION NOTIFICATIONS
+  // PROGRESS & COMPLETION NOTIFICATIONS
   // ============================================================================
 
-  /// Show login progress notification
   Future<void> showProgressNotification({
     required int currentStep,
     required int totalSteps,
@@ -680,7 +429,6 @@ class NotificationService {
     );
   }
 
-  /// Show completion notification
   Future<void> showCompletionNotification({
     required bool success,
     String? message,
@@ -704,29 +452,24 @@ class NotificationService {
       _notificationIds['test']!,
       success ? 'VIT Verse' : 'Sign In Failed',
       message ??
-          (success
-              ? 'Notifications are working perfectly! 🎉'
-              : 'Please try again'),
+          (success ? 'Notifications are working! 🎉' : 'Please try again'),
       NotificationDetails(android: androidDetails),
     );
 
-    // Auto-dismiss after 3 seconds
     Future.delayed(const Duration(seconds: 3), () {
       _notifications.cancel(_notificationIds['test']!);
     });
   }
 
-  /// Dismiss notification
   Future<void> dismissNotification() async {
     if (!_isInitialized) return;
     await _notifications.cancel(_notificationIds['login']!);
   }
 
   // ============================================================================
-  // PUBLIC API - SETTINGS
+  // SETTINGS
   // ============================================================================
 
-  /// Get current notification settings
   Future<NotificationSettings> getSettings() async {
     if (_cachedSettings != null) return _cachedSettings!;
 
@@ -740,15 +483,14 @@ class NotificationService {
     return _cachedSettings!;
   }
 
-  /// Update notification settings
   Future<void> setClassNotificationsEnabled(bool enabled) async {
     _cachedSettings = null;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_prefKeys['classEnabled']!, enabled);
     if (enabled) {
-      await forceScheduleImmediately();
+      await scheduleTodayClassNotifications();
     } else {
-      await _cancelAll();
+      await _classScheduler?.clearAllClassNotifications();
     }
   }
 
@@ -757,9 +499,9 @@ class NotificationService {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_prefKeys['examEnabled']!, enabled);
     if (enabled) {
-      await forceScheduleImmediately();
+      await scheduleExamNotifications();
     } else {
-      await _cancelAll();
+      await _cancelExamNotifications();
     }
   }
 
@@ -767,14 +509,14 @@ class NotificationService {
     _cachedSettings = null;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_prefKeys['classMinutes']!, minutes);
-    await forceScheduleImmediately();
+    await forceRescheduleClassNotifications();
   }
 
   Future<void> setExamReminderMinutes(int minutes) async {
     _cachedSettings = null;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_prefKeys['examMinutes']!, minutes);
-    await forceScheduleImmediately();
+    await scheduleExamNotifications();
   }
 
   Future<bool> getClassNotificationsEnabled() async =>
@@ -786,109 +528,58 @@ class NotificationService {
   Future<int> getExamReminderMinutes() async =>
       (await getSettings()).examReminderMinutes;
 
-  Future<void> forceRescheduleAllNotifications() async =>
-      await forceScheduleImmediately();
-
   // ============================================================================
-  // PUBLIC API - UTILITIES
+  // UTILITIES
   // ============================================================================
 
-  /// Set callback for cancel sync action
   void setOnCancelSyncCallback(void Function()? callback) {
     _onCancelSyncRequested = callback;
   }
 
-  /// Cancel all notifications (used during logout)
-  void cancelAllNotifications() {
-    _cachedSettings = null;
-    _schedulingDebounceTimer?.cancel();
-    _schedulingDebounceTimer = null;
-    _dailyCheckTimer?.cancel();
-    _dailyCheckTimer = null;
-    _isCurrentlyScheduling = false;
-    _lastSchedulingTime = null;
-    _lastAutoCheckTime = null;
-
-    Future.delayed(const Duration(milliseconds: 100), () async {
-      try {
-        await _cancelAll();
-      } catch (e) {
-        Logger.e('NotificationService', 'Background cancellation failed', e);
-      }
-    });
+  /// Clear all and reschedule fresh (on sync)
+  /// Always force reschedule - don't skip based on "already scheduled" marker
+  Future<void> rescheduleOnSync() async {
+    Logger.i(_tag, 'Rescheduling on sync...');
+    await cancelAllNotifications();
+    await Future.delayed(const Duration(milliseconds: 100));
+    // Use force reschedule to bypass the "already scheduled today" guard
+    await forceRescheduleClassNotifications();
+    await scheduleExamNotifications();
+    Logger.i(_tag, 'Sync reschedule complete');
   }
 
-  /// Get pending notifications
-  Future<List<PendingNotificationRequest>> getPendingNotifications() async {
-    if (!_isInitialized) await initialize();
+  /// Cancel all notifications (on logout)
+  Future<void> cancelAllNotifications() async {
+    _cachedSettings = null;
 
     try {
-      final pending = await _notifications.pendingNotificationRequests();
-      final synthetic = <PendingNotificationRequest>[...pending];
-
-      // Add synthetic exam notifications
-      final db = VitConnectDatabase.instance;
-      final database = await db.database;
-      final exams = await database.query('exams');
-      final now = DateTime.now();
-
-      ExamNotificationData? nextExam;
-      for (var exam in exams) {
-        final examDateTime = _parseExamDateTime(exam);
-        if (examDateTime != null && examDateTime.isAfter(now)) {
-          if (nextExam == null || examDateTime.isBefore(nextExam.dateTime)) {
-            nextExam = ExamNotificationData(
-              id: exam['id'] as int? ?? 0,
-              courseCode: exam['course_code']?.toString() ?? 'Unknown',
-              courseTitle: '',
-              examTitle: exam['title']?.toString() ?? 'Exam',
-              venue: '',
-              slot: null,
-              dateTime: examDateTime,
-            );
-          }
-        }
-      }
-
-      if (nextExam != null) {
-        final examStartedId = _notificationIds['examStarted']! + nextExam.id;
-        final examReminderId = _notificationIds['examReminder']! + nextExam.id;
-
-        if (!pending.any((n) => n.id == examStartedId)) {
-          synthetic.add(
-            PendingNotificationRequest(
-              examStartedId,
-              '🎓 Exam Started',
-              '${nextExam.courseCode} - ${nextExam.examTitle}',
-              null,
-            ),
-          );
-        }
-
-        if (!pending.any((n) => n.id == examReminderId)) {
-          synthetic.add(
-            PendingNotificationRequest(
-              examReminderId,
-              '🎓 Exam Reminder',
-              '${nextExam.courseCode} - ${nextExam.examTitle}',
-              null,
-            ),
-          );
-        }
-      }
-
-      Logger.i(
-        'NotificationService',
-        'Found ${synthetic.length} pending notifications',
-      );
-      return synthetic;
+      await _notifications.cancelAll();
+      await NotificationWorker.cancelAll();
+      Logger.i(_tag, 'All notifications cancelled');
     } catch (e) {
-      Logger.e('NotificationService', 'Failed to get pending notifications', e);
-      return [];
+      Logger.e(_tag, 'Cancellation failed', e);
     }
   }
 
-  /// Check and request permissions
+  /// Legacy method for backwards compatibility
+  void scheduleNotificationsDeferred() {
+    Future.delayed(const Duration(seconds: 2), () {
+      scheduleTodayClassNotifications();
+    });
+  }
+
+  Future<void> forceScheduleImmediately() async {
+    await forceRescheduleClassNotifications();
+    await scheduleExamNotifications();
+  }
+
+  /// Get all pending notifications (real data only)
+  Future<List<PendingNotificationRequest>> getPendingNotifications() async {
+    if (!_isInitialized) await initialize();
+    return _notifications.pendingNotificationRequests();
+  }
+
+  /// Check exact alarm permission
   Future<bool> canScheduleExactAlarms() async {
     if (!_isInitialized) await initialize();
     final android =
@@ -934,176 +625,16 @@ class NotificationService {
   // PRIVATE HELPERS
   // ============================================================================
 
-  /// Ensure permissions are granted
-  Future<bool> _ensurePermissions() async {
-    return await canScheduleExactAlarms() ||
-        await requestExactAlarmPermission();
-  }
-
-  /// Cancel all notifications efficiently
-  Future<void> _cancelAll() async {
-    try {
-      final android =
-          _notifications
-              .resolvePlatformSpecificImplementation<
-                AndroidFlutterLocalNotificationsPlugin
-              >();
-      await (android?.cancelAll() ?? _notifications.cancelAll());
-    } catch (e) {
-      Logger.e('NotificationService', 'Error cancelling notifications', e);
+  Future<void> _cancelExamNotifications() async {
+    final pending = await _notifications.pendingNotificationRequests();
+    for (final n in pending) {
+      if (n.id >= _notificationIds['examStarted']! &&
+          n.id < _notificationIds['laundry']!) {
+        await _notifications.cancel(n.id);
+      }
     }
   }
 
-  /// Build notification details
-  AndroidNotificationDetails _buildNotificationDetails({
-    required String channelKey,
-    required String title,
-    required String body,
-    bool ongoing = false,
-  }) {
-    final channel = _channels[channelKey]!;
-    return AndroidNotificationDetails(
-      channel.id,
-      channel.name,
-      channelDescription: channel.description,
-      importance: channel.importance,
-      priority:
-          channel.importance == Importance.max ? Priority.max : Priority.high,
-      playSound: channel.enableSound,
-      enableVibration: channel.enableVibration,
-      ongoing: ongoing,
-      autoCancel: !ongoing,
-      enableLights: channel.ledColor != null,
-      ledColor: channel.ledColor,
-      ledOnMs: channel.ledColor != null ? 1000 : null,
-      ledOffMs: channel.ledColor != null ? 500 : null,
-      styleInformation: BigTextStyleInformation(body, contentTitle: title),
-    );
-  }
-
-  /// Schedule class alarm
-  Future<void> _scheduleClassAlarm({
-    required DateTime nextOccurrence,
-    required String courseCode,
-    required String courseTitle,
-    required String venue,
-    required int slotId,
-    required int reminderMinutes,
-    required bool isReminder,
-    required String startTime,
-    required String endTime,
-  }) async {
-    final notificationTime = nextOccurrence.subtract(
-      Duration(minutes: reminderMinutes),
-    );
-    if (notificationTime.isBefore(DateTime.now())) return;
-
-    final notificationId =
-        (reminderMinutes == 0
-            ? _notificationIds['classStarted']!
-            : _notificationIds['classReminder']!) +
-        (slotId % 1000);
-    final timeRange =
-        startTime.isNotEmpty && endTime.isNotEmpty
-            ? '\n${_formatTo12Hour(startTime)} - ${_formatTo12Hour(endTime)}'
-            : '';
-    final title = isReminder ? '📚 Upcoming Class' : '📚 Class Starting Now';
-    final timeInfo =
-        isReminder ? 'Starts in $reminderMinutes minutes' : 'Starting now';
-    final body =
-        '$courseCode - $courseTitle\nVenue: $venue$timeRange\n$timeInfo';
-
-    final androidDetails = _buildNotificationDetails(
-      channelKey: 'class',
-      title: title,
-      body: body,
-    );
-
-    await _notifications.zonedSchedule(
-      notificationId,
-      title,
-      body,
-      tz.TZDateTime.from(notificationTime, tz.local),
-      NotificationDetails(android: androidDetails),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
-      payload: 'class_notification:$courseCode',
-    );
-  }
-
-  /// Schedule exam notification
-  Future<void> _scheduleExamNotification({
-    required int notificationId,
-    required String title,
-    required ExamNotificationData exam,
-    required DateTime scheduledTime,
-    required int reminderMinutes,
-  }) async {
-    final slotInfo =
-        exam.slot != null && exam.slot!.isNotEmpty
-            ? '\nSlot: ${exam.slot}'
-            : '';
-    final displayCourse =
-        exam.courseTitle.isNotEmpty
-            ? '${exam.courseCode} (${exam.courseTitle})'
-            : exam.courseCode;
-    final timeInfo =
-        reminderMinutes > 0
-            ? '\nStarts in $reminderMinutes minutes'
-            : '\nExam is starting now';
-    final body =
-        '$displayCourse - ${exam.examTitle}\nVenue: ${exam.venue}$slotInfo$timeInfo';
-
-    final androidDetails = _buildNotificationDetails(
-      channelKey: 'exam',
-      title: title,
-      body: body,
-    );
-
-    await _notifications.zonedSchedule(
-      notificationId,
-      title,
-      body,
-      tz.TZDateTime.from(scheduledTime, tz.local),
-      NotificationDetails(android: androidDetails),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
-    );
-
-    Logger.d(
-      'NotificationService',
-      'Scheduled exam notification: $title at ${scheduledTime.toString()}',
-    );
-  }
-
-  /// Schedule laundry notification
-  Future<void> _scheduleLaundryNotification({
-    required int notificationId,
-    required String title,
-    required String body,
-    required DateTime scheduledTime,
-  }) async {
-    final androidDetails = _buildNotificationDetails(
-      channelKey: 'laundry',
-      title: title,
-      body: body,
-    );
-
-    await _notifications.zonedSchedule(
-      notificationId,
-      title,
-      body,
-      tz.TZDateTime.from(scheduledTime, tz.local),
-      NotificationDetails(android: androidDetails),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
-    );
-  }
-
-  /// Parse exam date time from various formats
   DateTime? _parseExamDateTime(Map<String, dynamic> exam) {
     final dateTimeStr =
         exam['date_time']?.toString() ??
@@ -1111,10 +642,8 @@ class NotificationService {
         exam['exam_date']?.toString();
     if (dateTimeStr == null) return null;
 
-    // Try ISO string
     DateTime? examDateTime = DateTime.tryParse(dateTimeStr);
 
-    // Try milliseconds
     if (examDateTime == null) {
       final timestamp = int.tryParse(dateTimeStr);
       if (timestamp != null) {
@@ -1124,34 +653,12 @@ class NotificationService {
 
     return examDateTime;
   }
-
-  /// Format time to 12-hour format
-  String _formatTo12Hour(String time24) {
-    if (time24.isEmpty) return '';
-
-    try {
-      final parts = time24.split(':');
-      if (parts.length != 2) return time24;
-
-      int hour = int.parse(parts[0]);
-      final minute = parts[1];
-      final period = hour >= 12 ? 'PM' : 'AM';
-
-      if (hour > 12) hour -= 12;
-      if (hour == 0) hour = 12;
-
-      return '$hour:$minute $period';
-    } catch (e) {
-      return time24;
-    }
-  }
 }
 
 // ============================================================================
 // DATA CLASSES
 // ============================================================================
 
-/// Notification settings
 class NotificationSettings {
   final bool classEnabled;
   final bool examEnabled;
@@ -1166,7 +673,6 @@ class NotificationSettings {
   });
 }
 
-/// Channel configuration
 class _ChannelConfig {
   final String id;
   final String name;
@@ -1201,29 +707,7 @@ class _ChannelConfig {
   }
 }
 
-/// Class notification data
-class ClassNotificationData {
-  final String courseCode;
-  final String courseTitle;
-  final String venue;
-  final int slotId;
-  final DateTime time;
-  final String startTime;
-  final String endTime;
-
-  ClassNotificationData({
-    required this.courseCode,
-    required this.courseTitle,
-    required this.venue,
-    required this.slotId,
-    required this.time,
-    required this.startTime,
-    required this.endTime,
-  });
-}
-
-/// Exam notification data
-class ExamNotificationData {
+class ExamData {
   final int id;
   final String courseCode;
   final String courseTitle;
@@ -1232,7 +716,7 @@ class ExamNotificationData {
   final String? slot;
   final DateTime dateTime;
 
-  ExamNotificationData({
+  ExamData({
     required this.id,
     required this.courseCode,
     required this.courseTitle,

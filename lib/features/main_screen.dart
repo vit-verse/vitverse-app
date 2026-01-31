@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../core/theme/theme_provider.dart';
@@ -92,7 +93,7 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
       _currentIndex = index;
     });
 
-    Future.delayed(const Duration(milliseconds: 300), () {
+    Future.delayed(const Duration(milliseconds: 250), () {
       if (mounted) _isNavigating = false;
     });
   }
@@ -102,6 +103,7 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
     final themeProvider = Provider.of<ThemeProvider>(context);
 
     return Scaffold(
+      extendBody: true,
       body: SafeArea(
         top: false,
         bottom: false,
@@ -112,127 +114,240 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
   }
 
   Widget _buildBottomNavigationBar(ThemeProvider themeProvider) {
+    final theme = themeProvider.currentTheme;
+    final isDark = themeProvider.isDarkMode;
+
     return Container(
-      decoration: BoxDecoration(
-        color: themeProvider.currentTheme.surface,
-        boxShadow: [
-          BoxShadow(
-            color: themeProvider.currentTheme.text.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
-          ),
-        ],
-      ),
-      child: SafeArea(
-        child: SizedBox(
-          height: 70,
-          child: Row(
-            children: [
-              _buildNavItem(
-                Icons.home_rounded,
-                'Home',
-                0,
-                themeProvider,
-                false,
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(50),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Container(
+            height: 65,
+            decoration: BoxDecoration(
+              color:
+                  isDark
+                      ? theme.surface.withValues(alpha: 0.85)
+                      : theme.surface.withValues(alpha: 0.95),
+              borderRadius: BorderRadius.circular(50),
+              border: Border.all(
+                color:
+                    isDark
+                        ? theme.muted.withValues(alpha: 0.12)
+                        : theme.muted.withValues(alpha: 0.1),
+                width: 1,
               ),
-              _buildNavItem(
-                Icons.bar_chart_rounded,
-                'Performance',
-                1,
-                themeProvider,
-                false,
-              ),
-              _buildNavItem(
-                Icons.calendar_month_rounded,
-                'Calendar',
-                2,
-                themeProvider,
-                false,
-              ),
-              _buildNavItem(
-                Icons.auto_awesome_rounded,
-                'Features',
-                3,
-                themeProvider,
-                false,
-              ),
-              _buildNavItem(
-                Icons.person_rounded,
-                'Profile',
-                4,
-                themeProvider,
-                false,
-              ),
-            ],
+              boxShadow: [
+                BoxShadow(
+                  color: theme.text.withValues(alpha: isDark ? 0.2 : 0.08),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                  spreadRadius: -5,
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _buildNavItem(Icons.home_rounded, 0, themeProvider),
+                _buildNavItem(Icons.bar_chart_rounded, 1, themeProvider),
+                _buildNavItem(Icons.calendar_month_rounded, 2, themeProvider),
+                _buildNavItem(Icons.auto_awesome_rounded, 3, themeProvider),
+                _buildNavItem(Icons.person_rounded, 4, themeProvider),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildNavItem(
-    IconData icon,
-    String label,
-    int index,
-    ThemeProvider themeProvider,
-    bool hasNotification,
-  ) {
+  Widget _buildNavItem(IconData icon, int index, ThemeProvider themeProvider) {
     final isActive = index == _currentIndex;
+    final theme = themeProvider.currentTheme;
 
-    return Expanded(
-      child: GestureDetector(
-        onTap: () => _onTabTapped(index),
-        child: Container(
-          color: Colors.transparent,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      color:
-                          isActive
-                              ? themeProvider.currentTheme.primary.withOpacity(
-                                0.15,
-                              )
-                              : Colors.transparent,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Icon(
-                      icon,
-                      size: 24,
-                      color:
-                          isActive
-                              ? themeProvider.currentTheme.primary
-                              : themeProvider.currentTheme.muted,
+    return GestureDetector(
+      onTap: () => _onTabTapped(index),
+      behavior: HitTestBehavior.opaque,
+      child: SizedBox(
+        width: 48,
+        height: 48,
+        child:
+            isActive
+                ? _AnimatedIcon(
+                  icon: icon,
+                  color: Colors.white,
+                  primaryColor: theme.primary,
+                )
+                : Center(
+                  child: Icon(
+                    icon,
+                    size: 24,
+                    color: theme.muted.withValues(alpha: 0.6),
+                  ),
+                ),
+      ),
+    );
+  }
+}
+
+/// Animated icon widget with pulsing ripple effect
+class _AnimatedIcon extends StatefulWidget {
+  final IconData icon;
+  final Color color;
+  final Color primaryColor;
+
+  const _AnimatedIcon({
+    required this.icon,
+    required this.color,
+    required this.primaryColor,
+  });
+
+  @override
+  State<_AnimatedIcon> createState() => _AnimatedIconState();
+}
+
+class _AnimatedIconState extends State<_AnimatedIcon>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _ripple1Scale;
+  late Animation<double> _ripple1Opacity;
+  late Animation<double> _ripple2Scale;
+  late Animation<double> _ripple2Opacity;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 2000),
+      vsync: this,
+    )..repeat();
+
+    // First ripple wave
+    _ripple1Scale = Tween<double>(begin: 1.0, end: 2.2).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.0, 1.0, curve: Curves.easeOut),
+      ),
+    );
+
+    _ripple1Opacity = Tween<double>(begin: 0.8, end: 0.0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.0, 1.0, curve: Curves.easeOut),
+      ),
+    );
+
+    // Second ripple wave (delayed)
+    _ripple2Scale = Tween<double>(begin: 1.0, end: 2.2).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.4, 1.0, curve: Curves.easeOut),
+      ),
+    );
+
+    _ripple2Opacity = Tween<double>(begin: 0.6, end: 0.0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.4, 1.0, curve: Curves.easeOut),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return Stack(
+          alignment: Alignment.center,
+          children: [
+            // Second ripple wave
+            if (_controller.value > 0.4)
+              Transform.scale(
+                scale: _ripple2Scale.value,
+                child: Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: RadialGradient(
+                      colors: [
+                        widget.primaryColor.withValues(
+                          alpha: _ripple2Opacity.value * 0.8,
+                        ),
+                        widget.primaryColor.withValues(
+                          alpha: _ripple2Opacity.value * 0.4,
+                        ),
+                        widget.primaryColor.withValues(alpha: 0),
+                      ],
+                      stops: const [0.0, 0.6, 1.0],
                     ),
                   ),
-                  if (hasNotification && !isActive)
-                    Positioned(
-                      right: 8,
-                      top: 4,
-                      child: Container(
-                        width: 8,
-                        height: 8,
-                        decoration: const BoxDecoration(
-                          color: Colors.red,
-                          shape: BoxShape.circle,
-                        ),
+                ),
+              ),
+            // First ripple wave
+            Transform.scale(
+              scale: _ripple1Scale.value,
+              child: Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(
+                    colors: [
+                      widget.primaryColor.withValues(
+                        alpha: _ripple1Opacity.value,
                       ),
-                    ),
+                      widget.primaryColor.withValues(
+                        alpha: _ripple1Opacity.value * 0.5,
+                      ),
+                      widget.primaryColor.withValues(alpha: 0),
+                    ],
+                    stops: const [0.0, 0.6, 1.0],
+                  ),
+                ),
+              ),
+            ),
+            // Solid circle background with gradient
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    widget.primaryColor.withValues(alpha: 0.9),
+                    widget.primaryColor,
+                  ],
+                  stops: const [0.0, 1.0],
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: widget.primaryColor.withValues(alpha: 0.4),
+                    blurRadius: 12,
+                    spreadRadius: 0,
+                  ),
                 ],
               ),
-            ],
-          ),
-        ),
-      ),
+            ),
+            // Icon with subtle pulse
+            Transform.scale(
+              scale:
+                  1.0 +
+                  (0.05 * (1 - ((_controller.value * 2) % 1 - 0.5).abs() * 2)),
+              child: Icon(widget.icon, size: 24, color: widget.color),
+            ),
+          ],
+        );
+      },
     );
   }
 }

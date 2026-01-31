@@ -16,12 +16,14 @@ class MonthCalendarView extends StatelessWidget {
           children: [
             Container(
               margin: const EdgeInsets.all(16.0),
-              padding: const EdgeInsets.only(bottom: 8.0), 
+              padding: const EdgeInsets.only(bottom: 8.0),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.outline.withValues(alpha: 0.2),
                 ),
               ),
               child: TableCalendar<Event>(
@@ -327,14 +329,16 @@ class MonthCalendarView extends StatelessWidget {
     final hasHoliday = events.any((e) => e.isHoliday);
 
     if (hasPersonal) {
-      return Colors.blue.withOpacity(0.2);
+      return Colors.blue.withValues(alpha: 0.2);
     } else if (hasInstructional) {
-      return Colors.lightGreen.withOpacity(0.2);
+      return Colors.lightGreen.withValues(alpha: 0.2);
     } else if (hasHoliday) {
-      return Colors.red.withOpacity(0.2);
+      return Colors.red.withValues(alpha: 0.2);
     }
 
-    return Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.3);
+    return Theme.of(
+      context,
+    ).colorScheme.secondaryContainer.withValues(alpha: 0.3);
   }
 
   Color _getDayTextColor(BuildContext context, List<Event> events) {

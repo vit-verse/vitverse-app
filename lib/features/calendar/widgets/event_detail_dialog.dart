@@ -28,7 +28,7 @@ class EventDetailDialog extends StatelessWidget {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: theme.muted.withOpacity(0.3),
+                color: theme.muted.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -60,7 +60,10 @@ class EventDetailDialog extends StatelessWidget {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: _getEventColor(context, event).withOpacity(0.15),
+                      color: _getEventColor(
+                        context,
+                        event,
+                      ).withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
@@ -86,7 +89,7 @@ class EventDetailDialog extends StatelessWidget {
                   color: theme.surface,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: theme.muted.withOpacity(0.2),
+                    color: theme.muted.withValues(alpha: 0.2),
                     width: 1,
                   ),
                 ),

@@ -92,7 +92,6 @@ enum FeatureCategory {
   academic,
   faculty,
   finance,
-  club,
   academics,
   social,
   utilities,

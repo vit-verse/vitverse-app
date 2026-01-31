@@ -63,8 +63,8 @@ class LostFoundDetailDialog extends StatelessWidget {
                     decoration: BoxDecoration(
                       color:
                           item.isLost
-                              ? Colors.orange.withOpacity(0.15)
-                              : Colors.green.withOpacity(0.15),
+                              ? Colors.orange.withValues(alpha: 0.15)
+                              : Colors.green.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Row(
@@ -112,7 +112,9 @@ class LostFoundDetailDialog extends StatelessWidget {
                 Text(
                   'Posted ${_formatDate(item.createdAt)}',
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
+                    color: theme.textTheme.bodyMedium?.color?.withValues(
+                      alpha: 0.6,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -163,7 +165,7 @@ class LostFoundDetailDialog extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.primary.withOpacity(0.05),
+                    color: theme.colorScheme.primary.withValues(alpha: 0.05),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(
@@ -179,7 +181,7 @@ class LostFoundDetailDialog extends StatelessWidget {
                           text: TextSpan(
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: theme.textTheme.bodySmall?.color
-                                  ?.withOpacity(0.8),
+                                  ?.withValues(alpha: 0.8),
                             ),
                             children: [
                               const TextSpan(text: 'Posted by '),
@@ -194,7 +196,7 @@ class LostFoundDetailDialog extends StatelessWidget {
                                 style: TextStyle(
                                   fontSize: 11,
                                   color: theme.textTheme.bodySmall?.color
-                                      ?.withOpacity(0.6),
+                                      ?.withValues(alpha: 0.6),
                                 ),
                               ),
                             ],
@@ -225,7 +227,7 @@ class LostFoundDetailDialog extends StatelessWidget {
           placeholder:
               (context, url) => Container(
                 height: 200,
-                color: theme.colorScheme.primary.withOpacity(0.05),
+                color: theme.colorScheme.primary.withValues(alpha: 0.05),
                 child: const Center(
                   child: ThemedLottieWidget(
                     assetPath: 'assets/lottie/lostFound.lottie',
@@ -237,7 +239,7 @@ class LostFoundDetailDialog extends StatelessWidget {
           errorWidget:
               (context, url, error) => Container(
                 height: 200,
-                color: theme.colorScheme.primary.withOpacity(0.05),
+                color: theme.colorScheme.primary.withValues(alpha: 0.05),
                 child: const Center(
                   child: ThemedLottieWidget(
                     assetPath: 'assets/lottie/lostFound.lottie',
@@ -301,7 +303,9 @@ class LostFoundDetailDialog extends StatelessWidget {
         decoration: BoxDecoration(
           color: theme.cardColor,
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: theme.colorScheme.primary.withOpacity(0.1)),
+          border: Border.all(
+            color: theme.colorScheme.primary.withValues(alpha: 0.1),
+          ),
         ),
         child: Row(
           children: [
@@ -312,7 +316,7 @@ class LostFoundDetailDialog extends StatelessWidget {
               Icon(
                 Icons.arrow_forward_ios,
                 size: 14,
-                color: theme.colorScheme.primary.withOpacity(0.5),
+                color: theme.colorScheme.primary.withValues(alpha: 0.5),
               ),
           ],
         ),
@@ -345,7 +349,9 @@ class LostFoundDetailDialog extends StatelessWidget {
       decoration: BoxDecoration(
         color: theme.cardColor,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: theme.colorScheme.primary.withOpacity(0.1)),
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(alpha: 0.1),
+        ),
       ),
       child: Row(
         children: [
@@ -376,7 +382,7 @@ class LostFoundDetailDialog extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.primary.withOpacity(0.1),
+                    color: theme.colorScheme.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Image.asset(
@@ -395,7 +401,7 @@ class LostFoundDetailDialog extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF25D366).withOpacity(0.1),
+                    color: const Color(0xFF25D366).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Image.asset(

@@ -28,7 +28,7 @@ class BufferIndicator extends StatelessWidget {
     String message;
 
     if (isNeutral) {
-      backgroundColor = theme.primary.withOpacity(0.1);
+      backgroundColor = theme.primary.withValues(alpha: 0.1);
       textColor = theme.primary;
       icon = Icons.check_circle_outline;
       message = 'At target';
@@ -36,7 +36,7 @@ class BufferIndicator extends StatelessWidget {
       backgroundColor = (theme.isDark
               ? const Color(0xFF66BB6A)
               : const Color(0xFF43A047))
-          .withOpacity(0.1);
+          .withValues(alpha: 0.1);
       textColor =
           theme.isDark ? const Color(0xFF66BB6A) : const Color(0xFF43A047);
       icon = Icons.trending_up;
@@ -46,7 +46,7 @@ class BufferIndicator extends StatelessWidget {
       backgroundColor = (theme.isDark
               ? const Color(0xFFEF5350)
               : const Color(0xFFE53935))
-          .withOpacity(0.1);
+          .withValues(alpha: 0.1);
       textColor =
           theme.isDark ? const Color(0xFFEF5350) : const Color(0xFFE53935);
       icon = Icons.trending_down;

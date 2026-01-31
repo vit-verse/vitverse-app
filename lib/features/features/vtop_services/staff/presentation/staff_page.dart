@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
 import '../../../../../core/theme/theme_provider.dart';
 import '../../../../../core/utils/logger.dart';
 import '../../../../../core/utils/snackbar_utils.dart';
 import '../../../../../core/loading/loading_messages.dart';
+import '../../../../../firebase/analytics/analytics_service.dart';
 import '../data/staff_data_provider.dart';
 import '../logic/staff_logic.dart';
 import '../widgets/staff_widgets.dart';
@@ -16,7 +16,7 @@ class StaffPage extends StatefulWidget {
   State<StaffPage> createState() => _StaffPageState();
 }
 
-class _StaffPageState extends State<StaffPage> {
+class _StaffPageState extends State<StaffPage> with TickerProviderStateMixin {
   final StaffDataProvider _dataProvider = StaffDataProvider();
   final StaffLogic _logic = StaffLogic();
   Map<String, List<Map<String, String>>> _staffByType = {};
@@ -24,15 +24,23 @@ class _StaffPageState extends State<StaffPage> {
   String _selectedType = 'Proctor';
   bool _isLoading = true;
   String? _error;
+  late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
-    FirebaseAnalytics.instance.logScreenView(
+    _tabController = TabController(length: 3, vsync: this);
+    AnalyticsService.instance.logScreenView(
       screenName: 'Staff',
       screenClass: 'StaffPage',
     );
     _loadStaffData();
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadStaffData() async {
@@ -58,6 +66,18 @@ class _StaffPageState extends State<StaffPage> {
         if (availableTypes.isNotEmpty) {
           _staffTypes = availableTypes;
           _selectedType = availableTypes.first;
+          _tabController.dispose();
+          _tabController = TabController(
+            length: availableTypes.length,
+            vsync: this,
+          );
+          _tabController.addListener(() {
+            if (!_tabController.indexIsChanging) {
+              setState(() {
+                _selectedType = _staffTypes[_tabController.index];
+              });
+            }
+          });
         }
         _isLoading = false;
       });
@@ -132,7 +152,7 @@ class _StaffPageState extends State<StaffPage> {
             Icon(
               Icons.error_outline_rounded,
               size: 64,
-              color: themeProvider.currentTheme.muted.withOpacity(0.5),
+              color: themeProvider.currentTheme.muted.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 16),
             Text(
@@ -162,33 +182,98 @@ class _StaffPageState extends State<StaffPage> {
       color: themeProvider.currentTheme.primary,
       child: Column(
         children: [
-          StaffTypeTabs(
-            staffTypes: _staffTypes,
-            selectedType: _selectedType,
-            onTypeSelected: (type) => setState(() => _selectedType = type),
-            themeProvider: themeProvider,
+          _buildTabBar(themeProvider),
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              physics: const BouncingScrollPhysics(),
+              children:
+                  _staffTypes.map((type) {
+                    return _buildStaffListForType(type, themeProvider);
+                  }).toList(),
+            ),
           ),
-          Expanded(child: _buildStaffList(themeProvider)),
         ],
       ),
     );
   }
 
-  Widget _buildStaffList(ThemeProvider themeProvider) {
-    final staffList = _staffByType[_selectedType] ?? [];
+  Widget _buildTabBar(ThemeProvider themeProvider) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: themeProvider.currentTheme.surface,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: List.generate(_staffTypes.length, (index) {
+          return Expanded(
+            child: AnimatedBuilder(
+              animation: _tabController,
+              builder: (context, child) {
+                final isSelected = _tabController.index == index;
+                final animValue = _tabController.animation?.value ?? 0.0;
+                final progress = (animValue - index).abs().clamp(0.0, 1.0);
+                final colorValue = 1.0 - progress;
+
+                return GestureDetector(
+                  onTap: () {
+                    _tabController.animateTo(
+                      index,
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    decoration: BoxDecoration(
+                      color: Color.lerp(
+                        Colors.transparent,
+                        themeProvider.currentTheme.primary,
+                        colorValue,
+                      ),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      _staffTypes[index],
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight:
+                            isSelected ? FontWeight.w600 : FontWeight.normal,
+                        color: Color.lerp(
+                          themeProvider.currentTheme.muted,
+                          themeProvider.currentTheme.isDark
+                              ? Colors.black
+                              : Colors.white,
+                          colorValue,
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          );
+        }),
+      ),
+    );
+  }
+
+  Widget _buildStaffListForType(String type, ThemeProvider themeProvider) {
+    final staffList = _staffByType[type] ?? [];
     if (staffList.isEmpty) {
-      return EmptyStaffState(
-        staffType: _selectedType,
-        themeProvider: themeProvider,
-      );
+      return EmptyStaffState(staffType: type, themeProvider: themeProvider);
     }
     return ListView.builder(
       padding: const EdgeInsets.symmetric(vertical: 8),
+      physics: const AlwaysScrollableScrollPhysics(),
       itemCount: staffList.length,
       itemBuilder:
           (context, index) => StaffCard(
             staffData: staffList[index],
-            staffType: _selectedType,
+            staffType: type,
             themeProvider: themeProvider,
             logic: _logic,
           ),

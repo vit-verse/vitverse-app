@@ -1,14 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Startup splash screen with AMOLED black background and centered logo -->
+<!-- Startup splash screen with AMOLED black background and centered logos -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- AMOLED Black background -->
     <item android:drawable="@color/amoled_black" />
     
-    <!-- Centered VIT Connect transparent logo -->
+    <!-- VIT Connect logo - centered -->
     <item>
         <bitmap
             android:gravity="center"
             android:src="@drawable/vit_connect_logo"
+            android:tileMode="disabled" />
+    </item>
+    
+    <!-- VIT Verse Love branding - positioned at bottom with margin -->
+    <item android:bottom="120dp">
+        <bitmap
+            android:gravity="bottom|center_horizontal"
+            android:src="@drawable/vit_verse_love"
             android:tileMode="disabled" />
     </item>
 </layer-list>

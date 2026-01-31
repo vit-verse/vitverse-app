@@ -52,7 +52,7 @@ class CapsuleProgress extends StatelessWidget {
                   style: TextStyle(
                     fontSize: height * 0.25,
                     fontWeight: FontWeight.w600,
-                    color: color.withOpacity(0.7),
+                    color: color.withValues(alpha: 0.7),
                     height: 1,
                   ),
                 ),
@@ -81,18 +81,20 @@ class _CapsuleBorderPainter extends CustomPainter {
     final radius = size.height / 2;
 
     // Background border (grey)
-    final trackPaint = Paint()
-      ..color = Colors.grey.withOpacity(0.25)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = borderWidth
-      ..strokeCap = StrokeCap.round;
+    final trackPaint =
+        Paint()
+          ..color = Colors.grey.withValues(alpha: 0.25)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = borderWidth
+          ..strokeCap = StrokeCap.round;
 
     // Progress border (colored)
-    final progressPaint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = borderWidth
-      ..strokeCap = StrokeCap.round;
+    final progressPaint =
+        Paint()
+          ..color = color
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = borderWidth
+          ..strokeCap = StrokeCap.round;
 
     // Create capsule path
     final rect = Rect.fromLTWH(0, 0, size.width, size.height);

@@ -87,8 +87,9 @@ class _ColorCustomizationPageState extends State<ColorCustomizationPage> {
                   _useThemeForFeatureIcons,
                 );
 
-                if (mounted)
+                if (mounted) {
                   SnackbarUtils.success(context, 'Color customizations saved!');
+                }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: themeProvider.currentTheme.primary,
@@ -202,7 +203,9 @@ class _ColorCustomizationPageState extends State<ColorCustomizationPage> {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: themeProvider.currentTheme.primary.withOpacity(0.1),
+                color: themeProvider.currentTheme.primary.withValues(
+                  alpha: 0.1,
+                ),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
@@ -243,7 +246,7 @@ class _ColorCustomizationPageState extends State<ColorCustomizationPage> {
               });
             },
           );
-        }).toList(),
+        }),
       ],
     );
   }
@@ -336,7 +339,9 @@ class _ColorCustomizationPageState extends State<ColorCustomizationPage> {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: themeProvider.currentTheme.primary.withOpacity(0.1),
+                color: themeProvider.currentTheme.primary.withValues(
+                  alpha: 0.1,
+                ),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
@@ -373,7 +378,7 @@ class _ColorCustomizationPageState extends State<ColorCustomizationPage> {
               });
             },
           );
-        }).toList(),
+        }),
       ],
     );
   }
@@ -427,7 +432,9 @@ class _ColorCustomizationPageState extends State<ColorCustomizationPage> {
                 color: color,
                 borderRadius: BorderRadius.circular(6),
                 border: Border.all(
-                  color: themeProvider.currentTheme.muted.withOpacity(0.3),
+                  color: themeProvider.currentTheme.muted.withValues(
+                    alpha: 0.3,
+                  ),
                   width: 1,
                 ),
               ),
@@ -472,7 +479,9 @@ class _ColorCustomizationPageState extends State<ColorCustomizationPage> {
                 color: color,
                 borderRadius: BorderRadius.circular(6),
                 border: Border.all(
-                  color: themeProvider.currentTheme.muted.withOpacity(0.3),
+                  color: themeProvider.currentTheme.muted.withValues(
+                    alpha: 0.3,
+                  ),
                   width: 1,
                 ),
               ),
@@ -603,7 +612,7 @@ class _ColorCustomizationPageState extends State<ColorCustomizationPage> {
         color: themeProvider.currentTheme.surface,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: themeProvider.currentTheme.muted.withOpacity(0.3),
+          color: themeProvider.currentTheme.muted.withValues(alpha: 0.3),
           width: 1.5,
         ),
       ),

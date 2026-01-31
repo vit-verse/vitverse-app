@@ -73,7 +73,7 @@ class CourseDetailPage extends StatelessWidget {
       decoration: AppCardStyles.compactCardDecoration(
         isDark: theme.isDark,
         customBackgroundColor: theme.surface,
-        customBorderColor: statusColor.withOpacity(0.3),
+        customBorderColor: statusColor.withValues(alpha: 0.3),
       ),
       child: Column(
         children: [
@@ -125,9 +125,9 @@ class CourseDetailPage extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(ThemeConstants.spacingMd),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(ThemeConstants.radiusMd),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Column(
         children: [
@@ -265,7 +265,7 @@ class CourseDetailPage extends StatelessWidget {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: theme.primary.withOpacity(0.1),
+                          color: theme.primary.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(
                             ThemeConstants.radiusSm,
                           ),
@@ -288,7 +288,7 @@ class CourseDetailPage extends StatelessWidget {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: theme.primary.withOpacity(0.2),
+                          color: theme.primary.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(
                             ThemeConstants.radiusSm,
                           ),
@@ -322,12 +322,12 @@ class CourseDetailPage extends StatelessWidget {
                                   vertical: 4,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: theme.muted.withOpacity(0.1),
+                                  color: theme.muted.withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(
                                     ThemeConstants.radiusSm,
                                   ),
                                   border: Border.all(
-                                    color: theme.muted.withOpacity(0.3),
+                                    color: theme.muted.withValues(alpha: 0.3),
                                   ),
                                 ),
                                 child: Text(
@@ -449,7 +449,7 @@ class CourseDetailPage extends StatelessWidget {
               vertical: ThemeConstants.spacingSm,
             ),
             decoration: BoxDecoration(
-              color: theme.primary.withOpacity(0.1),
+              color: theme.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(ThemeConstants.radiusSm),
             ),
             child: Text(
