@@ -23,8 +23,12 @@ class ClassNotificationScheduler {
 
   ClassNotificationScheduler(this._notifications);
 
-  /// Schedule ALL classes for today only (production pattern)
-  /// Called on: app open, timetable change, midnight refresh
+  // ============================================================================
+  // SCHEDULING
+  // ============================================================================
+
+  /// Schedule ALL classes for today only (production pattern).
+  /// Called on: app open, timetable change, midnight refresh.
   Future<ScheduleResult> scheduleTodayClasses() async {
     final stopwatch = Stopwatch()..start();
 
@@ -181,7 +185,11 @@ class ClassNotificationScheduler {
     }
   }
 
-  /// Fetch today's classes from SQLite with Saturday handling
+  // ============================================================================
+  // DATA FETCHING
+  // ============================================================================
+
+  /// Fetches today's classes from SQLite with Saturday handling.
   Future<List<ClassData>> _fetchTodayClasses() async {
     final db = VitConnectDatabase.instance;
     final database = await db.database;
@@ -321,7 +329,11 @@ class ClassNotificationScheduler {
         '📍 ${classData.venue}';
   }
 
-  /// Schedule single notification via AlarmManager
+  // ============================================================================
+  // NOTIFICATION MANAGEMENT
+  // ============================================================================
+
+  /// Schedules single notification via AlarmManager.
   Future<void> _scheduleNotification({
     required int id,
     required String title,
@@ -420,7 +432,11 @@ class ClassNotificationScheduler {
   }
 }
 
-/// Class data model
+// ==============================================================================
+// DATA CLASSES
+// ==============================================================================
+
+/// Class data model.
 class ClassData {
   final int slotId;
   final String courseCode;
