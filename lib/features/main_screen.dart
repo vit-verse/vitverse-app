@@ -116,9 +116,12 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
   Widget _buildBottomNavigationBar(ThemeProvider themeProvider) {
     final theme = themeProvider.currentTheme;
     final isDark = themeProvider.isDarkMode;
+    
+    // Get system navigation bar height to prevent overlap with 3-button navigation
+    final bottomPadding = MediaQuery.of(context).viewPadding.bottom;
 
     return Container(
-      margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      margin: EdgeInsets.fromLTRB(16, 0, 16, 16 + bottomPadding),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(50),
         child: BackdropFilter(
