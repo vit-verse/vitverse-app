@@ -18,10 +18,20 @@ class MainScreen extends StatefulWidget {
   State<MainScreen> createState() => _MainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
+class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin, WidgetsBindingObserver {
   int _currentIndex = 0;
+  int _previousIndex = 0;
   bool _isNavigating = false;
   final Map<int, Widget> _pageCache = {};
+  
+  // Animation controller for smooth tab transitions
+  late AnimationController _tabAnimationController;
+  late Animation<double> _tabAnimation;
+  
+  // Ripple animation controller for active tab glow
+  late AnimationController _rippleController;
+
+  static const int _itemCount = 5;
 
   Widget _buildPage(int index) {
     if (_pageCache.containsKey(index)) {
@@ -57,6 +67,26 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    
+    // Initialize tab animation controller
+    _tabAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    
+    _tabAnimation = CurvedAnimation(
+      parent: _tabAnimationController,
+      curve: Curves.easeOutBack,
+    );
+    
+    // Initialize ripple/glow animation controller
+    _rippleController = AnimationController(
+      duration: const Duration(milliseconds: 2000),
+      vsync: this,
+    )..repeat();
+    
+    // Start at completed state for initial load
+    _tabAnimationController.value = 1.0;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _buildPage(0);
@@ -80,6 +110,8 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
 
   @override
   void dispose() {
+    _tabAnimationController.dispose();
+    _rippleController.dispose();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -88,14 +120,31 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
     if (_currentIndex == index || _isNavigating) return;
 
     _isNavigating = true;
-
+    _previousIndex = _currentIndex;
+    
     setState(() {
       _currentIndex = index;
     });
+    
+    // Animate the indicator
+    _tabAnimationController.reset();
+    _tabAnimationController.forward();
 
-    Future.delayed(const Duration(milliseconds: 250), () {
+    Future.delayed(const Duration(milliseconds: 300), () {
       if (mounted) _isNavigating = false;
     });
+  }
+  
+  void _onSwipeLeft() {
+    if (_currentIndex < _itemCount - 1) {
+      _onTabTapped(_currentIndex + 1);
+    }
+  }
+  
+  void _onSwipeRight() {
+    if (_currentIndex > 0) {
+      _onTabTapped(_currentIndex - 1);
+    }
   }
 
   @override
@@ -104,21 +153,37 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
 
     return Scaffold(
       extendBody: true,
-      body: SafeArea(
-        top: false,
-        bottom: false,
-        child: _buildPage(_currentIndex),
+      body: GestureDetector(
+        onHorizontalDragEnd: (details) {
+          if (details.primaryVelocity == null) return;
+          // Swipe left (positive velocity means finger moved right to left)
+          if (details.primaryVelocity! < -300) {
+            _onSwipeLeft();
+          }
+          // Swipe right (negative velocity means finger moved left to right)
+          else if (details.primaryVelocity! > 300) {
+            _onSwipeRight();
+          }
+        },
+        child: SafeArea(
+          top: false,
+          bottom: false,
+          child: _buildPage(_currentIndex),
+        ),
       ),
-      bottomNavigationBar: _buildBottomNavigationBar(themeProvider),
+      bottomNavigationBar: _buildAnimatedBottomNavigationBar(themeProvider),
     );
   }
 
-  Widget _buildBottomNavigationBar(ThemeProvider themeProvider) {
+  Widget _buildAnimatedBottomNavigationBar(ThemeProvider themeProvider) {
     final theme = themeProvider.currentTheme;
     final isDark = themeProvider.isDarkMode;
     
     // Get system navigation bar height to prevent overlap with 3-button navigation
     final bottomPadding = MediaQuery.of(context).viewPadding.bottom;
+    
+    const itemWidth = 48.0;
+    const navBarHeight = 65.0;
 
     return Container(
       margin: EdgeInsets.fromLTRB(16, 0, 16, 16 + bottomPadding),
@@ -127,7 +192,7 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
           child: Container(
-            height: 65,
+            height: navBarHeight,
             decoration: BoxDecoration(
               color:
                   isDark
@@ -150,24 +215,137 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
                 ),
               ],
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _buildNavItem(Icons.home_rounded, 0, themeProvider),
-                _buildNavItem(Icons.bar_chart_rounded, 1, themeProvider),
-                _buildNavItem(Icons.calendar_month_rounded, 2, themeProvider),
-                _buildNavItem(Icons.auto_awesome_rounded, 3, themeProvider),
-                _buildNavItem(Icons.person_rounded, 4, themeProvider),
-              ],
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final totalWidth = constraints.maxWidth;
+                final spacing = (totalWidth - (_itemCount * itemWidth)) / (_itemCount + 1);
+                
+                return AnimatedBuilder(
+                  animation: Listenable.merge([_tabAnimation, _rippleController]),
+                  builder: (context, child) {
+                    // Calculate positions
+                    final previousX = spacing + (_previousIndex * (itemWidth + spacing));
+                    final currentX = spacing + (_currentIndex * (itemWidth + spacing));
+                    
+                    // Lerp between previous and current position
+                    final indicatorX = lerpDouble(previousX, currentX, _tabAnimation.value)!;
+                    
+                    // Ripple animation values
+                    final rippleScale1 = 1.0 + (0.8 * _rippleController.value);
+                    final rippleOpacity1 = 0.6 * (1 - _rippleController.value);
+                    final rippleScale2 = 1.0 + (0.8 * ((_rippleController.value + 0.4) % 1.0));
+                    final rippleOpacity2 = 0.4 * (1 - ((_rippleController.value + 0.4) % 1.0));
+                    
+                    return Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        // Ripple glow effect 2 (delayed)
+                        if (_rippleController.value > 0.4 || _rippleController.value < 0.6)
+                          Positioned(
+                            left: indicatorX - (itemWidth * (rippleScale2 - 1) / 2),
+                            top: (navBarHeight - itemWidth * rippleScale2) / 2,
+                            child: Container(
+                              width: itemWidth * rippleScale2,
+                              height: itemWidth * rippleScale2,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                gradient: RadialGradient(
+                                  colors: [
+                                    theme.primary.withValues(alpha: rippleOpacity2 * 0.8),
+                                    theme.primary.withValues(alpha: rippleOpacity2 * 0.4),
+                                    theme.primary.withValues(alpha: 0),
+                                  ],
+                                  stops: const [0.0, 0.6, 1.0],
+                                ),
+                              ),
+                            ),
+                          ),
+                        // Ripple glow effect 1
+                        Positioned(
+                          left: indicatorX - (itemWidth * (rippleScale1 - 1) / 2),
+                          top: (navBarHeight - itemWidth * rippleScale1) / 2,
+                          child: Container(
+                            width: itemWidth * rippleScale1,
+                            height: itemWidth * rippleScale1,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: RadialGradient(
+                                colors: [
+                                  theme.primary.withValues(alpha: rippleOpacity1),
+                                  theme.primary.withValues(alpha: rippleOpacity1 * 0.5),
+                                  theme.primary.withValues(alpha: 0),
+                                ],
+                                stops: const [0.0, 0.6, 1.0],
+                              ),
+                            ),
+                          ),
+                        ),
+                        // Animated sliding pill indicator (solid circle)
+                        Positioned(
+                          left: indicatorX,
+                          top: (navBarHeight - itemWidth) / 2,
+                          child: Container(
+                            width: itemWidth,
+                            height: itemWidth,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: RadialGradient(
+                                colors: [
+                                  theme.primary.withValues(alpha: 0.9),
+                                  theme.primary,
+                                ],
+                                stops: const [0.0, 1.0],
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: theme.primary.withValues(alpha: 0.5),
+                                  blurRadius: 16,
+                                  spreadRadius: 2,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        // Nav items row - centered vertically
+                        SizedBox(
+                          height: navBarHeight,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: List.generate(_itemCount, (index) {
+                              return _buildAnimatedNavItem(
+                                _getIconForIndex(index),
+                                index,
+                                themeProvider,
+                              );
+                            }),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
             ),
           ),
         ),
       ),
     );
   }
+  
+  IconData _getIconForIndex(int index) {
+    switch (index) {
+      case 0: return Icons.home_rounded;
+      case 1: return Icons.bar_chart_rounded;
+      case 2: return Icons.calendar_month_rounded;
+      case 3: return Icons.auto_awesome_rounded;
+      case 4: return Icons.person_rounded;
+      default: return Icons.home_rounded;
+    }
+  }
 
-  Widget _buildNavItem(IconData icon, int index, ThemeProvider themeProvider) {
+  Widget _buildAnimatedNavItem(IconData icon, int index, ThemeProvider themeProvider) {
     final isActive = index == _currentIndex;
+    final wasActive = index == _previousIndex;
     final theme = themeProvider.currentTheme;
 
     return GestureDetector(
@@ -175,182 +353,45 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
       behavior: HitTestBehavior.opaque,
       child: SizedBox(
         width: 48,
-        height: 48,
-        child:
-            isActive
-                ? _AnimatedIcon(
-                  icon: icon,
-                  color: Colors.white,
-                  primaryColor: theme.primary,
-                )
-                : Center(
-                  child: Icon(
-                    icon,
-                    size: 24,
-                    color: theme.muted.withValues(alpha: 0.6),
-                  ),
-                ),
-      ),
-    );
-  }
-}
-
-/// Animated icon widget with pulsing ripple effect
-class _AnimatedIcon extends StatefulWidget {
-  final IconData icon;
-  final Color color;
-  final Color primaryColor;
-
-  const _AnimatedIcon({
-    required this.icon,
-    required this.color,
-    required this.primaryColor,
-  });
-
-  @override
-  State<_AnimatedIcon> createState() => _AnimatedIconState();
-}
-
-class _AnimatedIconState extends State<_AnimatedIcon>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _ripple1Scale;
-  late Animation<double> _ripple1Opacity;
-  late Animation<double> _ripple2Scale;
-  late Animation<double> _ripple2Opacity;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 2000),
-      vsync: this,
-    )..repeat();
-
-    // First ripple wave
-    _ripple1Scale = Tween<double>(begin: 1.0, end: 2.2).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.0, 1.0, curve: Curves.easeOut),
-      ),
-    );
-
-    _ripple1Opacity = Tween<double>(begin: 0.8, end: 0.0).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.0, 1.0, curve: Curves.easeOut),
-      ),
-    );
-
-    // Second ripple wave (delayed)
-    _ripple2Scale = Tween<double>(begin: 1.0, end: 2.2).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.4, 1.0, curve: Curves.easeOut),
-      ),
-    );
-
-    _ripple2Opacity = Tween<double>(begin: 0.6, end: 0.0).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.4, 1.0, curve: Curves.easeOut),
-      ),
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, child) {
-        return Stack(
-          alignment: Alignment.center,
-          children: [
-            // Second ripple wave
-            if (_controller.value > 0.4)
-              Transform.scale(
-                scale: _ripple2Scale.value,
-                child: Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: RadialGradient(
-                      colors: [
-                        widget.primaryColor.withValues(
-                          alpha: _ripple2Opacity.value * 0.8,
-                        ),
-                        widget.primaryColor.withValues(
-                          alpha: _ripple2Opacity.value * 0.4,
-                        ),
-                        widget.primaryColor.withValues(alpha: 0),
-                      ],
-                      stops: const [0.0, 0.6, 1.0],
-                    ),
-                  ),
+        height: 65, // Match navbar height for proper centering
+        child: AnimatedBuilder(
+          animation: _tabAnimation,
+          builder: (context, child) {
+            // Calculate icon color and scale based on animation
+            double scale = 1.0;
+            Color iconColor = theme.muted.withValues(alpha: 0.6);
+            
+            if (isActive) {
+              // Animating to active
+              scale = lerpDouble(1.0, 1.1, _tabAnimation.value)!;
+              iconColor = Color.lerp(
+                theme.muted.withValues(alpha: 0.6),
+                Colors.white,
+                _tabAnimation.value,
+              )!;
+            } else if (wasActive) {
+              // Animating from active
+              scale = lerpDouble(1.1, 1.0, _tabAnimation.value)!;
+              iconColor = Color.lerp(
+                Colors.white,
+                theme.muted.withValues(alpha: 0.6),
+                _tabAnimation.value,
+              )!;
+            }
+            
+            return Center(
+              child: Transform.scale(
+                scale: scale,
+                child: Icon(
+                  icon,
+                  size: 24,
+                  color: iconColor,
                 ),
               ),
-            // First ripple wave
-            Transform.scale(
-              scale: _ripple1Scale.value,
-              child: Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: RadialGradient(
-                    colors: [
-                      widget.primaryColor.withValues(
-                        alpha: _ripple1Opacity.value,
-                      ),
-                      widget.primaryColor.withValues(
-                        alpha: _ripple1Opacity.value * 0.5,
-                      ),
-                      widget.primaryColor.withValues(alpha: 0),
-                    ],
-                    stops: const [0.0, 0.6, 1.0],
-                  ),
-                ),
-              ),
-            ),
-            // Solid circle background with gradient
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    widget.primaryColor.withValues(alpha: 0.9),
-                    widget.primaryColor,
-                  ],
-                  stops: const [0.0, 1.0],
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: widget.primaryColor.withValues(alpha: 0.4),
-                    blurRadius: 12,
-                    spreadRadius: 0,
-                  ),
-                ],
-              ),
-            ),
-            // Icon with subtle pulse
-            Transform.scale(
-              scale:
-                  1.0 +
-                  (0.05 * (1 - ((_controller.value * 2) % 1 - 0.5).abs() * 2)),
-              child: Icon(widget.icon, size: 24, color: widget.color),
-            ),
-          ],
-        );
-      },
+            );
+          },
+        ),
+      ),
     );
   }
 }
