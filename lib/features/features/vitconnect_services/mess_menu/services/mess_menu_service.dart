@@ -25,15 +25,27 @@ class MessMenuService {
 
   /// Fetch mess menu from remote or cache
   /// fileName: e.g., 'VITC-M-V.json'
-  static Future<List<MessMenuItem>> fetchMessMenu(String fileName) async {
+  /// forceRefresh: if true, clears cache and fetches fresh data
+  static Future<List<MessMenuItem>> fetchMessMenu(
+    String fileName, {
+    bool forceRefresh = false,
+  }) async {
     try {
-      Logger.i(_tag, 'Fetching mess menu: $fileName');
+      Logger.i(_tag, 'Fetching mess menu: $fileName (forceRefresh: $forceRefresh)');
 
-      // Check cache first
-      final cachedData = await _getCachedMenu(fileName);
-      if (cachedData != null) {
-        Logger.i(_tag, 'Returning cached mess menu');
-        return cachedData;
+      // Clear all caches if force refresh to ensure fresh data
+      if (forceRefresh) {
+        Logger.i(_tag, 'Force refresh: clearing all mess menu caches');
+        await clearAllCaches();
+      }
+
+      // Check cache first (only if not force refreshing)
+      if (!forceRefresh) {
+        final cachedData = await _getCachedMenu(fileName);
+        if (cachedData != null) {
+          Logger.i(_tag, 'Returning cached mess menu');
+          return cachedData;
+        }
       }
 
       // Fetch from remote

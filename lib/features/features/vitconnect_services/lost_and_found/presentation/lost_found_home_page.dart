@@ -68,6 +68,51 @@ class _LostFoundHomePageState extends State<LostFoundHomePage>
     }
   }
 
+  String _getTimeAgo(DateTime dateTime) {
+    final now = DateTime.now();
+    final difference = now.difference(dateTime);
+
+    if (difference.inSeconds < 60) {
+      return 'Just now';
+    } else if (difference.inMinutes < 60) {
+      return '${difference.inMinutes}m ago';
+    } else if (difference.inHours < 24) {
+      return '${difference.inHours}h ago';
+    } else {
+      return '${difference.inDays}d ago';
+    }
+  }
+
+  Widget _buildRefreshButton({
+    required dynamic theme,
+    required bool isLoading,
+    required VoidCallback onPressed,
+  }) {
+    return GestureDetector(
+      onTap: onPressed,
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: theme.surface.withValues(alpha: 0.5),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: theme.muted.withValues(alpha: 0.2),
+          ),
+        ),
+        child: isLoading
+            ? SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation(theme.primary),
+                ),
+              )
+            : Icon(Icons.refresh, size: 20, color: theme.text),
+      ),
+    );
+  }
+
   @override
   void dispose() {
     _tabController.dispose();
@@ -115,6 +160,38 @@ class _LostFoundHomePageState extends State<LostFoundHomePage>
           backgroundColor: theme.surface,
           elevation: 0,
           iconTheme: IconThemeData(color: theme.text),
+          actions: [
+            Consumer<LostFoundProvider>(
+              builder: (context, provider, _) {
+                if (provider.lastRefreshTime != null) {
+                  final timeAgo = _getTimeAgo(provider.lastRefreshTime!);
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8.0, top: 14),
+                    child: Text(
+                      timeAgo,
+                      style: TextStyle(
+                        color: theme.muted,
+                        fontSize: 12,
+                      ),
+                    ),
+                  );
+                }
+                return const SizedBox.shrink();
+              },
+            ),
+            Padding(
+              padding: const EdgeInsets.only(right: 12.0),
+              child: Consumer<LostFoundProvider>(
+                builder: (context, provider, _) {
+                  return _buildRefreshButton(
+                    theme: theme,
+                    isLoading: provider.isSyncing,
+                    onPressed: provider.isSyncing ? () {} : _onRefresh,
+                  );
+                },
+              ),
+            ),
+          ],
         ),
         body: Column(
           children: [

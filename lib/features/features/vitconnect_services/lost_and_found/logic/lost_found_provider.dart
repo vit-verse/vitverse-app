@@ -15,14 +15,18 @@ class LostFoundProvider extends ChangeNotifier {
   bool _isLoading = false;
   bool _isLoadingMyPosts = false;
   bool _isDeleting = false;
+  bool _isSyncing = false;
   String? _errorMessage;
+  DateTime? _lastRefreshTime;
 
   List<LostFoundItem> get allItems => _allItems;
   List<LostFoundItem> get myPosts => _myPosts;
   bool get isLoading => _isLoading;
   bool get isLoadingMyPosts => _isLoadingMyPosts;
   bool get isDeleting => _isDeleting;
+  bool get isSyncing => _isSyncing;
   String? get errorMessage => _errorMessage;
+  DateTime? get lastRefreshTime => _lastRefreshTime;
 
   /// Get lost items
   List<LostFoundItem> get lostItems =>
@@ -114,13 +118,18 @@ class LostFoundProvider extends ChangeNotifier {
 
   /// Refresh items
   Future<void> refresh() async {
+    _isSyncing = true;
+    notifyListeners();
+    
     try {
       _allItems = await _repository.forceRefresh();
+      _lastRefreshTime = DateTime.now();
       Logger.d(_tag, 'Refreshed ${_allItems.length} items');
-      notifyListeners();
     } catch (e) {
       Logger.e(_tag, 'Error refreshing items', e);
       _errorMessage = 'Failed to refresh items';
+    } finally {
+      _isSyncing = false;
       notifyListeners();
     }
   }

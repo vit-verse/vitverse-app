@@ -25,17 +25,27 @@ class LaundryService {
 
   /// Fetch laundry schedule from remote or cache
   /// fileName: e.g., 'VITC-A-L.json'
+  /// forceRefresh: if true, clears cache and fetches fresh data
   static Future<List<LaundrySchedule>> fetchLaundrySchedule(
-    String fileName,
-  ) async {
+    String fileName, {
+    bool forceRefresh = false,
+  }) async {
     try {
-      Logger.i(_tag, 'Fetching laundry schedule: $fileName');
+      Logger.i(_tag, 'Fetching laundry schedule: $fileName (forceRefresh: $forceRefresh)');
 
-      // Check cache first
-      final cachedData = await _getCachedSchedule(fileName);
-      if (cachedData != null) {
-        Logger.i(_tag, 'Returning cached laundry schedule');
-        return cachedData;
+      // Clear all caches if force refresh to ensure fresh data
+      if (forceRefresh) {
+        Logger.i(_tag, 'Force refresh: clearing all laundry caches');
+        await clearAllCaches();
+      }
+
+      // Check cache first (only if not force refreshing)
+      if (!forceRefresh) {
+        final cachedData = await _getCachedSchedule(fileName);
+        if (cachedData != null) {
+          Logger.i(_tag, 'Returning cached laundry schedule');
+          return cachedData;
+        }
       }
 
       // Fetch from remote
