@@ -76,7 +76,10 @@ class _LaundryPageState extends State<LaundryPage> {
       }
 
       final fileName = prefs.getLaundryFileName();
-      final items = await LaundryService.fetchLaundrySchedule(fileName);
+      final items = await LaundryService.fetchLaundrySchedule(
+        fileName,
+        forceRefresh: forceRefresh,
+      );
 
       setState(() {
         _scheduleItems = items;

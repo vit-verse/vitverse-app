@@ -306,6 +306,7 @@ class TechStackCard extends StatelessWidget {
           Wrap(
             spacing: 12,
             runSpacing: 12,
+            alignment: WrapAlignment.center,
             children:
                 AboutConstants.techStackIcons
                     .map(

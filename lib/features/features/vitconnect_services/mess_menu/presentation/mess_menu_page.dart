@@ -63,7 +63,10 @@ class _MessMenuPageState extends State<MessMenuPage> {
       }
 
       final fileName = prefs.getMessMenuFileName();
-      final items = await MessMenuService.fetchMessMenu(fileName);
+      final items = await MessMenuService.fetchMessMenu(
+        fileName,
+        forceRefresh: forceRefresh,
+      );
 
       setState(() {
         _menuItems = items;
