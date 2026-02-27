@@ -22,6 +22,8 @@ import 'firebase/messaging/fcm_service.dart';
 import 'firebase/messaging/notification_handler.dart';
 import 'supabase/core/supabase_client.dart';
 import 'features/notifications/notifications_provider.dart';
+import 'features/force_update/force_update_screen.dart';
+import 'core/services/version_checker_service.dart';
 
 // Note: During development I kept the internal app name as VIT Connect, but before release I decided on VIT Verse. So in the codebase and class names it still uses VIT Connect, but anywhere shown to the user is updated to VIT Verse ;) ...
 
@@ -154,6 +156,7 @@ class AuthGate extends StatefulWidget {
 class _AuthGateState extends State<AuthGate> {
   bool _isLoading = true;
   bool _isAuthenticated = false;
+  KillSwitchResult? _killSwitchResult;
 
   @override
   void initState() {
@@ -164,11 +167,19 @@ class _AuthGateState extends State<AuthGate> {
   Future<void> _initializeApp() async {
     try {
       final authService = VTOPAuthService.instance;
-      final isSignedIn = await authService.isSignedIn();
+
+      // Run auth check and kill switch concurrently — fail-open on kill switch errors
+      final authFuture = authService.isSignedIn();
+      final killSwitchFuture = VersionCheckerService.checkKillSwitch()
+          .catchError((_) => KillSwitchResult.passThrough('unknown'));
+
+      final isSignedIn = await authFuture;
+      final killSwitch = await killSwitchFuture;
 
       if (mounted) {
         setState(() {
           _isAuthenticated = isSignedIn;
+          _killSwitchResult = killSwitch;
           _isLoading = false;
         });
       }
@@ -221,7 +232,14 @@ class _AuthGateState extends State<AuthGate> {
     if (_isLoading) {
       return Scaffold(
         backgroundColor: Theme.of(context).colorScheme.surface,
-        body: SafeArea(child: const Center(child: CircularProgressIndicator())),
+        body: const SafeArea(child: Center(child: CircularProgressIndicator())),
+      );
+    }
+
+    if (_killSwitchResult?.isBlocked == true) {
+      return ForceUpdateScreen(
+        currentVersion: _killSwitchResult!.currentVersion,
+        minVersion: _killSwitchResult!.minVersion!,
       );
     }
 
