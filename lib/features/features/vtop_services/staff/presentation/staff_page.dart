@@ -21,7 +21,6 @@ class _StaffPageState extends State<StaffPage> with TickerProviderStateMixin {
   final StaffLogic _logic = StaffLogic();
   Map<String, List<Map<String, String>>> _staffByType = {};
   List<String> _staffTypes = ['Proctor', 'HOD', 'Dean'];
-  String _selectedType = 'Proctor';
   bool _isLoading = true;
   String? _error;
   late TabController _tabController;
@@ -65,7 +64,6 @@ class _StaffPageState extends State<StaffPage> with TickerProviderStateMixin {
         _staffByType = staffByType;
         if (availableTypes.isNotEmpty) {
           _staffTypes = availableTypes;
-          _selectedType = availableTypes.first;
           _tabController.dispose();
           _tabController = TabController(
             length: availableTypes.length,
@@ -73,9 +71,7 @@ class _StaffPageState extends State<StaffPage> with TickerProviderStateMixin {
           );
           _tabController.addListener(() {
             if (!_tabController.indexIsChanging) {
-              setState(() {
-                _selectedType = _staffTypes[_tabController.index];
-              });
+              setState(() {});
             }
           });
         }

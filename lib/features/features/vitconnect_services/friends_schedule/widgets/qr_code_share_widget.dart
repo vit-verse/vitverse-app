@@ -297,7 +297,7 @@ class _QRCodeShareWidgetState extends State<QRCodeShareWidget> {
           'VITConnect_${widget.studentName.replaceAll(' ', '_')}_${widget.studentReg}_$timestamp.png';
 
       // Save to gallery
-      final result = await ImageGallerySaverPlus.saveImage(
+      await ImageGallerySaverPlus.saveImage(
         byteData.buffer.asUint8List(),
         name: fileName,
         quality: 100,

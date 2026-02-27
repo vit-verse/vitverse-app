@@ -21,8 +21,7 @@ class EnvConfig {
 
   static const String githubVitconnectToken = String.fromEnvironment(
     'GITHUB_VITCONNECT_TOKEN',
-    defaultValue:
-        '',
+    defaultValue: '',
   );
 
   static const String pyqSecretHeader = String.fromEnvironment(
@@ -46,7 +45,7 @@ class EnvConfig {
   }
 
   static bool get isEventsConfigured {
-    return supabaseEventsUrl.isNotEmpty && 
+    return supabaseEventsUrl.isNotEmpty &&
         supabaseEventsAnonKey.isNotEmpty &&
         eventsSecretHeader.isNotEmpty;
   }

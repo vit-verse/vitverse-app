@@ -372,6 +372,7 @@ class VitVerseDatabase {
     // App preferences indexes (key is already primary key)
   }
 
+  // ignore: unused_element
   Future<void> _dropAllTables(Database db) async {
     await db.execute('DROP TABLE IF EXISTS calendar_cache');
     await db.execute('DROP TABLE IF EXISTS personal_events');

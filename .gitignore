@@ -1,5 +1,6 @@
 # Ignore environment variable files
 .env
+temporary
 
 # Android keystore files (NEVER commit these!)
 android/key.properties

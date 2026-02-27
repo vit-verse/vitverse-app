@@ -15,7 +15,6 @@ class EventsProvider extends ChangeNotifier {
   bool _disposed = false;
   String? _errorMessage;
   String? _searchQuery;
-  String? _selectedCategory;
   String _sortBy = 'date'; // 'date', 'most_liked', 'most_commented'
   DateTime? _lastSyncTime;
 
@@ -380,7 +379,6 @@ class EventsProvider extends ChangeNotifier {
 
   void setCategory(String? category) {
     if (_disposed) return;
-    _selectedCategory = category;
     notifyListeners();
   }
 

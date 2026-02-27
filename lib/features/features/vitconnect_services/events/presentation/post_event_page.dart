@@ -759,6 +759,7 @@ class _PostEventPageState extends State<PostEventPage> {
     );
   }
 
+  // ignore: unused_element
   Widget _buildTimePicker(theme) {
     return GestureDetector(
       onTap: _selectTime,

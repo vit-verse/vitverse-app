@@ -761,6 +761,7 @@ class _ReportGenerationPageState extends State<ReportGenerationPage> {
     );
   }
 
+  // ignore: unused_element
   Widget _buildReportSummary(dynamic theme) {
     if (_reportData == null) return const SizedBox();
 
@@ -829,6 +830,7 @@ class _ReportGenerationPageState extends State<ReportGenerationPage> {
     );
   }
 
+  // ignore: unused_element
   Widget _buildActionButton({
     required dynamic theme,
     required IconData icon,

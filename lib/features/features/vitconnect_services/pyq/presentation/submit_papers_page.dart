@@ -453,20 +453,8 @@ class _SubmitPapersPageState extends State<SubmitPapersPage> {
       }
 
       // Generate proper filename with metadata
-      // Format: <courseCode>-<courseTitle>-<exam>-<slot>-<semester>-<faculty>-<classNo>-<examDate>.pdf
-      final sanitizedCourseCode = _sanitize(courseCode);
-      final sanitizedCourseTitle = _sanitize(courseTitle);
-      final sanitizedExam = _sanitize(examType);
-      final sanitizedSlot =
-          slots.isNotEmpty ? _sanitize(slots.join('+')) : 'NA';
-      final sanitizedSemester = _sanitize(_selectedSemester ?? 'NA');
-      final sanitizedFaculty = _sanitize(faculty.split(',')[0].trim());
-      final sanitizedClassNo = _sanitize(classNo.split(',')[0].trim());
       final dateStr =
           '${examDate.year.toString().padLeft(4, '0')}-${examDate.month.toString().padLeft(2, '0')}-${examDate.day.toString().padLeft(2, '0')}';
-      final newFilename =
-          '$sanitizedCourseCode-$sanitizedCourseTitle-$sanitizedExam-$sanitizedSlot-$sanitizedSemester-$sanitizedFaculty-$sanitizedClassNo-$dateStr.pdf';
-
       final result = await PyqApi.uploadPaper(
         file: fileToUpload,
         courseCode: courseCode,

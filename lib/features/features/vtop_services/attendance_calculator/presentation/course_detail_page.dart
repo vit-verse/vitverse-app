@@ -582,6 +582,7 @@ class CourseDetailPage extends StatelessWidget {
     return days[weekday - 1];
   }
 
+  // ignore: unused_element
   bool _hasClassOnDay(AttendanceDay day) {
     // Check if this course has classes on this day of the week
     final effectiveWeekday = day.followsScheduleOf ?? day.date.weekday;

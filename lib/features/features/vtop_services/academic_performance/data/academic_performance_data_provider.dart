@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../../core/database/database.dart';
 import '../../../../../core/database/daos/course_dao.dart';
-import '../../../../../core/database/entities/course.dart';
 import '../../../../../core/database/daos/curriculum_progress_dao.dart';
 import '../../../../../core/database/daos/basket_progress_dao.dart';
 import '../../../../../core/database/entities/cgpa_summary.dart';
@@ -99,9 +98,8 @@ class AcademicPerformanceDataProvider {
         final currentSemesterName = semesters.first.toString();
         currentSemesterId = semesterMap[currentSemesterName]?.toString() ?? '';
       }
-      List<Course> currentSemesterCourses = [];
       if (currentSemesterId.isNotEmpty) {
-        currentSemesterCourses = await courseDao.getBySemester(
+        await courseDao.getBySemester(
           currentSemesterId,
         );
       }
@@ -189,9 +187,8 @@ class AcademicPerformanceDataProvider {
         final currentSemesterName = semesters.first.toString();
         currentSemesterId = semesterMap[currentSemesterName]?.toString() ?? '';
       }
-      List<Course> currentSemesterCourses = [];
       if (currentSemesterId.isNotEmpty) {
-        currentSemesterCourses = await courseDao.getBySemester(
+        await courseDao.getBySemester(
           currentSemesterId,
         );
       }

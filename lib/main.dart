@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -18,6 +19,7 @@ import 'core/database/entities/student_profile.dart';
 import 'supabase/core/supabase_events_client.dart';
 import 'firebase/analytics/analytics_service.dart';
 import 'firebase/core/firebase_initializer.dart';
+import 'firebase/crashlytics/crashlytics_service.dart';
 import 'firebase/messaging/fcm_service.dart';
 import 'firebase/messaging/notification_handler.dart';
 import 'supabase/core/supabase_client.dart';
@@ -82,6 +84,17 @@ void main() async {
 
   final themeProvider = ThemeProvider();
   await themeProvider.initialize();
+
+  FlutterError.onError = (details) {
+    Logger.e('FlutterError', details.exceptionAsString());
+    CrashlyticsService.recordFlutterError(details);
+  };
+
+  PlatformDispatcher.instance.onError = (error, stack) {
+    Logger.e('UncaughtError', error.toString(), error, stack);
+    CrashlyticsService.recordError(error, stack, fatal: true);
+    return true;
+  };
 
   runApp(VitConnectApp(themeProvider: themeProvider));
   AppStartup.initializeBackground();

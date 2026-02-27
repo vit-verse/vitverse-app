@@ -27,6 +27,7 @@ class ClassDetailsDialog extends StatefulWidget {
 
 class _ClassDetailsDialogState extends State<ClassDetailsDialog> {
   final _ratingRepository = FacultyRatingRepository();
+  // ignore: unused_field
   FacultyRatingAggregate? _facultyRating;
 
   @override

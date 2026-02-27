@@ -6,6 +6,7 @@ import 'package:uuid/uuid.dart';
 import '../../../../../supabase/core/supabase_client.dart';
 import '../../../../../core/utils/logger.dart';
 import '../../../../../core/config/app_config.dart';
+import '../../../../../firebase/crashlytics/crashlytics_service.dart';
 import '../models/lost_found_item.dart';
 import 'lost_found_cache_service.dart';
 import '../services/image_compression_service.dart';
@@ -86,7 +87,23 @@ class LostFoundRepository {
       );
 
       return items;
+    } on SocketException catch (e) {
+      Logger.w(_tag, 'Network unavailable for Supabase fetch: $e');
+      final cached = await _cacheService.getCachedItems();
+      if (cached.isNotEmpty) return cached;
+      rethrow;
     } catch (e, stack) {
+      if (e.toString().contains('ClientException') ||
+          e.toString().contains('HandshakeException') ||
+          e.toString().contains('Connection timed out')) {
+        Logger.w(_tag, 'Connection error fetching from Supabase: $e');
+        await CrashlyticsService.recordError(
+          Exception('Supabase fetch connection error: $e'),
+          stack,
+        );
+        final cached = await _cacheService.getCachedItems();
+        if (cached.isNotEmpty) return cached;
+      }
       Logger.e(_tag, 'Error fetching from Supabase', e, stack);
       rethrow;
     }
@@ -192,7 +209,31 @@ class LostFoundRepository {
           .uploadBinary(filePath, await imageFile.readAsBytes());
 
       return filePath;
+    } on SocketException catch (e, stack) {
+      Logger.e(_tag, 'Network error uploading image', e, stack);
+      await CrashlyticsService.recordError(
+        Exception('Image upload SocketException: $e'),
+        stack,
+      );
+      throw Exception('No internet connection. Please check your network and try again.');
+    } on HttpException catch (e, stack) {
+      Logger.e(_tag, 'HTTP error uploading image', e, stack);
+      await CrashlyticsService.recordError(
+        Exception('Image upload HttpException: $e'),
+        stack,
+      );
+      throw Exception('Server error while uploading image. Please try again later.');
     } catch (e, stack) {
+      if (e.toString().contains('ClientException') ||
+          e.toString().contains('Connection timed out') ||
+          e.toString().contains('HandshakeException')) {
+        Logger.e(_tag, 'Connection error uploading image', e, stack);
+        await CrashlyticsService.recordError(
+          Exception('Image upload connection error: $e'),
+          stack,
+        );
+        throw Exception('Connection failed. Please check your internet and try again.');
+      }
       Logger.e(_tag, 'Error uploading image', e, stack);
       rethrow;
     }

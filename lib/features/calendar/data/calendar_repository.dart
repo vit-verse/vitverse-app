@@ -32,12 +32,10 @@ class CalendarRepository {
       'https://raw.githubusercontent.com/vit-verse/vit-academic-calendar/main';
   static const String _metadataUrl = '$_baseUrl/metadata.json';
 
-  final String? _githubToken;
   final CalendarCacheService _cacheService;
 
   CalendarRepository({String? githubToken})
-    : _githubToken = githubToken,
-      _cacheService = CalendarCacheService();
+    : _cacheService = CalendarCacheService();
 
   /// Initialize repository
   Future<void> initialize() async {

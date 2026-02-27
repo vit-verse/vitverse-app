@@ -234,7 +234,6 @@ class _ThemeSettingsPageState extends State<ThemeSettingsPage>
       child: AnimatedBuilder(
         animation: _tabController,
         builder: (context, child) {
-          final isSelected = _tabController.index == index;
           final animValue = _tabController.animation?.value ?? 0.0;
           final progress = (animValue - index).abs().clamp(0.0, 1.0);
           final colorValue = 1.0 - progress;

@@ -133,11 +133,9 @@ class _DaysSelectorState extends State<DaysSelector> {
     final themeProvider = context.read<ThemeProvider>();
     final theme = themeProvider.currentTheme;
     final days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
-    final today = DateTime.now().weekday - 1;
     final hasCalendar = _calendarService.isEnabled;
     final weekDates = _getWeekDates();
     final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
     final isCurrentWeek = _isCurrentWeek();
 
     final circleSize = ((screenWidth - 48) / 7).clamp(34.0, 42.0);

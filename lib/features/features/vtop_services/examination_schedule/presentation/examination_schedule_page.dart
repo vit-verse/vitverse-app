@@ -23,7 +23,6 @@ class _ExaminationSchedulePageState extends State<ExaminationSchedulePage>
 
   Map<String, List<Map<String, dynamic>>> _examsByType = {};
   List<String> _examTypes = [];
-  String? _selectedType;
   Map<String, dynamic>? _nextExam;
   bool _isLoading = true;
   String? _error;
@@ -84,7 +83,6 @@ class _ExaminationSchedulePageState extends State<ExaminationSchedulePage>
       setState(() {
         _examsByType = examsByType;
         _examTypes = examTypes;
-        _selectedType = mostUpcomingType;
         _nextExam = nextExam;
         _isLoading = false;
         // Reinitialize TabController with correct length
@@ -96,9 +94,7 @@ class _ExaminationSchedulePageState extends State<ExaminationSchedulePage>
         );
         _tabController.addListener(() {
           if (!_tabController.indexIsChanging) {
-            setState(() {
-              _selectedType = _examTypes[_tabController.index];
-            });
+            setState(() {});
           }
         });
       });

@@ -1137,6 +1137,10 @@ class VTOPAuthService extends ChangeNotifier {
 
       _setState(AuthState.dataDownloading);
 
+      if (_webView == null) {
+        throw Exception('WebView not initialized — cannot download data');
+      }
+
       await _notificationService.showProgressNotification(
         currentStep: 6,
         totalSteps: AuthConstants.totalAuthSteps,
@@ -1163,11 +1167,14 @@ class VTOPAuthService extends ChangeNotifier {
         stepLabel: AuthConstants.authStepComplete,
       );
 
-      // Start Phase 2 immediately - AuthHandler has its own stabilization delay
-      _authHandler.startPhase2Background(
-        webView: _webView!,
-        semesterID: _semesterID!,
-      );
+      if (_webView != null) {
+        _authHandler.startPhase2Background(
+          webView: _webView!,
+          semesterID: _semesterID!,
+        );
+      } else {
+        Logger.w('Auth', 'WebView disposed before Phase 2 — skipping background sync');
+      }
     } catch (e) {
       Logger.e('Auth', 'Semester selection failed', e);
       CrashlyticsService.recordError(

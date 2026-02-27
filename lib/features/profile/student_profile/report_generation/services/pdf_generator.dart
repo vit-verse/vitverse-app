@@ -374,6 +374,7 @@ class PdfGeneratorService {
     );
   }
 
+  // ignore: unused_element
   pw.Page _buildAcademicPage(StudentReportData data) {
     return pw.Page(
       pageFormat: PdfPageFormat.a4,
@@ -558,6 +559,7 @@ class PdfGeneratorService {
     );
   }
 
+  // ignore: unused_element
   pw.Page _buildGradeDistributionPage(StudentReportData data) {
     return pw.Page(
       pageFormat: PdfPageFormat.a4,
@@ -608,6 +610,7 @@ class PdfGeneratorService {
     );
   }
 
+  // ignore: unused_element
   pw.Page _buildSemesterPage(StudentReportData data, int semesterIndex) {
     final semester = data.gradeHistory[semesterIndex];
     final marks = data.marksHistory.firstWhere(
@@ -744,6 +747,7 @@ class PdfGeneratorService {
     );
   }
 
+  // ignore: unused_element
   pw.Page _buildDetailedAssessmentPage(StudentReportData data, int index) {
     if (index >= data.marksHistory.length) {
       return pw.Page(build: (context) => pw.Container());
@@ -883,6 +887,7 @@ class PdfGeneratorService {
     );
   }
 
+  // ignore: unused_element
   pw.Page _buildCourseWiseAnalysisPage(StudentReportData data) {
     final allCourses = <String, List<double>>{};
 
@@ -1012,6 +1017,7 @@ class PdfGeneratorService {
     );
   }
 
+  // ignore: unused_element
   pw.Page _buildFeePage(StudentReportData data) {
     return pw.Page(
       pageFormat: PdfPageFormat.a4,
@@ -1523,6 +1529,7 @@ class PdfGeneratorService {
     );
   }
 
+  // ignore: unused_element
   pw.Page _buildSemesterDetailPage(
     StudentReportData data,
     int semesterIndex,
@@ -1823,6 +1830,7 @@ class PdfGeneratorService {
   }
 
   // Build Semester GPA Trend Chart
+  // ignore: unused_element
   pw.Widget _buildSemesterGPAChart(StudentReportData data) {
     final maxGPA = 10.0;
     final chartHeight = 120.0;

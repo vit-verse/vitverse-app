@@ -24,7 +24,6 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
   bool _isLoading = true;
   bool _permissionsGranted = false;
   List<PendingNotificationRequest> _scheduledNotifications = [];
-  final bool _showScheduledNotifications = false;
   bool _lostFoundNotifications = true; // Default enabled
   bool _cabShareNotifications = true; // Default enabled
   bool _eventsNotifications = true; // Default enabled
@@ -857,6 +856,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
     );
   }
 
+  // ignore: unused_element
   String _formatDateTime(DateTime dateTime) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
