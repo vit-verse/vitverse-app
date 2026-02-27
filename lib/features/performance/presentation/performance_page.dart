@@ -87,6 +87,18 @@ class _PerformancePageState extends State<PerformancePage> {
     }
   }
 
+  Future<void> _handleMarkRead(List<int> markIds) async {
+    for (final id in markIds) {
+      await _logic.markAsRead(id);
+    }
+    _loadPerformanceData();
+  }
+
+  Future<void> _handleMarkAllRead() async {
+    await _logic.markAllRead();
+    _loadPerformanceData();
+  }
+
   /// Build consistent action button with border for AppBar
   Widget _buildActionButton({
     required IconData icon,
@@ -125,17 +137,36 @@ class _PerformancePageState extends State<PerformancePage> {
           actions: [
             Padding(
               padding: const EdgeInsets.only(right: 12.0),
-              child: _buildActionButton(
-                icon: _expandAll ? Icons.unfold_less : Icons.unfold_more,
-                onPressed: _toggleExpandAll,
-                tooltip: _expandAll ? 'Collapse all' : 'Expand all',
-                themeProvider: themeProvider,
+              child: Row(
+                children: [
+                  if (_performances.any((p) => p.unreadCount > 0))
+                    _buildActionButton(
+                      icon: Icons.done_all,
+                      onPressed: _handleMarkAllRead,
+                      tooltip: 'Mark all read',
+                      themeProvider: themeProvider,
+                    ),
+                  const SizedBox(width: 8),
+                  _buildActionButton(
+                    icon: _expandAll ? Icons.unfold_less : Icons.unfold_more,
+                    onPressed: _toggleExpandAll,
+                    tooltip: _expandAll ? 'Collapse all' : 'Expand all',
+                    themeProvider: themeProvider,
+                  ),
+                ],
               ),
             ),
           ],
         ),
         body: ListView(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.fromLTRB(
+            16,
+            16,
+            16,
+            16 +
+                MediaQuery.of(context).padding.bottom +
+                kBottomNavigationBarHeight,
+          ),
           children: [
             _buildStatsHeader(themeProvider),
             const SizedBox(height: 20),
@@ -146,6 +177,7 @@ class _PerformancePageState extends State<PerformancePage> {
                 performance: performance,
                 forceExpanded: _expandAll,
                 onUpdateAverage: _handleUpdateAverage,
+                onMarkRead: _handleMarkRead,
               );
             }),
           ],
@@ -156,6 +188,7 @@ class _PerformancePageState extends State<PerformancePage> {
 
   Widget _buildStatsHeader(ThemeProvider themeProvider) {
     final totalCourses = _performances.length;
+    final totalUnread = _performances.fold(0, (sum, p) => sum + p.unreadCount);
 
     // Calculate total assessments
     int totalAssessments = 0;
@@ -204,6 +237,15 @@ class _PerformancePageState extends State<PerformancePage> {
             '$presentAssessments / $totalAssessments',
             themeProvider,
           ),
+          if (totalUnread > 0) ...[
+            const SizedBox(height: 12),
+            _buildStatRow(
+              'New / Unread',
+              totalUnread.toString(),
+              themeProvider,
+              valueColor: themeProvider.currentTheme.primary,
+            ),
+          ],
         ],
       ),
     );
@@ -212,8 +254,9 @@ class _PerformancePageState extends State<PerformancePage> {
   Widget _buildStatRow(
     String label,
     String value,
-    ThemeProvider themeProvider,
-  ) {
+    ThemeProvider themeProvider, {
+    Color? valueColor,
+  }) {
     return Row(
       children: [
         Expanded(
@@ -230,7 +273,7 @@ class _PerformancePageState extends State<PerformancePage> {
           style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w600,
-            color: themeProvider.currentTheme.text,
+            color: valueColor ?? themeProvider.currentTheme.text,
           ),
         ),
       ],

@@ -11,6 +11,7 @@ import '../../../core/utils/sync_notifier.dart';
 import '../../../core/utils/snackbar_utils.dart';
 import '../../authentication/core/auth_service.dart';
 import '../../authentication/core/auth_constants.dart';
+import '../../authentication/core/auth_handler.dart';
 import '../../authentication/utils/auth_states.dart';
 import '../../authentication/ui/dialogs/captcha_dialog.dart';
 
@@ -33,45 +34,32 @@ class _SemesterSyncCardState extends State<SemesterSyncCard> {
     super.initState();
     _loadSemesterData();
 
-    // Listen for sync completion to reload data
     _syncSubscription = SyncNotifier.instance.onSyncComplete.listen((_) {
-      if (mounted) {
-        _loadSemesterData();
-      }
+      if (mounted) _loadSemesterData();
     });
 
-    // Listen to auth service to update button state when phases change
     VTOPAuthService.instance.addListener(_onAuthStateChanged);
+    VTOPAuthHandler.instance.addListener(_onAuthStateChanged);
   }
 
   @override
   void dispose() {
     try {
       _syncSubscription?.cancel();
-    } catch (e) {
-      // Ignore errors during disposal
-    } finally {
-      _syncSubscription = null;
-    }
+    } catch (_) {}
+    _syncSubscription = null;
     VTOPAuthService.instance.removeListener(_onAuthStateChanged);
+    VTOPAuthHandler.instance.removeListener(_onAuthStateChanged);
     super.dispose();
   }
 
-  /// Called when auth service state changes (phase updates)
   void _onAuthStateChanged() {
-    if (mounted) {
-      final currentPhase = VTOPAuthService.instance.currentSyncPhase;
-
-      // If phase is null, sync is complete
-      if (currentPhase == null) {
-        setState(() {
-          _isBackgroundSyncing = false;
-        });
-      }
-      // Otherwise, update UI to show current phase
-      else {
-        setState(() {});
-      }
+    if (!mounted) return;
+    final currentPhase = VTOPAuthService.instance.currentSyncPhase;
+    if (currentPhase == null && _isBackgroundSyncing) {
+      setState(() => _isBackgroundSyncing = false);
+    } else {
+      setState(() {});
     }
   }
 
@@ -87,12 +75,10 @@ class _SemesterSyncCardState extends State<SemesterSyncCard> {
         _availableSemesters = decoded.map((e) => e.toString()).toList();
       }
 
-      // Load last selected semester from the SAME key that auth_service uses
       final lastSemester = prefs.getString(AuthConstants.keySemester);
       if (lastSemester != null && _availableSemesters.contains(lastSemester)) {
         _selectedSemester = lastSemester;
       } else if (_availableSemesters.isNotEmpty) {
-        // Default to first semester if no last selection
         _selectedSemester = _availableSemesters.first;
       }
 
@@ -186,7 +172,6 @@ class _SemesterSyncCardState extends State<SemesterSyncCard> {
         _selectedSemester = selected;
       });
 
-      // Save selected semester to the SAME key that auth_service uses
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(AuthConstants.keySemester, selected);
 
@@ -218,9 +203,8 @@ class _SemesterSyncCardState extends State<SemesterSyncCard> {
 
       final authService = VTOPAuthService.instance;
 
-      // Start background sync with the selected semester
       final success = await authService.backgroundSync(
-        semesterName: _selectedSemester, // Pass the selected semester
+        semesterName: _selectedSemester,
         onSyncStateChanged: (isSyncing) {
           if (mounted) {
             setState(() {

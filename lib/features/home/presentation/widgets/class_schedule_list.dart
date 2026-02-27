@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/theme/theme_provider.dart';
@@ -10,8 +11,7 @@ class ClassScheduleList extends StatefulWidget {
   final int dayIndex;
   final HomeLogic homeLogic;
   final bool isDataLoading;
-  final DateTime?
-  actualDate; // Actual date for this day (considering week navigation)
+  final DateTime? actualDate;
 
   const ClassScheduleList({
     super.key,
@@ -27,6 +27,13 @@ class ClassScheduleList extends StatefulWidget {
 
 class _ClassScheduleListState extends State<ClassScheduleList> {
   final _calendarService = CalendarHomeService.instance;
+  late final String _holidayLottie;
+
+  @override
+  void initState() {
+    super.initState();
+    _holidayLottie = 'assets/lottie/holiday${Random().nextInt(9) + 1}.lottie';
+  }
 
   bool _isHoliday(int dayIndex) {
     final DateTime targetDate;
@@ -51,27 +58,21 @@ class _ClassScheduleListState extends State<ClassScheduleList> {
     String title,
     String subtitle,
   ) {
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        const Positioned.fill(
-          child: ThemedLottieWidget(
-            assetPath: 'assets/lottie/SpaceCat.lottie',
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ThemedLottieWidget(
+            assetPath: _holidayLottie,
+            width: 280,
+            height: 280,
             fallbackIcon: Icons.celebration_rounded,
             fallbackText: 'Holiday',
             showContainer: false,
           ),
-        ),
-        Center(
-          child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16),
-            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
-            decoration: BoxDecoration(
-              color: themeProvider.currentTheme.background.withValues(
-                alpha: 0.8,
-              ),
-              borderRadius: BorderRadius.circular(16),
-            ),
+          const SizedBox(height: 16),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -101,8 +102,8 @@ class _ClassScheduleListState extends State<ClassScheduleList> {
               ],
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 

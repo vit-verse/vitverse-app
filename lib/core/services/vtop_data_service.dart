@@ -11,6 +11,7 @@ import '../database/daos/attendance_dao.dart';
 import '../database/daos/attendance_detail_dao.dart';
 import '../database/daos/mark_dao.dart';
 import '../database/daos/all_semester_mark_dao.dart';
+import '../database_vitverse/database.dart';
 import '../database/entities/course.dart';
 import '../database/entities/attendance.dart';
 import '../database/entities/attendance_detail.dart';
@@ -1562,24 +1563,55 @@ class VTOPDataService {
       if (course != null) {
         final signature =
             '${course.code}_${markData['title']}_${markData['score']}'.hashCode;
-        final existing = await _markDao.getBySignature(signature);
+        final mark = Mark(
+          courseId: course.id!,
+          title: markData['title']?.toString() ?? '',
+          score: (markData['score'] ?? 0).toDouble(),
+          maxScore: (markData['max_score'] ?? 0).toDouble(),
+          weightage: (markData['weightage'] ?? 0).toDouble(),
+          maxWeightage: (markData['max_weightage'] ?? 0).toDouble(),
+          average: (markData['average'] ?? 0).toDouble(),
+          status: markData['status']?.toString() ?? '',
+          isRead: false,
+          signature: signature,
+        );
+        await _markDao.insert(mark);
+      }
+    }
+    await _restoreMarksMetaFromVitverse();
+  }
 
-        if (existing == null) {
-          final mark = Mark(
-            courseId: course.id!,
-            title: markData['title']?.toString() ?? '',
-            score: (markData['score'] ?? 0).toDouble(),
-            maxScore: (markData['max_score'] ?? 0).toDouble(),
-            weightage: (markData['weightage'] ?? 0).toDouble(),
-            maxWeightage: (markData['max_weightage'] ?? 0).toDouble(),
-            average: (markData['average'] ?? 0).toDouble(),
-            status: markData['status']?.toString() ?? '',
-            isRead: false,
-            signature: signature,
-          );
-          await _markDao.insert(mark);
+  Future<void> _restoreMarksMetaFromVitverse() async {
+    try {
+      final vitverse = VitVerseDatabase.instance;
+      final readSigs = await vitverse.marksMetaDao.getReadSignatures();
+      final avgMap = await vitverse.marksMetaDao.getAverages();
+      if (readSigs.isEmpty && avgMap.isEmpty) return;
+
+      final db = await VitConnectDatabase.instance.database;
+      final freshRows = await db.rawQuery('''
+        SELECT m.id, m.signature, m.title, c.code AS course_code
+        FROM marks m
+        LEFT JOIN courses c ON m.course_id = c.id
+      ''');
+      for (final row in freshRows) {
+        final id = row['id'] as int;
+        final sig = row['signature'] as int?;
+        final courseCode = row['course_code'] as String? ?? '';
+        final title = row['title'] as String? ?? '';
+        final identityKey = '${courseCode}_$title'.hashCode;
+        final isRead = sig != null && readSigs.contains(sig);
+        final savedAvg = avgMap[identityKey];
+        final updates = <String, Object?>{
+          if (isRead) 'is_read': 1,
+          if (savedAvg != null) 'average': savedAvg,
+        };
+        if (updates.isNotEmpty) {
+          await db.update('marks', updates, where: 'id = ?', whereArgs: [id]);
         }
       }
+    } catch (e) {
+      Logger.e('VTOP', 'Failed to restore marks meta from vitverse: $e');
     }
   }
 

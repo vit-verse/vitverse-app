@@ -132,6 +132,15 @@ flutter:
     - assets/icons/contributation.png
     - assets/lottie/student.lottie
     - assets/lottie/SpaceCat.lottie
+    - assets/lottie/holiday1.lottie
+    - assets/lottie/holiday2.lottie
+    - assets/lottie/holiday3.lottie
+    - assets/lottie/holiday4.lottie
+    - assets/lottie/holiday5.lottie
+    - assets/lottie/holiday6.lottie
+    - assets/lottie/holiday7.lottie
+    - assets/lottie/holiday8.lottie
+    - assets/lottie/holiday9.lottie
     - assets/lottie/lostFound.lottie
     - assets/lottie/cabshare.lottie
     - assets/lottie/loading1.lottie

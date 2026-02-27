@@ -2,12 +2,9 @@ import 'package:sqflite/sqflite.dart';
 import '../database.dart';
 import '../entities/mark.dart';
 
-/// Data Access Object for Mark entity
-/// Provides CRUD operations for marks table
 class MarkDao {
   static const String _tableName = 'marks';
 
-  /// Get database instance
   Future<Database> get _database async => VitConnectDatabase.instance.database;
 
   /// Insert mark
@@ -159,12 +156,37 @@ class MarkDao {
     return result.first['count'] as int;
   }
 
-  /// Get unread count
   Future<int> getUnreadCount() async {
     final db = await _database;
     final result = await db.rawQuery(
       'SELECT COUNT(*) as count FROM $_tableName WHERE is_read = 0',
     );
     return result.first['count'] as int;
+  }
+
+  Future<Mark?> getById(int id) async {
+    final db = await _database;
+    final maps = await db.query(
+      _tableName,
+      where: 'id = ?',
+      whereArgs: [id],
+      limit: 1,
+    );
+    if (maps.isEmpty) return null;
+    return Mark.fromMap(maps.first);
+  }
+
+  Future<Map<String, dynamic>?> getMarkWithCourse(int markId) async {
+    final db = await _database;
+    final rows = await db.rawQuery(
+      '''
+      SELECT m.signature, m.title, c.code AS course_code
+      FROM $_tableName m
+      LEFT JOIN courses c ON m.course_id = c.id
+      WHERE m.id = ?
+    ''',
+      [markId],
+    );
+    return rows.isEmpty ? null : rows.first;
   }
 }
