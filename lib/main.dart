@@ -168,24 +168,22 @@ class _AuthGateState extends State<AuthGate> {
     try {
       final authService = VTOPAuthService.instance;
 
-      // Run auth check and kill switch concurrently — fail-open on kill switch errors
-      final authFuture = authService.isSignedIn();
-      final killSwitchFuture = VersionCheckerService.checkKillSwitch()
-          .catchError((_) => KillSwitchResult.passThrough('unknown'));
-
-      final isSignedIn = await authFuture;
-      final killSwitch = await killSwitchFuture;
+      // Fast local check only — no network, no delay
+      final isSignedIn = await authService.isSignedIn();
 
       if (mounted) {
         setState(() {
           _isAuthenticated = isSignedIn;
-          _killSwitchResult = killSwitch;
           _isLoading = false;
         });
       }
 
       authService.addListener(_handleAuthStateChange);
       authService.initialize();
+
+      // Kill switch runs silently in background after the app is already shown.
+      // Fail-open: any error is swallowed and the app continues normally.
+      _checkKillSwitchInBackground();
     } catch (e) {
       Logger.e('AuthGate', 'Initialization failed', e);
       if (mounted) {
@@ -195,6 +193,22 @@ class _AuthGateState extends State<AuthGate> {
         });
       }
     }
+  }
+
+  void _checkKillSwitchInBackground() {
+    VersionCheckerService.checkKillSwitch()
+        .then((result) {
+          if (!mounted) return;
+          if (result.isBlocked) {
+            setState(() => _killSwitchResult = result);
+          }
+        })
+        .catchError((e) {
+          Logger.w(
+            'AuthGate',
+            'Kill switch background check failed — ignoring: $e',
+          );
+        });
   }
 
   void _handleAuthStateChange() {
