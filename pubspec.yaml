@@ -3,6 +3,7 @@ description: "VIT Verse - A companion app for VIT Chennai students with VTOP int
 publish_to: 'none'
 
 version: 2.1.1+6
+min_version: 2.0.0  # bump to force-update older installs; set equal to version to block all older builds
 
 environment:
   sdk: ^3.7.2
