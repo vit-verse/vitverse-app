@@ -322,7 +322,7 @@ class VTOPDataService {
 
     final result = await _executeJavaScript(jsCode);
     if (result.isNotEmpty && result != 'null') {
-      final data = jsonDecode(result);
+      final data = jsonDecode(_sanitizeJsonString(result));
       if (data.containsKey('name') && data['name'].toString().isNotEmpty) {
         await _saveProfileData(data);
         Logger.success('VTOP', 'Profile: ${data['name']}');
@@ -463,7 +463,7 @@ class VTOPDataService {
 
     final result = await _executeJavaScript(jsCode);
     if (result.isNotEmpty && result != 'null') {
-      final data = jsonDecode(result);
+      final data = jsonDecode(_sanitizeJsonString(result));
       await _saveGradeHistoryData(data);
       Logger.success('VTOP', 'Grade history extracted');
     }
@@ -621,7 +621,7 @@ class VTOPDataService {
 
     final result = await _executeJavaScript(jsCode);
     if (result.isNotEmpty && result != 'null') {
-      final response = jsonDecode(result);
+      final response = jsonDecode(_sanitizeJsonString(result));
       final labArray = response['lab'] as List;
       final theoryArray = response['theory'] as List;
 
@@ -702,7 +702,7 @@ class VTOPDataService {
 
     final result = await _executeJavaScript(jsCode);
     if (result.isNotEmpty && result != 'null') {
-      final data = jsonDecode(result);
+      final data = jsonDecode(_sanitizeJsonString(result));
       if (data.containsKey('attendance')) {
         await _saveAttendanceData(data['attendance'] as List);
         Logger.success(
@@ -800,7 +800,7 @@ class VTOPDataService {
 
     final result = await _executeJavaScript(jsCode);
     if (result.isNotEmpty && result != 'null') {
-      final data = jsonDecode(result);
+      final data = jsonDecode(_sanitizeJsonString(result));
       if (data.containsKey('marks')) {
         await _saveMarksData(data['marks'] as List);
         Logger.success('VTOP', '${(data['marks'] as List).length} marks');
@@ -892,7 +892,7 @@ class VTOPDataService {
 
     final result = await _executeJavaScript(jsCode);
     if (result.isNotEmpty && result != 'null') {
-      final data = jsonDecode(result);
+      final data = jsonDecode(_sanitizeJsonString(result));
       await _saveExamScheduleData(data);
       Logger.success('VTOP', 'Exam schedule extracted');
     }
@@ -1135,7 +1135,7 @@ class VTOPDataService {
 
     final result = await _executeJavaScript(jsCode);
     if (result.isNotEmpty && result != 'null') {
-      final data = jsonDecode(result);
+      final data = jsonDecode(_sanitizeJsonString(result));
       if (data.containsKey('receipts')) {
         await _saveReceiptData(data['receipts'] as List);
         Logger.success('VTOP', '${(data['receipts'] as List).length} receipts');
@@ -1217,7 +1217,7 @@ class VTOPDataService {
 
     final result = await _executeJavaScript(jsCode);
     if (result.isNotEmpty && result != 'null') {
-      final response = jsonDecode(result);
+      final response = jsonDecode(_sanitizeJsonString(result));
       final prefs = await SharedPreferences.getInstance();
       if (response['due_payments'] == true) {
         await prefs.setBool('duePayments', true);
@@ -1862,7 +1862,7 @@ class VTOPDataService {
     final result = await _executeJavaScript(jsCode);
     if (result.isEmpty || result == 'null') return [];
 
-    final data = jsonDecode(result);
+    final data = jsonDecode(_sanitizeJsonString(result));
     if (data.containsKey('error')) return [];
 
     final courses = data['courses'] as List? ?? [];
@@ -1943,7 +1943,7 @@ class VTOPDataService {
     final result = await _executeJavaScript(jsCode);
     if (result.isEmpty || result == 'null') return [];
 
-    final data = jsonDecode(result);
+    final data = jsonDecode(_sanitizeJsonString(result));
     if (data['success'] == false) return [];
     if (data['success'] == true && data['data'] != null) {
       final responseData = data['data'];
@@ -2049,7 +2049,7 @@ class VTOPDataService {
     final result = await _executeJavaScript(jsCode);
     if (result.isEmpty || result == 'null') return [];
 
-    final data = jsonDecode(result);
+    final data = jsonDecode(_sanitizeJsonString(result));
     if (data.containsKey('success') && data['success'] == false) return [];
     if (!data.containsKey('marks')) return [];
 
@@ -2333,5 +2333,27 @@ class VTOPDataService {
     } catch (e) {
       return null;
     }
+  }
+
+  String _sanitizeJsonString(String json) {
+    final buffer = StringBuffer();
+    var i = 0;
+    while (i < json.length) {
+      if (json[i] == '\\' && i + 1 < json.length) {
+        final next = json[i + 1];
+        if ('"\\\/bfnrtu'.contains(next)) {
+          buffer.write(json[i]);
+          buffer.write(next);
+          i += 2;
+        } else {
+          buffer.write('\\\\');
+          i++;
+        }
+      } else {
+        buffer.write(json[i]);
+        i++;
+      }
+    }
+    return buffer.toString();
   }
 }
