@@ -181,16 +181,16 @@ class _DaysSelectorState extends State<DaysSelector> {
                 decoration: BoxDecoration(
                   color:
                       isSelected
-                          ? theme.primary.withOpacity(0.15)
+                          ? theme.primary.withValues(alpha: 0.15)
                           : Colors.transparent,
                   shape: BoxShape.circle,
                   border: Border.all(
                     color:
                         isCalendarHoliday
-                            ? theme.primary.withOpacity(0.4)
+                            ? theme.primary.withValues(alpha: 0.4)
                             : isSelected
                             ? theme.primary
-                            : theme.muted.withOpacity(0.3),
+                            : theme.muted.withValues(alpha: 0.3),
                     width: isCalendarHoliday ? 2.5 : 2,
                   ),
                 ),
@@ -477,7 +477,7 @@ class _DaysSelectorState extends State<DaysSelector> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
-          border: Border.all(color: theme.primary.withOpacity(0.3), width: 0.5),
+          border: Border.all(color: theme.primary.withValues(alpha: 0.3), width: 0.5),
           borderRadius: BorderRadius.circular(16),
         ),
         child: Row(

@@ -163,8 +163,8 @@ class _CoursePerformanceCardState extends State<CoursePerformanceCard>
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: themeProvider.currentTheme.muted.withOpacity(
-                              0.1,
+                            color: themeProvider.currentTheme.muted.withValues(
+                              alpha: 0.1,
                             ),
                             borderRadius: BorderRadius.circular(6),
                           ),
@@ -222,8 +222,8 @@ class _CoursePerformanceCardState extends State<CoursePerformanceCard>
                   decoration: BoxDecoration(
                     border: Border(
                       top: BorderSide(
-                        color: themeProvider.currentTheme.muted.withOpacity(
-                          0.2,
+                        color: themeProvider.currentTheme.muted.withValues(
+                          alpha: 0.2,
                         ),
                         width: 1,
                       ),

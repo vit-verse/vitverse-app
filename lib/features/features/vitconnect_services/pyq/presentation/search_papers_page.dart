@@ -20,7 +20,7 @@ class _SearchPapersPageState extends State<SearchPapersPage> {
   static const _tag = 'SearchPapersPage';
   final TextEditingController _searchController = TextEditingController();
   final CourseDao _courseDao = CourseDao();
-  String _searchQuery = '';
+  final String _searchQuery = '';
   bool _showMyCoursesOnly = false;
   List<Map<String, dynamic>> _filteredCourses = [];
 

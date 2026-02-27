@@ -32,7 +32,7 @@ class ThemeSelectorCard extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(theme.isDark ? 0.3 : 0.1),
+            color: Colors.black.withValues(alpha: theme.isDark ? 0.3 : 0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),

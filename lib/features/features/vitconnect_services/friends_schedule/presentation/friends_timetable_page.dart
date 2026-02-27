@@ -296,7 +296,7 @@ class _FriendsSchedulePageState extends State<FriendsSchedulePage> {
                   final color = Color(
                     ScheduleConstants.friendColorValues[index],
                   );
-                  final isSelected = friend.color.value == color.value;
+                  final isSelected = friend.color.toARGB32() == color.toARGB32();
 
                   return GestureDetector(
                     onTap: () {

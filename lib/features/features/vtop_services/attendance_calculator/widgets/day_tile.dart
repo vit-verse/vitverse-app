@@ -64,7 +64,7 @@ class DayTile extends StatelessWidget {
           color: statusColor.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(ThemeConstants.radiusSm),
           border: Border.all(
-            color: statusColor.withOpacity(day.isToday ? 0.6 : 0.3),
+            color: statusColor.withValues(alpha: day.isToday ? 0.6 : 0.3),
             width: day.isToday ? 2 : 1,
           ),
         ),

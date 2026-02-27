@@ -527,6 +527,7 @@ class _MyEventsTabState extends State<_MyEventsTab> {
 
         if (userId != null) {
           setState(() => _userId = userId);
+          if (!mounted) return;
           final events = await context.read<EventsProvider>().getUserEvents(
             userId,
           );
@@ -565,6 +566,7 @@ class _MyEventsTabState extends State<_MyEventsTab> {
 
     if (confirmed == true) {
       try {
+        if (!mounted) return;
         await context.read<EventsProvider>().deleteUserEvent(event.id);
         setState(() => _myEvents.removeWhere((e) => e.id == event.id));
         if (mounted) {

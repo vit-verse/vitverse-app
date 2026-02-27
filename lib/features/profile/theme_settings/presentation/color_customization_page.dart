@@ -87,7 +87,7 @@ class _ColorCustomizationPageState extends State<ColorCustomizationPage> {
                   _useThemeForFeatureIcons,
                 );
 
-                if (mounted) {
+                if (context.mounted) {
                   SnackbarUtils.success(context, 'Color customizations saved!');
                 }
               },

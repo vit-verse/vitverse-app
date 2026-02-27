@@ -340,7 +340,7 @@ class _MyRidesTabState extends State<MyRidesTab> {
                     ride.id,
                     _profile!.registerNumber,
                   );
-                  if (mounted) {
+                  if (context.mounted) {
                     if (success) {
                       SnackbarUtils.success(
                         context,

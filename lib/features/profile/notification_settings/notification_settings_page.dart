@@ -94,7 +94,9 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
       });
 
       if (result) {
-        SnackbarUtils.success(context, 'Notification permissions granted');
+        if (mounted) {
+          SnackbarUtils.success(context, 'Notification permissions granted');
+        }
         final canSchedule = await _notificationService.canScheduleExactAlarms();
         if (!canSchedule) {
           await _notificationService.requestExactAlarmPermission();
@@ -104,7 +106,9 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
       }
     } catch (e) {
       Logger.e('NotificationSettings', 'Failed to request permissions: $e');
-      SnackbarUtils.error(context, 'Failed to request permissions');
+      if (mounted) {
+        SnackbarUtils.error(context, 'Failed to request permissions');
+      }
     }
   }
 
@@ -200,9 +204,9 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
               ),
               const SizedBox(height: 8),
               Text(
-                '1. Tap \"Open Settings\" below\n'
-                '2. Find \"Alarms & reminders\" permission\n'
-                '3. Enable \"Allow setting alarms and reminders\"',
+                '1. Tap "Open Settings" below\n'
+                '2. Find "Alarms & reminders" permission\n'
+                '3. Enable "Allow setting alarms and reminders"',
                 style: TextStyle(color: themeProvider.currentTheme.muted),
               ),
             ],
@@ -1068,13 +1072,17 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
     try {
       if (value) {
         await FCMService.subscribeLostFoundTopic();
-        SnackbarUtils.success(context, 'Subscribed to Lost & Found updates');
+        if (mounted) {
+          SnackbarUtils.success(context, 'Subscribed to Lost & Found updates');
+        }
       } else {
         await FCMService.unsubscribeLostFoundTopic();
-        SnackbarUtils.success(
-          context,
-          'Unsubscribed from Lost & Found updates',
-        );
+        if (mounted) {
+          SnackbarUtils.success(
+            context,
+            'Unsubscribed from Lost & Found updates',
+          );
+        }
       }
 
       // Save to SharedPreferences
@@ -1088,7 +1096,9 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
         'Error toggling Lost & Found notifications',
         e,
       );
-      SnackbarUtils.error(context, 'Failed to update notification settings');
+      if (mounted) {
+        SnackbarUtils.error(context, 'Failed to update notification settings');
+      }
     }
   }
 
@@ -1208,10 +1218,14 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
     try {
       if (value) {
         await FCMService.subscribeToTopic('cab_share_updates');
-        SnackbarUtils.success(context, 'Subscribed to Cab Share updates');
+        if (mounted) {
+          SnackbarUtils.success(context, 'Subscribed to Cab Share updates');
+        }
       } else {
         await FCMService.unsubscribeFromTopic('cab_share_updates');
-        SnackbarUtils.success(context, 'Unsubscribed from Cab Share updates');
+        if (mounted) {
+          SnackbarUtils.success(context, 'Unsubscribed from Cab Share updates');
+        }
       }
 
       final prefs = await SharedPreferences.getInstance();
@@ -1224,7 +1238,9 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
         'Error toggling Cab Share notifications',
         e,
       );
-      SnackbarUtils.error(context, 'Failed to update notification settings');
+      if (mounted) {
+        SnackbarUtils.error(context, 'Failed to update notification settings');
+      }
     }
   }
 
@@ -1232,10 +1248,14 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
     try {
       if (value) {
         await FCMService.subscribeEventsTopic();
-        SnackbarUtils.success(context, 'Subscribed to Events updates');
+        if (mounted) {
+          SnackbarUtils.success(context, 'Subscribed to Events updates');
+        }
       } else {
         await FCMService.unsubscribeEventsTopic();
-        SnackbarUtils.success(context, 'Unsubscribed from Events updates');
+        if (mounted) {
+          SnackbarUtils.success(context, 'Unsubscribed from Events updates');
+        }
       }
 
       final prefs = await SharedPreferences.getInstance();
@@ -1248,7 +1268,9 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
         'Error toggling Events notifications',
         e,
       );
-      SnackbarUtils.error(context, 'Failed to update notification settings');
+      if (mounted) {
+        SnackbarUtils.error(context, 'Failed to update notification settings');
+      }
     }
   }
 

@@ -554,7 +554,7 @@ class _PredictorTabState extends State<PredictorTab> {
       final List<dynamic> savedGrades = jsonDecode(gradesJson);
 
       if (savedGrades.isEmpty) {
-        SnackbarUtils.info(context, 'No courses added yet');
+        if (mounted) SnackbarUtils.info(context, 'No courses added yet');
         return;
       }
 

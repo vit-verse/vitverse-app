@@ -94,7 +94,7 @@ class _MeTabState extends State<MeTab> {
           ),
     );
 
-    if (confirmed == true && mounted) {
+    if (confirmed == true && context.mounted) {
       final provider = Provider.of<LostFoundProvider>(context, listen: false);
       final success = await provider.deleteItem(
         itemId,
@@ -102,7 +102,7 @@ class _MeTabState extends State<MeTab> {
         imagePath: imagePath,
       );
 
-      if (mounted) {
+      if (context.mounted) {
         if (success) {
           SnackbarUtils.success(context, 'Item deleted successfully');
         } else {

@@ -618,7 +618,7 @@ class _ReportGenerationPageState extends State<ReportGenerationPage> {
             padding: const EdgeInsets.all(30),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: theme.primary.withOpacity(0.1),
+              color: theme.primary.withValues(alpha: 0.1),
             ),
             child: Icon(
               Icons.check_circle_outline,
@@ -853,7 +853,7 @@ class _ReportGenerationPageState extends State<ReportGenerationPage> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: theme.primary.withOpacity(0.1),
+                color: theme.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(icon, color: theme.primary, size: 28),
@@ -890,9 +890,9 @@ class _ReportGenerationPageState extends State<ReportGenerationPage> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: theme.surface.withOpacity(0.5),
+        color: theme.surface.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: theme.border.withOpacity(0.5)),
+        border: Border.all(color: theme.border.withValues(alpha: 0.5)),
       ),
       child: Column(
         children: [

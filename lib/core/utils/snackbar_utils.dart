@@ -28,6 +28,7 @@ class StackedSnackbarManager extends StatefulWidget {
   @override
   State<StackedSnackbarManager> createState() => _StackedSnackbarManagerState();
 
+  // ignore: library_private_types_in_public_api
   static _StackedSnackbarManagerState? of(BuildContext context) {
     return context.findAncestorStateOfType<_StackedSnackbarManagerState>();
   }
@@ -224,7 +225,7 @@ class _SnackbarCard extends StatelessWidget {
                 width: width,
                 height: height,
                 decoration: BoxDecoration(
-                  color: baseColor.withOpacity(opacity * 0.2),
+                  color: baseColor.withValues(alpha: opacity * 0.2),
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
@@ -233,7 +234,7 @@ class _SnackbarCard extends StatelessWidget {
                 width: width * (1 - item.progressController.value),
                 height: height,
                 decoration: BoxDecoration(
-                  color: baseColor.withOpacity(opacity),
+                  color: baseColor.withValues(alpha: opacity),
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),

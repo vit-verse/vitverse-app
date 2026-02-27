@@ -88,12 +88,12 @@ class VTOPDataService {
       // Parallel: Profile + Courses
       await Future.wait([
         _executeStep(
-          () => _step1_getProfileInfo(),
+          () => _step1GetProfileInfo(),
           1,
           DataServiceConstants.step1Name,
         ),
         _executeStep(
-          () => _step3_getCourseInfo(semesterId),
+          () => _step3GetCourseInfo(semesterId),
           3,
           DataServiceConstants.step3Name,
         ),
@@ -105,12 +105,12 @@ class VTOPDataService {
       // Parallel: Timetable + Attendance
       await Future.wait([
         _executeStep(
-          () => _step4_getTimetableData(semesterId),
+          () => _step4GetTimetableData(semesterId),
           4,
           DataServiceConstants.step4Name,
         ),
         _executeStep(
-          () => _step5_getAttendanceData(semesterId),
+          () => _step5GetAttendanceData(semesterId),
           5,
           DataServiceConstants.step5Name,
         ),
@@ -121,7 +121,7 @@ class VTOPDataService {
 
       // Sequential: Detailed Attendance
       await _executeStep(
-        () => _step13_getAttendanceDetails(semesterId),
+        () => _step13GetAttendanceDetails(semesterId),
         13,
         DataServiceConstants.step13Name,
       );
@@ -173,15 +173,15 @@ class VTOPDataService {
       );
 
       final steps = [
-        () => _step6_getMarksData(semesterId),
-        () => _step2_getGradeHistory(),
-        () => _step7_getExamSchedule(semesterId),
-        () => _step14_getAllSemesterMarks(),
-        () => _step11_previousSemesterGradesAndGPA(semesterId),
-        () => _step8_getStaffInfo(semesterId),
-        () => _step9_getSpotlightData(),
-        () => _step10_getReceiptData(),
-        () => _step12_checkDues(),
+        () => _step6GetMarksData(semesterId),
+        () => _step2GetGradeHistory(),
+        () => _step7GetExamSchedule(semesterId),
+        () => _step14GetAllSemesterMarks(),
+        () => _step11PreviousSemesterGradesAndGPA(semesterId),
+        () => _step8GetStaffInfo(semesterId),
+        () => _step9GetSpotlightData(),
+        () => _step10GetReceiptData(),
+        () => _step12CheckDues(),
       ];
 
       final stepNumbers = [6, 2, 7, 14, 11, 8, 9, 10, 12];
@@ -256,7 +256,7 @@ class VTOPDataService {
   // EXTRACTION STEPS (1-14)
   // ═══════════════════════════════════════════════════════
 
-  Future<void> _step1_getProfileInfo() async {
+  Future<void> _step1GetProfileInfo() async {
     _updateProgress(1, 'Extracting profile');
 
     final jsCode = '''
@@ -331,7 +331,7 @@ class VTOPDataService {
     }
   }
 
-  Future<void> _step2_getGradeHistory() async {
+  Future<void> _step2GetGradeHistory() async {
     _updateProgress(2, 'Extracting grade history');
 
     final jsCode = '''
@@ -470,7 +470,7 @@ class VTOPDataService {
     }
   }
 
-  Future<void> _step3_getCourseInfo(String semesterId) async {
+  Future<void> _step3GetCourseInfo(String semesterId) async {
     _updateProgress(3, 'Extracting courses');
 
     final jsCode = '''
@@ -566,7 +566,7 @@ class VTOPDataService {
     }
   }
 
-  Future<void> _step4_getTimetableData(String semesterId) async {
+  Future<void> _step4GetTimetableData(String semesterId) async {
     _updateProgress(4, 'Extracting timetable');
 
     final jsCode = '''
@@ -657,7 +657,7 @@ class VTOPDataService {
     }
   }
 
-  Future<void> _step5_getAttendanceData(String semesterId) async {
+  Future<void> _step5GetAttendanceData(String semesterId) async {
     _updateProgress(5, 'Extracting attendance');
 
     final jsCode = '''
@@ -740,7 +740,7 @@ class VTOPDataService {
     }
   }
 
-  Future<void> _step6_getMarksData(String semesterId) async {
+  Future<void> _step6GetMarksData(String semesterId) async {
     _updateProgress(6, 'Extracting marks');
 
     final jsCode = '''
@@ -835,7 +835,7 @@ class VTOPDataService {
     }
   }
 
-  Future<void> _step7_getExamSchedule(String semesterId) async {
+  Future<void> _step7GetExamSchedule(String semesterId) async {
     _updateProgress(7, 'Extracting exam schedule');
 
     final jsCode = '''
@@ -925,7 +925,7 @@ class VTOPDataService {
     }
   }
 
-  Future<void> _step8_getStaffInfo(String semesterId) async {
+  Future<void> _step8GetStaffInfo(String semesterId) async {
     _updateProgress(8, 'Extracting staff info');
 
     final proctorJs = '''
@@ -1004,7 +1004,7 @@ class VTOPDataService {
 
   // TODO: fix this as vtop removed old spotlight
 
-  Future<void> _step9_getSpotlightData() async {
+  Future<void> _step9GetSpotlightData() async {
     _updateProgress(9, 'Extracting announcements');
 
     final jsCode = '''
@@ -1113,7 +1113,7 @@ class VTOPDataService {
     }
   }
 
-  Future<void> _step10_getReceiptData() async {
+  Future<void> _step10GetReceiptData() async {
     _updateProgress(10, 'Extracting receipts');
 
     final jsCode = '''
@@ -1170,7 +1170,7 @@ class VTOPDataService {
     }
   }
 
-  Future<void> _step11_previousSemesterGradesAndGPA(
+  Future<void> _step11PreviousSemesterGradesAndGPA(
     String currentSemesterId,
   ) async {
     _updateProgress(11, 'Extracting grade history');
@@ -1218,7 +1218,7 @@ class VTOPDataService {
     }
   }
 
-  Future<void> _step12_checkDues() async {
+  Future<void> _step12CheckDues() async {
     _updateProgress(12, 'Checking dues');
 
     final jsCode = '''
@@ -1258,7 +1258,7 @@ class VTOPDataService {
     }
   }
 
-  Future<void> _step13_getAttendanceDetails(String semesterId) async {
+  Future<void> _step13GetAttendanceDetails(String semesterId) async {
     _updateProgress(13, 'Extracting attendance details');
 
     final attendanceRecords = await _attendanceDao.getAll();
@@ -1268,8 +1268,9 @@ class VTOPDataService {
     for (var attendance in attendanceRecords) {
       if (attendance.courseId == null) continue;
       final course = await _courseDao.getById(attendance.courseId!);
-      if (course == null || course.id == null || course.classId == null)
+      if (course == null || course.id == null || course.classId == null) {
         continue;
+      }
 
       final db = await VitConnectDatabase.instance.database;
       final slotDao = SlotDao(db);
@@ -1291,7 +1292,7 @@ class VTOPDataService {
     Logger.success('VTOP', '$totalDetails attendance details');
   }
 
-  Future<void> _step14_getAllSemesterMarks() async {
+  Future<void> _step14GetAllSemesterMarks() async {
     _updateProgress(14, 'Extracting marks history');
 
     final prefs = await SharedPreferences.getInstance();
@@ -1766,8 +1767,9 @@ class VTOPDataService {
           String type = staffType.toString().toLowerCase();
           if (type.contains('dean')) {
             type = 'dean';
-          } else if (type.contains('hod'))
+          } else if (type.contains('hod')) {
             type = 'hod';
+          }
 
           for (var staffItem in staffList) {
             final key = staffItem['key']?.toString() ?? '';
@@ -2267,8 +2269,9 @@ class VTOPDataService {
 
             if (amPm.toUpperCase() == 'PM' && hour != 12) {
               hour += 12;
-            } else if (amPm.toUpperCase() == 'AM' && hour == 12)
+            } else if (amPm.toUpperCase() == 'AM' && hour == 12) {
               hour = 0;
+            }
 
             return DateTime(year, month, day, hour, minute);
           }
@@ -2447,7 +2450,7 @@ class VTOPDataService {
     while (i < json.length) {
       if (json[i] == '\\' && i + 1 < json.length) {
         final next = json[i + 1];
-        if ('"\\\/bfnrtu'.contains(next)) {
+        if ('"\\/bfnrtu'.contains(next)) {
           buffer.write(json[i]);
           buffer.write(next);
           i += 2;

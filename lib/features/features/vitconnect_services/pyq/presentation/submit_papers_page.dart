@@ -437,17 +437,17 @@ class _SubmitPapersPageState extends State<SubmitPapersPage> {
 
       // Validate required fields
       if (_selectedSemester == null || _selectedSemester!.isEmpty) {
-        SnackbarUtils.warning(context, 'Please select a semester');
+        if (mounted) SnackbarUtils.warning(context, 'Please select a semester');
         setState(() => _isUploading = false);
         return;
       }
       if (faculty.isEmpty) {
-        SnackbarUtils.warning(context, 'Faculty information missing');
+        if (mounted) SnackbarUtils.warning(context, 'Faculty information missing');
         setState(() => _isUploading = false);
         return;
       }
       if (classNo.isEmpty) {
-        SnackbarUtils.warning(context, 'Class number missing');
+        if (mounted) SnackbarUtils.warning(context, 'Class number missing');
         setState(() => _isUploading = false);
         return;
       }
@@ -659,8 +659,8 @@ class _SubmitPapersPageState extends State<SubmitPapersPage> {
       padding: const EdgeInsets.all(16),
       decoration: AppCardStyles.compactCardDecoration(
         isDark: themeProvider.currentTheme.isDark,
-        customBackgroundColor: themeProvider.currentTheme.error.withOpacity(
-          0.1,
+        customBackgroundColor: themeProvider.currentTheme.error.withValues(
+          alpha: 0.1,
         ),
         customBorderColor: themeProvider.currentTheme.error.withValues(
           alpha: 0.3,
@@ -837,8 +837,8 @@ class _SubmitPapersPageState extends State<SubmitPapersPage> {
                   decoration: BoxDecoration(
                     color:
                         isSelected
-                            ? themeProvider.currentTheme.primary.withOpacity(
-                              0.1,
+                            ? themeProvider.currentTheme.primary.withValues(
+                              alpha: 0.1,
                             )
                             : themeProvider.currentTheme.surface,
                     borderRadius: BorderRadius.circular(8),
@@ -857,8 +857,8 @@ class _SubmitPapersPageState extends State<SubmitPapersPage> {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: themeProvider.currentTheme.primary.withOpacity(
-                            0.15,
+                          color: themeProvider.currentTheme.primary.withValues(
+                            alpha: 0.15,
                           ),
                           borderRadius: BorderRadius.circular(4),
                         ),
@@ -1354,8 +1354,8 @@ class _SubmitPapersPageState extends State<SubmitPapersPage> {
           backgroundColor: themeProvider.currentTheme.primary,
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(vertical: 16),
-          disabledBackgroundColor: themeProvider.currentTheme.muted.withOpacity(
-            0.3,
+          disabledBackgroundColor: themeProvider.currentTheme.muted.withValues(
+            alpha: 0.3,
           ),
         ),
         child:

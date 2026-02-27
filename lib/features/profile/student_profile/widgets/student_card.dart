@@ -96,8 +96,8 @@ class _StudentCardState extends State<StudentCard> {
               UserAvatar(
                 key: ValueKey(_avatarKey),
                 size: 84,
-                backgroundColor: themeProvider.currentTheme.primary.withOpacity(
-                  0.12,
+                backgroundColor: themeProvider.currentTheme.primary.withValues(
+                  alpha: 0.12,
                 ),
                 iconColor: themeProvider.currentTheme.primary,
               ),

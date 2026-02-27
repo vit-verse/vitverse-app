@@ -71,8 +71,8 @@ class StaffTypeTabs extends StatelessWidget {
                         color:
                             isSelected
                                 ? themeProvider.currentTheme.primary
-                                : themeProvider.currentTheme.muted.withOpacity(
-                                  0.2,
+                                : themeProvider.currentTheme.muted.withValues(
+                                  alpha: 0.2,
                                 ),
                         width: 1.5,
                       ),
