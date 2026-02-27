@@ -1173,7 +1173,10 @@ class VTOPAuthService extends ChangeNotifier {
           semesterID: _semesterID!,
         );
       } else {
-        Logger.w('Auth', 'WebView disposed before Phase 2 — skipping background sync');
+        Logger.w(
+          'Auth',
+          'WebView disposed before Phase 2 — skipping background sync',
+        );
       }
     } catch (e) {
       Logger.e('Auth', 'Semester selection failed', e);

@@ -215,14 +215,18 @@ class LostFoundRepository {
         Exception('Image upload SocketException: $e'),
         stack,
       );
-      throw Exception('No internet connection. Please check your network and try again.');
+      throw Exception(
+        'No internet connection. Please check your network and try again.',
+      );
     } on HttpException catch (e, stack) {
       Logger.e(_tag, 'HTTP error uploading image', e, stack);
       await CrashlyticsService.recordError(
         Exception('Image upload HttpException: $e'),
         stack,
       );
-      throw Exception('Server error while uploading image. Please try again later.');
+      throw Exception(
+        'Server error while uploading image. Please try again later.',
+      );
     } catch (e, stack) {
       if (e.toString().contains('ClientException') ||
           e.toString().contains('Connection timed out') ||
@@ -232,7 +236,9 @@ class LostFoundRepository {
           Exception('Image upload connection error: $e'),
           stack,
         );
-        throw Exception('Connection failed. Please check your internet and try again.');
+        throw Exception(
+          'Connection failed. Please check your internet and try again.',
+        );
       }
       Logger.e(_tag, 'Error uploading image', e, stack);
       rethrow;

@@ -99,9 +99,7 @@ class AcademicPerformanceDataProvider {
         currentSemesterId = semesterMap[currentSemesterName]?.toString() ?? '';
       }
       if (currentSemesterId.isNotEmpty) {
-        await courseDao.getBySemester(
-          currentSemesterId,
-        );
+        await courseDao.getBySemester(currentSemesterId);
       }
 
       // Calculate added credits per curriculum (manual + classified current semester)
@@ -188,9 +186,7 @@ class AcademicPerformanceDataProvider {
         currentSemesterId = semesterMap[currentSemesterName]?.toString() ?? '';
       }
       if (currentSemesterId.isNotEmpty) {
-        await courseDao.getBySemester(
-          currentSemesterId,
-        );
+        await courseDao.getBySemester(currentSemesterId);
       }
 
       // Calculate added credits per basket (manual + classified current semester)

@@ -627,18 +627,33 @@ class VTOPDataService {
       final theoryArray = response['theory'] as List;
 
       if (labArray.isEmpty && theoryArray.isEmpty) {
-        Logger.w('VTOP', 'Timetable extraction returned empty arrays. Raw response length: ${result.length}');
-        await CrashlyticsService.setCustomKey('vtop_timetable_response_length', result.length);
-        await CrashlyticsService.setCustomKey('vtop_timetable_response',
-            result.length > 2000 ? result.substring(0, 2000) : result);
-        await CrashlyticsService.log('Timetable extraction returned 0 lab + 0 theory entries');
+        Logger.w(
+          'VTOP',
+          'Timetable extraction returned empty arrays. Raw response length: ${result.length}',
+        );
+        await CrashlyticsService.setCustomKey(
+          'vtop_timetable_response_length',
+          result.length,
+        );
+        await CrashlyticsService.setCustomKey(
+          'vtop_timetable_response',
+          result.length > 2000 ? result.substring(0, 2000) : result,
+        );
+        await CrashlyticsService.log(
+          'Timetable extraction returned 0 lab + 0 theory entries',
+        );
       }
 
       await _saveTimetableData(labArray, theoryArray);
-      Logger.success('VTOP', 'Timetable: ${theoryArray.length} theory + ${labArray.length} lab slots');
+      Logger.success(
+        'VTOP',
+        'Timetable: ${theoryArray.length} theory + ${labArray.length} lab slots',
+      );
     } else {
       Logger.w('VTOP', 'Timetable: empty/null JS response');
-      await CrashlyticsService.log('Timetable step returned empty/null response');
+      await CrashlyticsService.log(
+        'Timetable step returned empty/null response',
+      );
     }
   }
 
@@ -1253,7 +1268,8 @@ class VTOPDataService {
     for (var attendance in attendanceRecords) {
       if (attendance.courseId == null) continue;
       final course = await _courseDao.getById(attendance.courseId!);
-      if (course == null || course.id == null || course.classId == null) continue;
+      if (course == null || course.id == null || course.classId == null)
+        continue;
 
       final db = await VitConnectDatabase.instance.database;
       final slotDao = SlotDao(db);
@@ -1513,11 +1529,21 @@ class VTOPDataService {
     for (int i = 0; i < maxLength; i++) {
       if (i < labArray.length) {
         final labObject = labArray[i] as Map<String, dynamic>;
-        final days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+        final days = [
+          'sunday',
+          'monday',
+          'tuesday',
+          'wednesday',
+          'thursday',
+          'friday',
+          'saturday',
+        ];
         for (final day in days) {
           final slotName = labObject[day]?.toString();
           if (slotName != null && slotName.isNotEmpty) {
-            _getSlotIdByName(slotName) != null ? mappedSlots++ : unmappedSlots++;
+            _getSlotIdByName(slotName) != null
+                ? mappedSlots++
+                : unmappedSlots++;
           }
         }
         final labEntry = Timetable(
@@ -1537,11 +1563,21 @@ class VTOPDataService {
 
       if (i < theoryArray.length) {
         final theoryObject = theoryArray[i] as Map<String, dynamic>;
-        final days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+        final days = [
+          'sunday',
+          'monday',
+          'tuesday',
+          'wednesday',
+          'thursday',
+          'friday',
+          'saturday',
+        ];
         for (final day in days) {
           final slotName = theoryObject[day]?.toString();
           if (slotName != null && slotName.isNotEmpty) {
-            _getSlotIdByName(slotName) != null ? mappedSlots++ : unmappedSlots++;
+            _getSlotIdByName(slotName) != null
+                ? mappedSlots++
+                : unmappedSlots++;
           }
         }
         final theoryEntry = Timetable(
@@ -1560,9 +1596,14 @@ class VTOPDataService {
       }
     }
 
-    Logger.d('VTOP', 'Timetable saved: ${timetableId - 1} rows, $mappedSlots mapped, $unmappedSlots unmapped');
+    Logger.d(
+      'VTOP',
+      'Timetable saved: ${timetableId - 1} rows, $mappedSlots mapped, $unmappedSlots unmapped',
+    );
     if (unmappedSlots > 0) {
-      await CrashlyticsService.log('Timetable: $unmappedSlots slot(s) could not be mapped to courses');
+      await CrashlyticsService.log(
+        'Timetable: $unmappedSlots slot(s) could not be mapped to courses',
+      );
     }
   }
 
@@ -2157,8 +2198,11 @@ class VTOPDataService {
     }
 
     if (slotId == null) {
-      Logger.w('VTOP', 'Timetable slot "$slotName" not found in registered slots '
-          '(theory: ${_theorySlots.keys.toList()}, lab: ${_labSlots.keys.toList()}, project: ${_projectSlots.keys.toList()})');
+      Logger.w(
+        'VTOP',
+        'Timetable slot "$slotName" not found in registered slots '
+            '(theory: ${_theorySlots.keys.toList()}, lab: ${_labSlots.keys.toList()}, project: ${_projectSlots.keys.toList()})',
+      );
     }
 
     return slotId;
@@ -2327,14 +2371,20 @@ class VTOPDataService {
         e,
       );
 
-      final responsePreview = _lastJsResponse.length > 4000
-          ? _lastJsResponse.substring(0, 4000)
-          : _lastJsResponse;
+      final responsePreview =
+          _lastJsResponse.length > 4000
+              ? _lastJsResponse.substring(0, 4000)
+              : _lastJsResponse;
       await CrashlyticsService.setCustomKey('vtop_failed_step', stepName);
       await CrashlyticsService.setCustomKey('vtop_step_number', stepNumber);
-      await CrashlyticsService.setCustomKey('vtop_response_length', _lastJsResponse.length);
+      await CrashlyticsService.setCustomKey(
+        'vtop_response_length',
+        _lastJsResponse.length,
+      );
       await CrashlyticsService.setCustomKey('vtop_response', responsePreview);
-      await CrashlyticsService.log('VTOP Step $stepNumber ($stepName) failed: $e');
+      await CrashlyticsService.log(
+        'VTOP Step $stepNumber ($stepName) failed: $e',
+      );
       await CrashlyticsService.recordError(
         Exception('VTOP Step $stepNumber ($stepName) failed: $e'),
         stack,
