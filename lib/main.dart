@@ -21,6 +21,7 @@ import 'firebase/core/firebase_initializer.dart';
 import 'firebase/messaging/fcm_service.dart';
 import 'firebase/messaging/notification_handler.dart';
 import 'supabase/core/supabase_client.dart';
+import 'features/notifications/notifications_provider.dart';
 
 // Note: During development I kept the internal app name as VIT Connect, but before release I decided on VIT Verse. So in the codebase and class names it still uses VIT Connect, but anywhere shown to the user is updated to VIT Verse ;) ...
 
@@ -96,6 +97,7 @@ class VitConnectApp extends StatelessWidget {
         ChangeNotifierProvider.value(value: themeProvider),
         ChangeNotifierProvider(create: (_) => VTOPAuthService.instance),
         ChangeNotifierProvider(create: (_) => WidgetCustomizationProvider()),
+        ChangeNotifierProvider(create: (_) => NotificationsProvider()),
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, _) {
