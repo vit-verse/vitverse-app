@@ -1,79 +1,55 @@
 import 'package:http/http.dart' as http;
-import 'package:package_info_plus/package_info_plus.dart';
-import '../../../core/utils/logger.dart';
+import '../config/app_version.dart';
+import '../utils/logger.dart';
 
 class VersionCheckerService {
   static const String _tag = 'VersionChecker';
 
-  // ── Branch URLs ────────────────────────────────────────────────────────────
-  // Switch between branches during development/testing.
-  // Comment one and uncomment the other as needed.
-
-  // static const String _pubspecUrl =
-  //     'https://raw.githubusercontent.com/vit-verse/vitverse-app/main/pubspec.yaml';
-
   static const String _pubspecUrl =
       'https://raw.githubusercontent.com/vit-verse/vitverse-app/working/pubspec.yaml';
 
-  // ── Kill switch ────────────────────────────────────────────────────────────
+  static String get _currentVersion => AppVersion.version;
 
-  /// Checks if the current install is below the minimum supported version.
-  /// Fail-open: returns false on any network/parse error — never blocks the user.
   static Future<KillSwitchResult> checkKillSwitch() async {
     try {
-      final packageInfo = await PackageInfo.fromPlatform().timeout(
-        const Duration(seconds: 5),
-      );
-      final currentVersion = packageInfo.version;
-
-      Logger.d(_tag, 'Kill switch check — current: $currentVersion');
+      Logger.d(_tag, 'Kill switch check — current: $_currentVersion');
 
       final pubspecContent = await _fetchPubspec();
       if (pubspecContent == null) {
-        // Network/server issue — fail-open
         Logger.w(
           _tag,
           'Kill switch: could not fetch pubspec — allowing through',
         );
-        return KillSwitchResult.passThrough(currentVersion);
+        return KillSwitchResult.passThrough(_currentVersion);
       }
 
       final minVersion = _extractField(pubspecContent, 'min_version');
       if (minVersion == null) {
-        // Field not present yet — fail-open
         Logger.d(_tag, 'Kill switch: min_version not set — allowing through');
-        return KillSwitchResult.passThrough(currentVersion);
+        return KillSwitchResult.passThrough(_currentVersion);
       }
 
-      Logger.d(_tag, 'Kill switch: min=$minVersion current=$currentVersion');
+      Logger.d(_tag, 'Kill switch: min=$minVersion current=$_currentVersion');
 
-      final isBlocked = _compareVersions(currentVersion, minVersion) < 0;
+      final isBlocked = _compareVersions(_currentVersion, minVersion) < 0;
       if (isBlocked) {
-        Logger.w(_tag, 'Kill switch TRIGGERED: $currentVersion < $minVersion');
-        return KillSwitchResult.blocked(currentVersion, minVersion);
+        Logger.w(_tag, 'Kill switch TRIGGERED: $_currentVersion < $minVersion');
+        return KillSwitchResult.blocked(_currentVersion, minVersion);
       }
 
-      Logger.d(_tag, 'Kill switch: version OK');
-      return KillSwitchResult.passThrough(currentVersion);
+      return KillSwitchResult.passThrough(_currentVersion);
     } catch (e) {
-      // Any error → fail-open, never block on exceptions
       Logger.e(_tag, 'Kill switch check failed — allowing through', e);
-      return KillSwitchResult.passThrough('unknown');
+      return KillSwitchResult.passThrough(_currentVersion);
     }
   }
 
-  // ── Update checker ─────────────────────────────────────────────────────────
-
-  /// Check if a newer version is available (used in profile page).
   static Future<VersionCheckResult> checkForUpdate() async {
     try {
       Logger.d(_tag, 'Checking for updates from GitHub...');
 
-      final packageInfo = await PackageInfo.fromPlatform();
-      final currentVersion = packageInfo.version;
-      final currentBuildNumber = packageInfo.buildNumber;
-
-      Logger.d(_tag, 'Current version: $currentVersion+$currentBuildNumber');
+      final currentVersion = _currentVersion;
+      Logger.d(_tag, 'Current version: ${AppVersion.fullVersion}');
 
       final pubspecContent = await _fetchPubspec();
       if (pubspecContent == null) {
@@ -94,7 +70,6 @@ class VersionCheckerService {
         );
       }
 
-      // Strip build number (e.g. "2.1.1+6" → "2.1.1")
       final latestClean = latestVersion.split('+').first;
       Logger.d(_tag, 'Latest version: $latestClean');
 
@@ -107,28 +82,25 @@ class VersionCheckerService {
           latestVersion: latestClean,
           message: 'Update available',
         );
-      } else {
-        Logger.i(_tag, 'App is up to date');
-        return VersionCheckResult(
-          status: UpdateStatus.upToDate,
-          currentVersion: currentVersion,
-          latestVersion: latestClean,
-          message: 'Already updated',
-        );
       }
+
+      Logger.i(_tag, 'App is up to date');
+      return VersionCheckResult(
+        status: UpdateStatus.upToDate,
+        currentVersion: currentVersion,
+        latestVersion: latestClean,
+        message: 'Already updated',
+      );
     } catch (e, stack) {
       Logger.e(_tag, 'Error checking for updates', e, stack);
       return VersionCheckResult(
         status: UpdateStatus.error,
-        currentVersion: 'Unknown',
+        currentVersion: _currentVersion,
         message: 'Unable to check for updates',
       );
     }
   }
 
-  // ── Shared helpers ─────────────────────────────────────────────────────────
-
-  /// Fetches pubspec.yaml from GitHub. Returns null on any failure — no throw.
   static Future<String?> _fetchPubspec() async {
     try {
       final response = await http
@@ -145,8 +117,6 @@ class VersionCheckerService {
     }
   }
 
-  /// Extracts a top-level field value from raw pubspec.yaml text.
-  /// Works for both  `version: 2.1.1+6`  and  `min_version: 2.0.0`.
   static String? _extractField(String content, String field) {
     try {
       final regex = RegExp('^$field:\\s*([^\\s#]+)', multiLine: true);
@@ -158,7 +128,6 @@ class VersionCheckerService {
     }
   }
 
-  /// Compares two semver strings. Returns -1 / 0 / 1.
   static int _compareVersions(String v1, String v2) {
     try {
       final p1 = v1.split('+').first.split('.').map(int.parse).toList();
@@ -176,8 +145,6 @@ class VersionCheckerService {
     }
   }
 }
-
-// ── Enums & Models ─────────────────────────────────────────────────────────
 
 enum UpdateStatus { upToDate, updateAvailable, error }
 

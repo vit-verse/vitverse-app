@@ -1,65 +1,12 @@
-// import 'package:supabase_flutter/supabase_flutter.dart';
-// import '../../core/config/app_config.dart';
-// import '../../core/utils/logger.dart';
-
-// /// Supabase client singleton
-// class SupabaseClientService {
-//   static const String _tag = 'Supabase';
-//   static SupabaseClient? _client;
-
-//   static SupabaseClient get client {
-//     if (_client == null) {
-//       throw StateError('Supabase not initialized. Call initialize() first.');
-//     }
-//     return _client!;
-//   }
-
-//   /// Initialize Supabase
-//   static Future<void> initialize() async {
-//     try {
-//       if (AppConfig.supabaseUrl.isEmpty || AppConfig.supabaseAnonKey.isEmpty) {
-//         Logger.w(_tag, 'Supabase credentials not configured');
-//         return;
-//       }
-
-//       await Supabase.initialize(
-//         url: AppConfig.supabaseUrl,
-//         anonKey: AppConfig.supabaseAnonKey,
-//       );
-
-//       _client = Supabase.instance.client;
-//       Logger.success(_tag, 'Supabase initialized');
-//     } catch (e, stack) {
-//       Logger.e(_tag, 'Supabase initialization failed', e, stack);
-//       rethrow;
-//     }
-//   }
-
-//   /// Check if Supabase is configured
-//   static bool get isConfigured {
-//     return AppConfig.supabaseUrl.isNotEmpty &&
-//         AppConfig.supabaseAnonKey.isNotEmpty;
-//   }
-
-//   /// Check if Supabase is initialized
-//   static bool get isInitialized => _client != null;
-// }
-
-/// ---------------------------------------------------------------------------
-/// Date: 28 Feb 2026
-/// Issue: Intermittent DNS resolution failures in India for *.supabase.co
-///        (ISP-level resolver issues causing random connection failures).
-/// Fix: Implemented primary + fallback endpoint logic using Jiobase proxy.
-///      App now tries Supabase primary first and switches to proxy on failure.
-/// ---------------------------------------------------------------------------
-
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:http/http.dart' as http;
-import '../../core/config/app_config.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../core/config/env_config.dart';
 import '../../core/utils/logger.dart';
 
 class SupabaseClientService {
   static const String _tag = 'Supabase';
+  static const String _cachedEndpointKey = 'supabase_cached_endpoint';
   static SupabaseClient? _client;
   static String? _activeUrl;
 
@@ -70,15 +17,11 @@ class SupabaseClientService {
     return _client!;
   }
 
-  static const String _primary = 'https://nptyxmthlvqnoricblhf.supabase.co';
-
-  static const String _fallback = 'https://nptyxmthlvqnoricblhf.jiobase.com';
-
   static Future<void> initialize() async {
     try {
       final url = await _resolveEndpoint();
 
-      await Supabase.initialize(url: url, anonKey: AppConfig.supabaseAnonKey);
+      await Supabase.initialize(url: url, anonKey: EnvConfig.supabaseAnonKey);
 
       _client = Supabase.instance.client;
       _activeUrl = url;
@@ -93,24 +36,55 @@ class SupabaseClientService {
   static Future<String> _resolveEndpoint() async {
     if (_activeUrl != null) return _activeUrl!;
 
+    final primary = EnvConfig.supabaseUrl;
+    final fallback = EnvConfig.supabaseFallbackUrl;
+
+    final cached = await _getCachedEndpoint();
+    if (cached != null) {
+      try {
+        final response = await http
+            .head(Uri.parse('$cached/rest/v1/'))
+            .timeout(const Duration(seconds: 3));
+        if (response.statusCode < 500) return cached;
+      } catch (_) {
+        Logger.w(_tag, 'Cached endpoint failed, re-resolving');
+      }
+    }
+
     try {
       final response = await http
-          .head(Uri.parse('$_primary/rest/v1/'))
-          .timeout(const Duration(seconds: 5));
-
+          .head(Uri.parse('$primary/rest/v1/'))
+          .timeout(const Duration(seconds: 4));
       if (response.statusCode < 500) {
-        return _primary;
+        _cacheEndpoint(primary);
+        return primary;
       }
     } catch (_) {
       Logger.w(_tag, 'Primary failed, switching to fallback');
     }
 
-    return _fallback;
+    _cacheEndpoint(fallback);
+    return fallback;
   }
 
-  // Check if configured
-  static bool get isConfigured => AppConfig.supabaseAnonKey.isNotEmpty;
+  static Future<String?> _getCachedEndpoint() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return prefs.getString(_cachedEndpointKey);
+    } catch (_) {
+      return null;
+    }
+  }
 
-  // Check if initialized
+  static void _cacheEndpoint(String url) {
+    SharedPreferences.getInstance()
+        .then((prefs) {
+          prefs.setString(_cachedEndpointKey, url);
+        })
+        .catchError((_) {});
+  }
+
+  static bool get isConfigured => EnvConfig.supabaseAnonKey.isNotEmpty;
+
   static bool get isInitialized => _client != null;
 }

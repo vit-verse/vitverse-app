@@ -4,16 +4,28 @@ import '../notifications_provider.dart';
 import '../../../core/theme/theme_provider.dart';
 import 'notifications_page.dart';
 
-/// Hidden when no notifications exist; shows bell + unread badge otherwise.
-class NotificationBellButton extends StatelessWidget {
+class NotificationBellButton extends StatefulWidget {
   const NotificationBellButton({super.key});
+
+  @override
+  State<NotificationBellButton> createState() => _NotificationBellButtonState();
+}
+
+class _NotificationBellButtonState extends State<NotificationBellButton> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        context.read<NotificationsProvider>().ensureLoaded();
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = context.watch<ThemeProvider>().currentTheme;
     final provider = context.watch<NotificationsProvider>();
-
-    // Hide entirely when there are no notifications
     if (provider.notifications.isEmpty) return const SizedBox.shrink();
 
     final count = provider.unreadCount;

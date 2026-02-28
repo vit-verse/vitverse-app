@@ -4,6 +4,11 @@ class EnvConfig {
     defaultValue: '',
   );
 
+  static const String supabaseFallbackUrl = String.fromEnvironment(
+    'SUPABASE_FALLBACK_URL',
+    defaultValue: '',
+  );
+
   static const String supabaseAnonKey = String.fromEnvironment(
     'SUPABASE_ANON_KEY',
     defaultValue: '',
@@ -11,6 +16,11 @@ class EnvConfig {
 
   static const String supabaseEventsUrl = String.fromEnvironment(
     'SUPABASE_EVENTS_URL',
+    defaultValue: '',
+  );
+
+  static const String supabaseEventsFallbackUrl = String.fromEnvironment(
+    'SUPABASE_EVENTS_FALLBACK_URL',
     defaultValue: '',
   );
 

@@ -69,17 +69,43 @@ class NotificationsProvider extends ChangeNotifier {
   String? get error => _error;
   int get unreadCount => _notifications.where((n) => !n.isRead).length;
 
-  NotificationsProvider() {
+  bool _hasFetched = false;
+  bool _retryScheduled = false;
+  static const int _maxRetries = 10;
+  int _retryCount = 0;
+
+  bool get hasFetched => _hasFetched;
+
+  NotificationsProvider();
+
+  void ensureLoaded() {
+    if (_hasFetched) return;
+    if (!SupabaseClientService.isInitialized) {
+      _scheduleRetry();
+      return;
+    }
     fetchNotifications();
   }
 
-  /// Always fetches fresh — no local data cache.
+  void _scheduleRetry() {
+    if (_retryScheduled || _retryCount >= _maxRetries) return;
+    _retryScheduled = true;
+    _retryCount++;
+    Future.delayed(const Duration(seconds: 2), () {
+      _retryScheduled = false;
+      if (!_hasFetched) {
+        ensureLoaded();
+      }
+    });
+  }
+
   Future<void> fetchNotifications() async {
     if (!SupabaseClientService.isInitialized) {
       Logger.w(_tag, 'Supabase not initialized — skipping notifications fetch');
       return;
     }
 
+    _hasFetched = true;
     _isLoading = true;
     _error = null;
     notifyListeners();
