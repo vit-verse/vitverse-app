@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/theme/app_card_styles.dart';
+import '../../../core/utils/snackbar_utils.dart';
 import '../core/auth_service.dart';
 import '../utils/auth_states.dart';
 import 'dialogs/captcha_dialog.dart';
@@ -47,9 +48,6 @@ class _LoginScreenState extends State<LoginScreen> {
         if (creds['username'] != null) {
           setState(() {
             _usernameController.text = creds['username']!;
-            if (creds['password'] != null) {
-              _passwordController.text = creds['password']!;
-            }
           });
         }
       }
@@ -77,9 +75,10 @@ class _LoginScreenState extends State<LoginScreen> {
         _showSemesterDialog();
         break;
       case AuthState.complete:
-        // Notify platform to save credentials for autofill
         TextInput.finishAutofillContext(shouldSave: true);
-        _navigateToHome();
+        Future.delayed(const Duration(milliseconds: 300), () {
+          if (mounted) _navigateToHome();
+        });
         break;
       case AuthState.error:
         _showError(_authService.errorMessage ?? 'Authentication failed');
@@ -112,9 +111,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _showError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: Colors.red),
-    );
+    SnackbarUtils.error(context, message);
   }
 
   Future<void> _handleLogin() async {
@@ -278,8 +275,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 autofillHints: const [AutofillHints.password],
                                 keyboardType: TextInputType.visiblePassword,
                                 textInputAction: TextInputAction.done,
-                                onEditingComplete:
-                                    () => TextInput.finishAutofillContext(),
+                                onEditingComplete: _handleLogin,
                                 decoration: InputDecoration(
                                   labelText: 'Password',
                                   border: const OutlineInputBorder(),

@@ -41,7 +41,7 @@ class AuthError {
     invalidCaptcha: 'Invalid captcha. Please try again.',
     invalidCredentials: 'Invalid username or password.',
     accountLocked: 'Your account is locked.',
-    maxAttempts: 'Maximum login attempts reached.',
+    maxAttempts: 'Maximum login attempts reached. Reset your password on VTOP.',
     unknownError: 'An unknown error occurred.',
 
     // Connection errors
