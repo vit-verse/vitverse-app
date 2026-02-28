@@ -2,7 +2,7 @@ name: vit_connect_flutter
 description: "VIT Verse - A companion app for VIT Chennai students with VTOP integration and community features."
 publish_to: 'none'
 
-version: 2.1.1+6
+version: 2.2.0+7
 min_version: 2.1.1 # killswitch version
 
 environment:
@@ -126,6 +126,7 @@ flutter:
     - assets/icons/flutter.png
     - assets/icons/vercel.png
     - assets/icons/google_cloud.png
+    - assets/icons/cloud_flare.png
     - assets/icons/whatsapp.png
     - assets/icons/developer.png
     - assets/icons/collaboration.png

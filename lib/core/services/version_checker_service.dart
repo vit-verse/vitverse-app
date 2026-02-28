@@ -6,7 +6,7 @@ class VersionCheckerService {
   static const String _tag = 'VersionChecker';
 
   static const String _pubspecUrl =
-      'https://raw.githubusercontent.com/vit-verse/vitverse-app/working/pubspec.yaml';
+      'https://raw.githubusercontent.com/vit-verse/vitverse-app/main/pubspec.yaml';
 
   static String get _currentVersion => AppVersion.version;
 
