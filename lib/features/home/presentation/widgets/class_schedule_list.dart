@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/theme/theme_provider.dart';
@@ -10,8 +11,7 @@ class ClassScheduleList extends StatefulWidget {
   final int dayIndex;
   final HomeLogic homeLogic;
   final bool isDataLoading;
-  final DateTime?
-  actualDate; // Actual date for this day (considering week navigation)
+  final DateTime? actualDate;
 
   const ClassScheduleList({
     super.key,
@@ -27,6 +27,13 @@ class ClassScheduleList extends StatefulWidget {
 
 class _ClassScheduleListState extends State<ClassScheduleList> {
   final _calendarService = CalendarHomeService.instance;
+  late final String _holidayLottie;
+
+  @override
+  void initState() {
+    super.initState();
+    _holidayLottie = 'assets/lottie/holiday${Random().nextInt(9) + 1}.lottie';
+  }
 
   bool _isHoliday(int dayIndex) {
     final DateTime targetDate;
@@ -51,58 +58,62 @@ class _ClassScheduleListState extends State<ClassScheduleList> {
     String title,
     String subtitle,
   ) {
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        const Positioned.fill(
-          child: ThemedLottieWidget(
-            assetPath: 'assets/lottie/SpaceCat.lottie',
-            fallbackIcon: Icons.celebration_rounded,
-            fallbackText: 'Holiday',
-            showContainer: false,
-          ),
-        ),
-        Center(
-          child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16),
-            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
-            decoration: BoxDecoration(
-              color: themeProvider.currentTheme.background.withValues(
-                alpha: 0.8,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          physics: const ClampingScrollPhysics(),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ThemedLottieWidget(
+                    assetPath: _holidayLottie,
+                    width: 280,
+                    height: 280,
+                    fallbackIcon: Icons.celebration_rounded,
+                    fallbackText: 'Holiday',
+                    showContainer: false,
+                  ),
+                  const SizedBox(height: 16),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 32),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          title,
+                          textAlign: TextAlign.center,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 20,
+                            color: themeProvider.currentTheme.text,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          subtitle,
+                          textAlign: TextAlign.center,
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: themeProvider.currentTheme.muted,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  title,
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 20,
-                    color: themeProvider.currentTheme.text,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  subtitle,
-                  textAlign: TextAlign.center,
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: themeProvider.currentTheme.muted,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
             ),
           ),
-        ),
-      ],
+        );
+      },
     );
   }
 

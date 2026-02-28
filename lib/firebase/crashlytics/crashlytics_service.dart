@@ -60,4 +60,11 @@ class CrashlyticsService {
       await _crashlytics?.setCustomKey(key, value);
     } catch (_) {}
   }
+
+  /// Log a breadcrumb message
+  static Future<void> log(String message) async {
+    try {
+      await _crashlytics?.log(message);
+    } catch (_) {}
+  }
 }

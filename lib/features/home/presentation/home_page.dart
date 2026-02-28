@@ -10,6 +10,7 @@ import 'widgets/greeting_widget.dart';
 import 'widgets/home_widgets_section.dart';
 import 'widgets/days_selector.dart';
 import 'widgets/class_schedule_list.dart';
+import '../../notifications/presentation/notification_bell_button.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -167,7 +168,14 @@ class _HomePageState extends State<HomePage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const GreetingWidget(),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Expanded(child: GreetingWidget()),
+                                const SizedBox(width: 12),
+                                const NotificationBellButton(),
+                              ],
+                            ),
                             const SizedBox(height: 28),
                             HomeWidgetsSection(
                               homeLogic: _homeLogic,

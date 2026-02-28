@@ -76,7 +76,7 @@ class Friend {
       'nickname': nickname,
       'regNumber': regNumber,
       'classSlots': classSlots.map((e) => e.toJson()).toList(),
-      'color': color.value,
+      'color': color.toARGB32(),
       'addedAt': addedAt.toIso8601String(),
       'showInFriendsSchedule': showInFriendsSchedule,
       'showInHomePage': showInHomePage,

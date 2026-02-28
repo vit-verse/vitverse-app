@@ -4,6 +4,11 @@ class EnvConfig {
     defaultValue: '',
   );
 
+  static const String supabaseFallbackUrl = String.fromEnvironment(
+    'SUPABASE_FALLBACK_URL',
+    defaultValue: '',
+  );
+
   static const String supabaseAnonKey = String.fromEnvironment(
     'SUPABASE_ANON_KEY',
     defaultValue: '',
@@ -14,6 +19,11 @@ class EnvConfig {
     defaultValue: '',
   );
 
+  static const String supabaseEventsFallbackUrl = String.fromEnvironment(
+    'SUPABASE_EVENTS_FALLBACK_URL',
+    defaultValue: '',
+  );
+
   static const String supabaseEventsAnonKey = String.fromEnvironment(
     'SUPABASE_EVENTS_ANON_KEY',
     defaultValue: '',
@@ -21,8 +31,7 @@ class EnvConfig {
 
   static const String githubVitconnectToken = String.fromEnvironment(
     'GITHUB_VITCONNECT_TOKEN',
-    defaultValue:
-        '',
+    defaultValue: '',
   );
 
   static const String pyqSecretHeader = String.fromEnvironment(
@@ -46,7 +55,7 @@ class EnvConfig {
   }
 
   static bool get isEventsConfigured {
-    return supabaseEventsUrl.isNotEmpty && 
+    return supabaseEventsUrl.isNotEmpty &&
         supabaseEventsAnonKey.isNotEmpty &&
         eventsSecretHeader.isNotEmpty;
   }

@@ -30,6 +30,7 @@ class AboutConstants {
     {'name': 'Firebase', 'icon': 'assets/icons/firebase.png'},
     {'name': 'Supabase', 'icon': 'assets/icons/supabase.png'},
     {'name': 'Google Cloud', 'icon': 'assets/icons/google_cloud.png'},
+    {'name': 'Cloudflare', 'icon': 'assets/icons/cloud_flare.png'},
     {'name': 'GitHub', 'icon': 'assets/icons/github.png'},
     {'name': 'Vercel', 'icon': 'assets/icons/vercel.png'},
   ];

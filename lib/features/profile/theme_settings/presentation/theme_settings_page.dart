@@ -234,7 +234,6 @@ class _ThemeSettingsPageState extends State<ThemeSettingsPage>
       child: AnimatedBuilder(
         animation: _tabController,
         builder: (context, child) {
-          final isSelected = _tabController.index == index;
           final animValue = _tabController.animation?.value ?? 0.0;
           final progress = (animValue - index).abs().clamp(0.0, 1.0);
           final colorValue = 1.0 - progress;
@@ -343,7 +342,7 @@ class _ThemeSettingsPageState extends State<ThemeSettingsPage>
                 isCompact: false,
                 onTap: () async {
                   await themeProvider.setTheme(appTheme);
-                  if (mounted) {
+                  if (context.mounted) {
                     SnackbarUtils.success(
                       context,
                       '${appTheme.name} theme applied',
@@ -393,7 +392,7 @@ class _ThemeSettingsPageState extends State<ThemeSettingsPage>
                 isCompact: false,
                 onTap: () async {
                   await themeProvider.setTheme(appTheme);
-                  if (mounted) {
+                  if (context.mounted) {
                     SnackbarUtils.success(
                       context,
                       '${appTheme.name} theme applied',
@@ -447,7 +446,7 @@ class _ThemeSettingsPageState extends State<ThemeSettingsPage>
                       isCompact: false,
                       onTap: () async {
                         await themeProvider.setCustomTheme(customTheme);
-                        if (mounted) {
+                        if (context.mounted) {
                           SnackbarUtils.success(
                             context,
                             '${customTheme.name} theme applied',
@@ -463,7 +462,7 @@ class _ThemeSettingsPageState extends State<ThemeSettingsPage>
                         child: Container(
                           padding: const EdgeInsets.all(4),
                           decoration: BoxDecoration(
-                            color: Colors.red.withOpacity(0.9),
+                            color: Colors.red.withValues(alpha: 0.9),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: const Icon(
@@ -883,7 +882,7 @@ class _ThemeSettingsPageState extends State<ThemeSettingsPage>
                   color: color,
                   borderRadius: BorderRadius.circular(ThemeConstants.radiusMd),
                   border: Border.all(
-                    color: themeProvider.currentTheme.muted.withOpacity(0.3),
+                    color: themeProvider.currentTheme.muted.withValues(alpha: 0.3),
                     width: 2,
                   ),
                 ),
@@ -897,7 +896,7 @@ class _ThemeSettingsPageState extends State<ThemeSettingsPage>
                 child: TextField(
                   controller: TextEditingController(
                     text:
-                        color.value
+                        color.toARGB32()
                             .toRadixString(16)
                             .substring(2)
                             .toUpperCase(),
@@ -935,7 +934,7 @@ class _ThemeSettingsPageState extends State<ThemeSettingsPage>
                           int.parse('FF$value', radix: 16),
                         );
                         onColorChanged(newColor);
-                      } catch (e) {}
+                      } catch (_) {}
                     }
                   },
                 ),
@@ -1094,8 +1093,8 @@ class _ThemeSettingsPageState extends State<ThemeSettingsPage>
                         color: themeProvider.currentTheme.background,
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color: themeProvider.currentTheme.muted.withOpacity(
-                            0.2,
+                          color: themeProvider.currentTheme.muted.withValues(
+                            alpha: 0.2,
                           ),
                         ),
                       ),
@@ -1106,7 +1105,7 @@ class _ThemeSettingsPageState extends State<ThemeSettingsPage>
                             width: 16,
                             height: 16,
                             decoration: BoxDecoration(
-                              color: Color(theme.primary.value),
+                              color: Color(theme.primary.toARGB32()),
                               borderRadius: BorderRadius.circular(4),
                             ),
                           ),
@@ -1164,7 +1163,7 @@ class _ThemeSettingsPageState extends State<ThemeSettingsPage>
               color: _customBackground,
               borderRadius: BorderRadius.circular(ThemeConstants.radiusMd),
               border: Border.all(
-                color: themeProvider.currentTheme.muted.withOpacity(0.3),
+                color: themeProvider.currentTheme.muted.withValues(alpha: 0.3),
               ),
             ),
             child: Column(

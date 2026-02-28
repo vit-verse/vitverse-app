@@ -251,8 +251,8 @@ class _AddLostFoundPageState extends State<AddLostFoundPage> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          disabledBackgroundColor: theme.primary.withOpacity(
-                            0.5,
+                          disabledBackgroundColor: theme.primary.withValues(
+                            alpha: 0.5,
                           ),
                         ),
                         child:

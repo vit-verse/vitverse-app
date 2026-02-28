@@ -20,10 +20,9 @@ class _SearchPapersPageState extends State<SearchPapersPage> {
   static const _tag = 'SearchPapersPage';
   final TextEditingController _searchController = TextEditingController();
   final CourseDao _courseDao = CourseDao();
-  String _searchQuery = '';
+  final String _searchQuery = '';
   bool _showMyCoursesOnly = false;
   List<Map<String, dynamic>> _filteredCourses = [];
-  bool _isLoadingCourses = false;
 
   @override
   void initState() {
@@ -66,12 +65,9 @@ class _SearchPapersPageState extends State<SearchPapersPage> {
     if (controller.globalMeta == null) {
       setState(() {
         _filteredCourses = [];
-        _isLoadingCourses = false;
       });
       return;
     }
-
-    setState(() => _isLoadingCourses = true);
 
     try {
       // Fetch all courses from local DB
@@ -135,13 +131,11 @@ class _SearchPapersPageState extends State<SearchPapersPage> {
 
       setState(() {
         _filteredCourses = courseList;
-        _isLoadingCourses = false;
       });
     } catch (e) {
       Logger.e(_tag, 'Error building course list', e);
       setState(() {
         _filteredCourses = [];
-        _isLoadingCourses = false;
       });
     }
   }

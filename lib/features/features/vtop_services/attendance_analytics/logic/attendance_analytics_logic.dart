@@ -92,16 +92,21 @@ class AttendanceAnalyticsLogic {
   }) {
     if (total == 0) return 0;
 
+    final clampedTarget = targetPercentage.clamp(0.1, 99.9);
     final currentPercentage = (attended / total) * 100;
-    final target = targetPercentage / 100;
+    final target = clampedTarget / 100;
 
-    if (currentPercentage < targetPercentage) {
-      final classesNeeded = ((target * total - attended) / (1 - target)).ceil();
+    if (currentPercentage < clampedTarget) {
+      final divisor = 1 - target;
+      if (divisor.abs() < 1e-9) return -total;
+      final classesNeeded = ((target * total - attended) / divisor).ceil();
       return -classesNeeded.abs();
-    } else if (currentPercentage == 100.0) {
+    } else if (currentPercentage >= 99.99) {
+      if (target.abs() < 1e-9) return total;
       final maxTotal = (attended / target).floor();
       return maxTotal - total;
     } else {
+      if (target.abs() < 1e-9) return total;
       final canMiss = ((attended - target * total) / target).floor();
       return canMiss >= 0 ? canMiss : 0;
     }

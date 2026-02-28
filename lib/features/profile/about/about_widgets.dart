@@ -732,14 +732,6 @@ class _ContributorRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final initials =
-        name
-            .split(' ')
-            .map((word) => word.isNotEmpty ? word[0] : '')
-            .take(2)
-            .join()
-            .toUpperCase();
-
     return Row(
       children: [
         Container(

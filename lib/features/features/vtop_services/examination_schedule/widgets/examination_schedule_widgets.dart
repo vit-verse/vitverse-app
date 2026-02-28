@@ -56,8 +56,8 @@ class ExamCard extends StatelessWidget {
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: themeProvider.currentTheme.primary.withOpacity(
-                        0.15,
+                      color: themeProvider.currentTheme.primary.withValues(
+                        alpha: 0.15,
                       ),
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -122,8 +122,8 @@ class ExamCard extends StatelessWidget {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: themeProvider.currentTheme.muted.withOpacity(
-                              0.15,
+                            color: themeProvider.currentTheme.muted.withValues(
+                              alpha: 0.15,
                             ),
                             borderRadius: BorderRadius.circular(6),
                             border: Border.all(
@@ -482,8 +482,8 @@ class ExamTypeTabs extends StatelessWidget {
                         color:
                             isSelected
                                 ? themeProvider.currentTheme.primary
-                                : themeProvider.currentTheme.muted.withOpacity(
-                                  0.2,
+                                : themeProvider.currentTheme.muted.withValues(
+                                  alpha: 0.2,
                                 ),
                         width: 1.5,
                       ),

@@ -13,6 +13,7 @@ import 'user_agent_service.dart';
 import '../ocr_custom/captcha_solver.dart';
 import '../../../core/services/notification_service.dart';
 import '../../../core/database/database.dart';
+import '../../../core/database_vitverse/database.dart';
 import '../../../core/utils/logger.dart';
 import '../../../firebase/analytics/analytics_service.dart';
 import '../../../firebase/crashlytics/crashlytics_service.dart';
@@ -1136,6 +1137,10 @@ class VTOPAuthService extends ChangeNotifier {
 
       _setState(AuthState.dataDownloading);
 
+      if (_webView == null) {
+        throw Exception('WebView not initialized — cannot download data');
+      }
+
       await _notificationService.showProgressNotification(
         currentStep: 6,
         totalSteps: AuthConstants.totalAuthSteps,
@@ -1162,11 +1167,17 @@ class VTOPAuthService extends ChangeNotifier {
         stepLabel: AuthConstants.authStepComplete,
       );
 
-      // Start Phase 2 immediately - AuthHandler has its own stabilization delay
-      _authHandler.startPhase2Background(
-        webView: _webView!,
-        semesterID: _semesterID!,
-      );
+      if (_webView != null) {
+        _authHandler.startPhase2Background(
+          webView: _webView!,
+          semesterID: _semesterID!,
+        );
+      } else {
+        Logger.w(
+          'Auth',
+          'WebView disposed before Phase 2 — skipping background sync',
+        );
+      }
     } catch (e) {
       Logger.e('Auth', 'Semester selection failed', e);
       CrashlyticsService.recordError(
@@ -1358,13 +1369,10 @@ class VTOPAuthService extends ChangeNotifier {
 
       final prefs = await SharedPreferences.getInstance();
 
-      // 1. Clear authentication flag immediately
       await prefs.setBool(AuthConstants.keyIsSignedIn, false);
 
-      // 2. Clear secure storage (credentials)
       await _secureStorage.deleteAll();
 
-      // 3. Clear ONLY student-specific SharedPreferences keys
       final studentSpecificKeys = {
         'user_session',
         'student_profile',
@@ -1385,16 +1393,11 @@ class VTOPAuthService extends ChangeNotifier {
         await prefs.remove(key);
       }
 
-      // 4. Clear VIT Connect Database (all student academic data)
       final db = VitConnectDatabase.instance;
       await db.clearAllData();
 
-      // 5. VitVerse Database - KEEP ALL (no clearing needed)
-      // All VitVerse tables contain app-level data that should persist
-      // including: calendar_cache, personal_events, selected_calendars,
-      // app_preferences, lost_found_cache, cab_ride_cache, custom_themes, events_cache
+      await VitVerseDatabase.instance.clearStudentData();
 
-      // 6. Reset authentication state
       _resetState();
       _setState(AuthState.idle);
 

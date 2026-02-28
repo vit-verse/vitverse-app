@@ -462,7 +462,7 @@ class _MessMenuPageState extends State<MessMenuPage> {
                     decoration: BoxDecoration(
                       gradient: RadialGradient(
                         colors: [
-                          gradientColor.withOpacity(theme.isDark ? 0.08 : 0.06),
+                          gradientColor.withValues(alpha: theme.isDark ? 0.08 : 0.06),
                           gradientColor.withValues(alpha: 0.0),
                         ],
                         center: Alignment.bottomRight,

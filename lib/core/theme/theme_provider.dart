@@ -258,7 +258,7 @@ class ThemeProvider with ChangeNotifier {
 
   /// Helper: Convert Color to Hex
   String _colorToHex(Color color) {
-    return '#${color.value.toRadixString(16).substring(2).toUpperCase()}';
+    return '#${color.toARGB32().toRadixString(16).substring(2).toUpperCase()}';
   }
 
   /// Helper: Convert Hex to Color

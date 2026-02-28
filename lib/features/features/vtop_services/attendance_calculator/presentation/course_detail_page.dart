@@ -524,11 +524,11 @@ class CourseDetailPage extends StatelessWidget {
       margin: const EdgeInsets.all(2),
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: statusColor.withOpacity(hasClassOnThisDay ? 0.15 : 0.05),
+        color: statusColor.withValues(alpha: hasClassOnThisDay ? 0.15 : 0.05),
         borderRadius: BorderRadius.circular(ThemeConstants.radiusSm),
         border: Border.all(
-          color: statusColor.withOpacity(
-            hasClassOnThisDay ? (day.isToday ? 0.6 : 0.4) : 0.1,
+          color: statusColor.withValues(
+            alpha: hasClassOnThisDay ? (day.isToday ? 0.6 : 0.4) : 0.1,
           ),
           width: hasClassOnThisDay && day.isToday ? 2 : 1,
         ),
@@ -541,7 +541,7 @@ class CourseDetailPage extends StatelessWidget {
               'CAT${day.catNumber}',
               style: TextStyle(
                 fontSize: 7,
-                color: statusColor.withOpacity(opacity),
+                color: statusColor.withValues(alpha: opacity),
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -550,7 +550,7 @@ class CourseDetailPage extends StatelessWidget {
               _getWeekdayAbbr(day.followsScheduleOf!),
               style: TextStyle(
                 fontSize: 6,
-                color: statusColor.withOpacity(opacity),
+                color: statusColor.withValues(alpha: opacity),
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -559,7 +559,7 @@ class CourseDetailPage extends StatelessWidget {
             day.day.toString(),
             style: TextStyle(
               fontSize: 12,
-              color: theme.text.withOpacity(opacity),
+              color: theme.text.withValues(alpha: opacity),
               fontWeight:
                   hasClassOnThisDay && day.isToday
                       ? FontWeight.bold
@@ -569,7 +569,7 @@ class CourseDetailPage extends StatelessWidget {
           Icon(
             day.status.icon,
             size: 11,
-            color: statusColor.withOpacity(opacity),
+            color: statusColor.withValues(alpha: opacity),
           ),
         ],
       ),
@@ -582,6 +582,7 @@ class CourseDetailPage extends StatelessWidget {
     return days[weekday - 1];
   }
 
+  // ignore: unused_element
   bool _hasClassOnDay(AttendanceDay day) {
     // Check if this course has classes on this day of the week
     final effectiveWeekday = day.followsScheduleOf ?? day.date.weekday;

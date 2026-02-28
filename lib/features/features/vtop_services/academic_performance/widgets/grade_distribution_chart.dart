@@ -103,7 +103,7 @@ class GradeDistributionChart extends StatelessWidget {
           width: 32,
           height: barHeight < 20 ? 20 : barHeight,
           decoration: BoxDecoration(
-            color: theme.primary.withOpacity(opacity),
+            color: theme.primary.withValues(alpha: opacity),
             borderRadius: BorderRadius.circular(6),
           ),
         ),

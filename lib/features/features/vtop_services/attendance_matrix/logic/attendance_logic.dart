@@ -61,7 +61,7 @@ class AttendanceMatrixLogic {
   }
 
   static Color getStatusColor(AttendanceStatus status, {double opacity = 1.0}) {
-    return status.color.withOpacity(opacity);
+    return status.color.withValues(alpha: opacity);
   }
 
   static String generateInterpretation({

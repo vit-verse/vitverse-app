@@ -98,6 +98,7 @@ function Build-ReleaseSplit {
         Write-Host "  - build/app/outputs/flutter-apk/app-arm64-v8a-release.apk" -ForegroundColor Yellow
         Write-Host "  - build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk" -ForegroundColor Yellow
         Write-Host "  - build/app/outputs/flutter-apk/app-x86_64-release.apk" -ForegroundColor Yellow
+        Copy-APKsToScripts
     } else {
         Write-Host "Build failed with exit code $LASTEXITCODE" -ForegroundColor Red
     }
@@ -121,6 +122,7 @@ function Build-ReleaseUniversal {
     if ($LASTEXITCODE -eq 0) {
         Write-Host "Build completed successfully" -ForegroundColor Green
         Write-Host "Output: build/app/outputs/flutter-apk/app-release.apk" -ForegroundColor Yellow
+        Copy-APKsToScripts
     } else {
         Write-Host "Build failed with exit code $LASTEXITCODE" -ForegroundColor Red
     }
@@ -195,8 +197,46 @@ function Build-All {
     Write-Host "[7/7] Building Profile APK..." -ForegroundColor Yellow
     Build-Profile -DartDefines $DartDefines
     
+    Copy-APKsToScripts
+
     Write-Host ""
     Write-Host "All builds completed" -ForegroundColor Green
+}
+
+function Get-AppVersion {
+    $pubspec = Get-Content ".\pubspec.yaml" | Where-Object { $_ -match '^version:' }
+    if ($pubspec -match 'version:\s*([\d\.]+)') {
+        return $matches[1]
+    }
+    return "unknown"
+}
+
+function Copy-APKsToScripts {
+    $version = Get-AppVersion
+    $scriptsDir = ".\scripts"
+    $apkSrcDir = ".\build\app\outputs\flutter-apk"
+
+    $apks = @(
+        @{ src = "app-arm64-v8a-release.apk";  dst = "VITverse-v$version-app-arm64-v8a-release.apk" },
+        @{ src = "app-armeabi-v7a-release.apk"; dst = "VITverse-v$version-app-armeabi-v7a-release.apk" },
+        @{ src = "app-release.apk";             dst = "VITverse-v$version-app-release.apk" }
+    )
+
+    Write-Host ""
+    Write-Host "Copying APKs to scripts/ (v$version)..." -ForegroundColor Cyan
+    $copied = 0
+    foreach ($apk in $apks) {
+        $srcPath = Join-Path $apkSrcDir $apk.src
+        $dstPath = Join-Path $scriptsDir $apk.dst
+        if (Test-Path $srcPath) {
+            Copy-Item -Path $srcPath -Destination $dstPath -Force
+            Write-Host "  [COPIED] $($apk.dst)" -ForegroundColor Green
+            $copied++
+        } else {
+            Write-Host "  [SKIP]   $($apk.src) not found" -ForegroundColor DarkGray
+        }
+    }
+    Write-Host "  $copied APK(s) copied to scripts/" -ForegroundColor Yellow
 }
 
 function Clean-BuildDirectory {

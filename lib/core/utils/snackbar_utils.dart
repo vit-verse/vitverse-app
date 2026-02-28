@@ -1,16 +1,24 @@
-import 'package:flutter/material.dart';
 import 'dart:async';
+import 'dart:math' as math;
+
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../theme/theme_provider.dart';
 
 enum SnackbarType { success, error, info, warning }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Data model
+// ─────────────────────────────────────────────────────────────────────────────
 
 class SnackbarItem {
   final String message;
   final SnackbarType type;
   final Duration duration;
   final SnackBarAction? action;
-  late final Timer timer;
-  late final AnimationController slideController;
-  late final AnimationController progressController;
+  late AnimationController slideController;
+  late AnimationController countdownController;
+  late Timer timer;
 
   SnackbarItem({
     required this.message,
@@ -20,6 +28,10 @@ class SnackbarItem {
   });
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Manager widget (wrap your app root with this)
+// ─────────────────────────────────────────────────────────────────────────────
+
 class StackedSnackbarManager extends StatefulWidget {
   final Widget child;
 
@@ -28,6 +40,7 @@ class StackedSnackbarManager extends StatefulWidget {
   @override
   State<StackedSnackbarManager> createState() => _StackedSnackbarManagerState();
 
+  // ignore: library_private_types_in_public_api
   static _StackedSnackbarManagerState? of(BuildContext context) {
     return context.findAncestorStateOfType<_StackedSnackbarManagerState>();
   }
@@ -35,134 +48,109 @@ class StackedSnackbarManager extends StatefulWidget {
 
 class _StackedSnackbarManagerState extends State<StackedSnackbarManager>
     with TickerProviderStateMixin {
-  final List<SnackbarItem> _snackbars = [];
+  SnackbarItem? _current;
 
   void addSnackbar(SnackbarItem item) {
-    setState(() {
-      if (_snackbars.length >= 3) {
-        final oldest = _snackbars.removeAt(0);
-        oldest.slideController.dispose();
-        oldest.progressController.dispose();
-        oldest.timer.cancel();
-      }
+    // Instantly dismiss any existing snackbar
+    if (_current != null) {
+      _disposeItem(_current!);
+      _current = null;
+    }
 
-      item.slideController = AnimationController(
-        duration: const Duration(milliseconds: 300),
-        vsync: this,
-      );
+    item.slideController = AnimationController(
+      duration: const Duration(milliseconds: 280),
+      vsync: this,
+    );
 
-      item.progressController = AnimationController(
-        duration: item.duration,
-        vsync: this,
-      );
+    item.countdownController = AnimationController(
+      duration: item.duration,
+      vsync: this,
+    );
 
-      _snackbars.add(item);
-      item.slideController.forward();
-      item.progressController.forward();
+    setState(() => _current = item);
 
-      item.timer = Timer(item.duration, () => _removeSnackbar(item));
-    });
+    item.slideController.forward();
+    item.countdownController.forward();
+
+    item.timer = Timer(item.duration, () => _removeSnackbar(item));
   }
 
   void _removeSnackbar(SnackbarItem item) {
-    if (_snackbars.contains(item)) {
+    if (_current == item) {
       item.slideController.reverse().then((_) {
-        if (mounted) {
-          setState(() {
-            _snackbars.remove(item);
-            item.slideController.dispose();
-            item.progressController.dispose();
-            item.timer.cancel();
-          });
+        if (mounted && _current == item) {
+          _disposeItem(item);
+          setState(() => _current = null);
         }
       });
     }
   }
 
+  void _disposeItem(SnackbarItem item) {
+    item.timer.cancel();
+    if (item.slideController.isAnimating || !item.slideController.isDismissed) {
+      item.slideController.stop();
+    }
+    item.slideController.dispose();
+    item.countdownController.dispose();
+  }
+
   @override
   void dispose() {
-    for (final item in _snackbars) {
-      item.slideController.dispose();
-      item.progressController.dispose();
-      item.timer.cancel();
-    }
+    if (_current != null) _disposeItem(_current!);
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // Calculate bottom padding to account for navigation bar
     final mediaQuery = MediaQuery.of(context);
     final viewInsets = mediaQuery.viewInsets.bottom;
     final bottomPadding = mediaQuery.padding.bottom;
 
-    // Check if we're on a screen with bottom navigation
-    // Look for a Scaffold with bottomNavigationBar in the widget tree
     bool hasBottomNav = false;
-
-    // Try to find a Scaffold ancestor with bottomNavigationBar
     context.visitAncestorElements((element) {
       if (element.widget is Scaffold) {
         final scaffold = element.widget as Scaffold;
         if (scaffold.bottomNavigationBar != null) {
           hasBottomNav = true;
-          return false; // Stop searching
+          return false;
         }
       }
-      return true; // Continue searching
+      return true;
     });
 
-    // Calculate bottom offset:
-    // - If keyboard is open: position above keyboard
-    // - If bottom nav exists: 85px (nav height + margin) + 16px spacing
-    // - Otherwise: just safe area padding + 16px
     final snackbarBottom =
         viewInsets > 0
-            ? viewInsets + 16.0
+            ? viewInsets + 12.0
             : (hasBottomNav
-                ? 101.0
-                : (bottomPadding > 0 ? bottomPadding + 16.0 : 16.0));
+                ? 100.0
+                : (bottomPadding > 0 ? bottomPadding + 12.0 : 12.0));
 
     return Stack(
       children: [
         widget.child,
-        if (_snackbars.isNotEmpty)
+        if (_current != null)
           Positioned(
             bottom: snackbarBottom,
             left: 16,
             right: 16,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children:
-                  _snackbars.asMap().entries.map((entry) {
-                    final index = entry.key;
-                    final item = entry.value;
-
-                    return AnimatedBuilder(
-                      animation: item.slideController,
-                      builder: (context, child) {
-                        return Transform.translate(
-                          offset: Offset(
-                            0,
-                            (1 - item.slideController.value) * 100,
-                          ),
-                          child: Opacity(
-                            opacity: item.slideController.value,
-                            child: Container(
-                              margin: EdgeInsets.only(
-                                bottom: index < _snackbars.length - 1 ? 4 : 0,
-                              ),
-                              child: _SnackbarCard(
-                                item: item,
-                                index: index,
-                                totalCount: _snackbars.length,
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    );
-                  }).toList(),
+            child: AnimatedBuilder(
+              animation: _current!.slideController,
+              builder: (context, child) {
+                final slide = CurvedAnimation(
+                  parent: _current!.slideController,
+                  curve: Curves.easeOutCubic,
+                  reverseCurve: Curves.easeInCubic,
+                );
+                return Transform.translate(
+                  offset: Offset(0, (1 - slide.value) * 60),
+                  child: Opacity(opacity: slide.value, child: child),
+                );
+              },
+              child: _SnackbarCard(
+                item: _current!,
+                onDismiss: () => _removeSnackbar(_current!),
+              ),
             ),
           ),
       ],
@@ -170,108 +158,165 @@ class _StackedSnackbarManagerState extends State<StackedSnackbarManager>
   }
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Snackbar card widget
+// ─────────────────────────────────────────────────────────────────────────────
+
 class _SnackbarCard extends StatelessWidget {
   final SnackbarItem item;
-  final int index;
-  final int totalCount;
+  final VoidCallback onDismiss;
 
-  const _SnackbarCard({
-    required this.item,
-    required this.index,
-    required this.totalCount,
-  });
+  const _SnackbarCard({required this.item, required this.onDismiss});
 
-  Color _getColor() {
-    return switch (item.type) {
-      SnackbarType.success => const Color(0xFF10B981),
-      SnackbarType.error => const Color(0xFFEF4444),
-      SnackbarType.info => const Color(0xFF3B82F6),
-      SnackbarType.warning => const Color(0xFFF59E0B),
-    };
-  }
+  Color _typeColor() => switch (item.type) {
+    SnackbarType.success => const Color(0xFF22C55E),
+    SnackbarType.error => const Color(0xFFEF4444),
+    SnackbarType.info => const Color(0xFF3B82F6),
+    SnackbarType.warning => const Color(0xFFF59E0B),
+  };
 
   @override
   Widget build(BuildContext context) {
-    final baseColor = _getColor();
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isLatest = index == totalCount - 1;
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+    final appTheme = themeProvider.currentTheme;
+    final typeColor = _typeColor();
 
-    // Latest snackbar gets full width, older ones get progressively smaller
-    final width = screenWidth - 32 - ((totalCount - 1 - index) * 20);
-    final opacity = isLatest ? 1.0 : 0.7 - ((totalCount - 1 - index) * 0.15);
-    final height = 28.0;
-
-    return AnimatedBuilder(
-      animation: item.progressController,
-      builder: (context, child) {
-        return Container(
-          width: width,
-          height: height,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.08),
-                blurRadius: 4,
-                offset: const Offset(0, 1),
-              ),
-            ],
+    return GestureDetector(
+      onTap: onDismiss,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+        decoration: BoxDecoration(
+          color: appTheme.surface,
+          borderRadius: BorderRadius.circular(40),
+          border: Border.all(
+            color: appTheme.border.withValues(alpha: 0.6),
+            width: 0.8,
           ),
-          child: Stack(
-            children: [
-              // Background
-              Container(
-                width: width,
-                height: height,
-                decoration: BoxDecoration(
-                  color: baseColor.withOpacity(opacity * 0.2),
-                  borderRadius: BorderRadius.circular(8),
-                ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(
+                alpha: appTheme.isDark ? 0.40 : 0.14,
               ),
-              // Progress fill
-              Container(
-                width: width * (1 - item.progressController.value),
-                height: height,
-                decoration: BoxDecoration(
-                  color: baseColor.withOpacity(opacity),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              // Content
-              Positioned.fill(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          item.message,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w500,
-                            fontSize: 12,
-                            decoration: TextDecoration.none,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      if (item.action != null && isLatest)
-                        Padding(
-                          padding: const EdgeInsets.only(left: 8),
-                          child: item.action!,
-                        ),
-                    ],
+              blurRadius: 24,
+              offset: const Offset(0, 8),
+              spreadRadius: 0,
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Circular countdown ring with center dot
+            AnimatedBuilder(
+              animation: item.countdownController,
+              builder: (context, _) {
+                final remaining = 1.0 - item.countdownController.value;
+                return SizedBox(
+                  width: 26,
+                  height: 26,
+                  child: CustomPaint(
+                    painter: _CountdownRingPainter(
+                      progress: remaining,
+                      color: typeColor,
+                      trackColor: typeColor.withValues(alpha: 0.18),
+                      strokeWidth: 2.4,
+                      dotRadius: 4.2,
+                    ),
                   ),
+                );
+              },
+            ),
+            const SizedBox(width: 10),
+            // Message text
+            Flexible(
+              child: Text(
+                item.message,
+                style: TextStyle(
+                  color: appTheme.text,
+                  fontSize: 13.5,
+                  fontWeight: FontWeight.w500,
+                  decoration: TextDecoration.none,
+                  height: 1.3,
                 ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
+            ),
+            // Optional action
+            if (item.action != null) ...[
+              const SizedBox(width: 8),
+              item.action!,
             ],
-          ),
-        );
-      },
+          ],
+        ),
+      ),
     );
   }
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Custom painter: countdown ring + center dot
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _CountdownRingPainter extends CustomPainter {
+  final double progress; // 1.0 → full ring, 0.0 → empty
+  final Color color;
+  final Color trackColor;
+  final double strokeWidth;
+  final double dotRadius;
+
+  const _CountdownRingPainter({
+    required this.progress,
+    required this.color,
+    required this.trackColor,
+    required this.strokeWidth,
+    required this.dotRadius,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = (size.width - strokeWidth) / 2;
+
+    // Track (background ring)
+    final trackPaint =
+        Paint()
+          ..color = trackColor
+          ..strokeWidth = strokeWidth
+          ..style = PaintingStyle.stroke
+          ..strokeCap = StrokeCap.round;
+    canvas.drawCircle(center, radius, trackPaint);
+
+    // Progress arc (countdown)
+    if (progress > 0.01) {
+      final progressPaint =
+          Paint()
+            ..color = color
+            ..strokeWidth = strokeWidth
+            ..style = PaintingStyle.stroke
+            ..strokeCap = StrokeCap.round;
+
+      canvas.drawArc(
+        Rect.fromCircle(center: center, radius: radius),
+        -math.pi / 2, // start from 12 o'clock
+        2 * math.pi * progress, // sweep angle
+        false,
+        progressPaint,
+      );
+    }
+
+    // Center dot
+    canvas.drawCircle(center, dotRadius, Paint()..color = color);
+  }
+
+  @override
+  bool shouldRepaint(_CountdownRingPainter old) =>
+      old.progress != progress || old.color != color;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Public API
+// ─────────────────────────────────────────────────────────────────────────────
 
 class SnackbarUtils {
   static void show(
@@ -282,64 +327,59 @@ class SnackbarUtils {
     SnackBarAction? action,
   }) {
     final manager = StackedSnackbarManager.of(context);
-    if (manager != null) {
-      manager.addSnackbar(
-        SnackbarItem(
-          message: message,
-          type: type,
-          duration: duration,
-          action: action,
-        ),
-      );
-    }
+    manager?.addSnackbar(
+      SnackbarItem(
+        message: message,
+        type: type,
+        duration: duration,
+        action: action,
+      ),
+    );
   }
 
   static void success(
     BuildContext context,
     String message, {
     Duration? duration,
-  }) {
-    show(
-      context,
-      message: message,
-      type: SnackbarType.success,
-      duration: duration ?? const Duration(seconds: 3),
-    );
-  }
+  }) => show(
+    context,
+    message: message,
+    type: SnackbarType.success,
+    duration: duration ?? const Duration(seconds: 3),
+  );
 
   static void error(
     BuildContext context,
     String message, {
     Duration? duration,
     SnackBarAction? action,
-  }) {
-    show(
-      context,
-      message: message,
-      type: SnackbarType.error,
-      duration: duration ?? const Duration(seconds: 3),
-    );
-  }
+  }) => show(
+    context,
+    message: message,
+    type: SnackbarType.error,
+    duration: duration ?? const Duration(seconds: 3),
+    action: action,
+  );
 
-  static void info(BuildContext context, String message, {Duration? duration}) {
-    show(
-      context,
-      message: message,
-      type: SnackbarType.info,
-      duration: duration ?? const Duration(seconds: 3),
-    );
-  }
+  static void info(
+    BuildContext context,
+    String message, {
+    Duration? duration,
+  }) => show(
+    context,
+    message: message,
+    type: SnackbarType.info,
+    duration: duration ?? const Duration(seconds: 3),
+  );
 
   static void warning(
     BuildContext context,
     String message, {
     Duration? duration,
-  }) {
-    show(
-      context,
-      message: message,
-      type: SnackbarType.warning,
-      duration: duration ?? const Duration(seconds: 3),
-    );
-  }
+  }) => show(
+    context,
+    message: message,
+    type: SnackbarType.warning,
+    duration: duration ?? const Duration(seconds: 3),
+  );
 }

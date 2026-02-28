@@ -1,11 +1,12 @@
 import 'package:package_info_plus/package_info_plus.dart';
 
-/// App version information
 class AppVersion {
   static PackageInfo? _packageInfo;
 
+  static PackageInfo? get packageInfo => _packageInfo;
+
   static Future<void> initialize() async {
-    _packageInfo = await PackageInfo.fromPlatform();
+    _packageInfo ??= await PackageInfo.fromPlatform();
   }
 
   static String get version => _packageInfo?.version ?? '1.1.0';

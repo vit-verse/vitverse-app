@@ -448,7 +448,7 @@ class _AddCoursesPageState extends State<_AddCoursesPage> {
       }
 
       widget.onSave();
-      Navigator.pop(context);
+      if (mounted) Navigator.pop(context);
     } catch (e) {
       Logger.e('AddCourses', 'Failed to save classifications', e);
       if (mounted) {

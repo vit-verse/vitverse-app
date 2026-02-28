@@ -65,6 +65,7 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
+  // ignore: unused_element
   Future<void> _openDownloadPage() async {
     const downloadUrl = 'https://vitverse.divyanshupatel.com';
     try {

@@ -78,7 +78,7 @@ class _CalendarIntegrationCardState extends State<CalendarIntegrationCard> {
                     icon: Icon(Icons.close, color: theme.muted, size: 18),
                     onPressed: () async {
                       await calendarService.clearCalendar();
-                      if (mounted) {
+                      if (context.mounted) {
                         setState(() {});
                         SnackbarUtils.info(context, 'Calendar cleared');
                       }

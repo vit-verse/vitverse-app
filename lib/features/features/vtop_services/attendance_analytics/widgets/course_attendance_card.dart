@@ -150,13 +150,13 @@ class CourseAttendanceCard extends StatelessWidget {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: themeProvider.currentTheme.primary.withOpacity(
-                          0.1,
+                        color: themeProvider.currentTheme.primary.withValues(
+                          alpha: 0.1,
                         ),
                         borderRadius: BorderRadius.circular(6),
                         border: Border.all(
-                          color: themeProvider.currentTheme.primary.withOpacity(
-                            0.3,
+                          color: themeProvider.currentTheme.primary.withValues(
+                            alpha: 0.3,
                           ),
                           width: 1,
                         ),

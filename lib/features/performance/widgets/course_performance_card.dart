@@ -8,16 +8,17 @@ import '../models/performance_models.dart';
 import 'performance_widgets.dart';
 import 'assessment_mark_tile.dart';
 
-/// Collapsible card showing course performance with all assessments
 class CoursePerformanceCard extends StatefulWidget {
   final CoursePerformance performance;
   final Function(int markId, double average) onUpdateAverage;
+  final Function(List<int> markIds) onMarkRead;
   final bool forceExpanded;
 
   const CoursePerformanceCard({
     super.key,
     required this.performance,
     required this.onUpdateAverage,
+    required this.onMarkRead,
     this.forceExpanded = false,
   });
 
@@ -55,6 +56,7 @@ class _CoursePerformanceCardState extends State<CoursePerformanceCard>
         _isExpanded = widget.forceExpanded;
         if (_isExpanded) {
           _animationController.forward();
+          _markUnreadVisible();
         } else {
           _animationController.reverse();
         }
@@ -73,15 +75,27 @@ class _CoursePerformanceCardState extends State<CoursePerformanceCard>
       _isExpanded = !_isExpanded;
       if (_isExpanded) {
         _animationController.forward();
+        _markUnreadVisible();
       } else {
         _animationController.reverse();
       }
     });
   }
 
+  void _markUnreadVisible() {
+    final unreadIds =
+        widget.performance.assessments
+            .where((a) => !a.isRead)
+            .map((a) => a.id)
+            .toList();
+    if (unreadIds.isNotEmpty) widget.onMarkRead(unreadIds);
+  }
+
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
+    final unreadCount =
+        widget.performance.assessments.where((a) => !a.isRead).length;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -149,8 +163,8 @@ class _CoursePerformanceCardState extends State<CoursePerformanceCard>
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: themeProvider.currentTheme.muted.withOpacity(
-                              0.1,
+                            color: themeProvider.currentTheme.muted.withValues(
+                              alpha: 0.1,
                             ),
                             borderRadius: BorderRadius.circular(6),
                           ),
@@ -166,6 +180,27 @@ class _CoursePerformanceCardState extends State<CoursePerformanceCard>
                         const SizedBox(width: 8),
                         // Credits
                         CreditPill(credits: widget.performance.credits),
+                        if (unreadCount > 0) ...[
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: themeProvider.currentTheme.primary,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              '$unreadCount NEW',
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
                         const Spacer(),
                         // Dropdown icon
                         RotationTransition(
@@ -187,8 +222,8 @@ class _CoursePerformanceCardState extends State<CoursePerformanceCard>
                   decoration: BoxDecoration(
                     border: Border(
                       top: BorderSide(
-                        color: themeProvider.currentTheme.muted.withOpacity(
-                          0.2,
+                        color: themeProvider.currentTheme.muted.withValues(
+                          alpha: 0.2,
                         ),
                         width: 1,
                       ),
@@ -211,9 +246,12 @@ class _CoursePerformanceCardState extends State<CoursePerformanceCard>
                       ...widget.performance.assessments.map((assessment) {
                         return AssessmentMarkTile(
                           assessment: assessment,
-                          onAddAverage: () {
-                            _showAddAverageDialog(context, assessment);
-                          },
+                          onMarkRead:
+                              assessment.isRead
+                                  ? null
+                                  : () => widget.onMarkRead([assessment.id]),
+                          onAddAverage:
+                              () => _showAddAverageDialog(context, assessment),
                         );
                       }),
                     ],
@@ -247,52 +285,83 @@ class _CoursePerformanceCardState extends State<CoursePerformanceCard>
   }
 
   void _showAddAverageDialog(BuildContext context, AssessmentMark assessment) {
-    final controller = TextEditingController(
-      text:
-          assessment.average != null && assessment.average! > 0
-              ? assessment.average!.toStringAsFixed(1)
-              : '',
-    );
-
     showDialog(
       context: context,
       builder:
-          (context) => AddAverageDialog(
-            controller: controller,
-            assessmentTitle: assessment.title,
-            onSave: (value) {
-              final average = double.tryParse(value);
-              if (average != null && average >= 0) {
-                widget.onUpdateAverage(assessment.id, average);
-              }
-            },
+          (context) => _AddAverageDialog(
+            assessment: assessment,
+            onSave: (average) => widget.onUpdateAverage(assessment.id, average),
           ),
     );
   }
 }
 
-/// Dialog for adding/editing average
-class AddAverageDialog extends StatelessWidget {
-  final TextEditingController controller;
-  final String assessmentTitle;
-  final Function(String) onSave;
+class _AddAverageDialog extends StatefulWidget {
+  final AssessmentMark assessment;
+  final Function(double average) onSave;
 
-  const AddAverageDialog({
-    super.key,
-    required this.controller,
-    required this.assessmentTitle,
-    required this.onSave,
-  });
+  const _AddAverageDialog({required this.assessment, required this.onSave});
+
+  @override
+  State<_AddAverageDialog> createState() => _AddAverageDialogState();
+}
+
+class _AddAverageDialogState extends State<_AddAverageDialog> {
+  late final TextEditingController _controller;
+  String? _errorText;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(
+      text:
+          widget.assessment.average != null && widget.assessment.average! > 0
+              ? widget.assessment.average!.toStringAsFixed(1)
+              : '',
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _handleSave() {
+    final raw = _controller.text.trim();
+    final parsed = double.tryParse(raw);
+    final maxScore = widget.assessment.maxScore;
+
+    if (parsed == null || raw.isEmpty) {
+      setState(() => _errorText = 'Enter a valid number');
+      return;
+    }
+    if (parsed < 0) {
+      setState(() => _errorText = 'Cannot be negative');
+      return;
+    }
+    if (maxScore != null && maxScore > 0 && parsed > maxScore) {
+      setState(
+        () =>
+            _errorText =
+                'Cannot exceed max score (${maxScore.toStringAsFixed(1)})',
+      );
+      return;
+    }
+    widget.onSave(parsed);
+    Navigator.of(context).pop();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+    final maxScore = widget.assessment.maxScore;
 
     return AlertDialog(
       backgroundColor: themeProvider.currentTheme.surface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       title: Text(
-        'Add/Edit Average',
+        'Set Average',
         style: TextStyle(
           color: themeProvider.currentTheme.text,
           fontWeight: FontWeight.bold,
@@ -303,7 +372,7 @@ class AddAverageDialog extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            assessmentTitle,
+            widget.assessment.title,
             style: TextStyle(
               color: themeProvider.currentTheme.muted,
               fontSize: 14,
@@ -311,13 +380,24 @@ class AddAverageDialog extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           TextField(
-            controller: controller,
+            controller: _controller,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             autofocus: true,
+            onChanged: (_) {
+              if (_errorText != null) setState(() => _errorText = null);
+            },
             style: TextStyle(color: themeProvider.currentTheme.text),
             decoration: InputDecoration(
               labelText: 'Average Score',
-              hintText: 'Enter average score',
+              hintText:
+                  maxScore != null && maxScore > 0
+                      ? '0 – ${maxScore.toStringAsFixed(1)}'
+                      : 'Enter average score',
+              helperText:
+                  maxScore != null && maxScore > 0
+                      ? 'Max: ${maxScore.toStringAsFixed(1)}'
+                      : null,
+              errorText: _errorText,
               prefixIcon: const Icon(Icons.numbers),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -335,10 +415,7 @@ class AddAverageDialog extends StatelessWidget {
           ),
         ),
         ElevatedButton(
-          onPressed: () {
-            onSave(controller.text);
-            Navigator.of(context).pop();
-          },
+          onPressed: _handleSave,
           style: ElevatedButton.styleFrom(
             backgroundColor: themeProvider.currentTheme.primary,
             foregroundColor: Colors.white,

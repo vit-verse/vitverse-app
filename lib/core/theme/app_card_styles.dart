@@ -302,10 +302,10 @@ class AppCardStyles {
   }) {
     final color = accentColor ?? const Color(0xFF6366F1);
     return BoxDecoration(
-      color: color.withOpacity(isDark ? 0.15 : 0.08),
+      color: color.withValues(alpha: isDark ? 0.15 : 0.08),
       borderRadius: BorderRadius.circular(12.0),
       border: Border.all(
-        color: color.withOpacity(isDark ? 0.4 : 0.3),
+        color: color.withValues(alpha: isDark ? 0.4 : 0.3),
         width: 1.5,
       ),
     );

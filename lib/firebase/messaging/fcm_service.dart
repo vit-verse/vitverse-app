@@ -317,7 +317,6 @@ class FCMService {
         if (notificationType == 'event') {
           final description = message.data['description'] as String? ?? '';
           final eventLink = message.data['eventLink'] as String? ?? '';
-          final eventId = message.data['eventId'] as String? ?? '';
 
           // Build big text with all details
           final bigText = '${notification.body}\n\n$description';

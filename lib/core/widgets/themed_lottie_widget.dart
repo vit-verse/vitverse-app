@@ -30,7 +30,6 @@ class ThemedLottieWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // If not a LottieBundle .lottie → normal Lottie
     if (!assetPath.toLowerCase().endsWith(".lottie")) {
       return Lottie.asset(
         assetPath,
@@ -42,12 +41,15 @@ class ThemedLottieWidget extends StatelessWidget {
       );
     }
 
-    // .lottie → correct loader for dotlottie_loader >= 0.0.5
     return DotLottieLoader.fromAsset(
       assetPath,
       frameBuilder: (context, dot) {
         if (dot == null || dot.animations.isEmpty) {
-          return SizedBox(width: width, height: height);
+          return SizedBox(
+            width: width,
+            height: height,
+            child: const Center(child: CircularProgressIndicator()),
+          );
         }
 
         final raw = dot.animations.values.first;

@@ -215,6 +215,7 @@ class CommunityLinkCard extends StatelessWidget {
     }
   }
 
+  // ignore: unused_element
   Color _getIconColor() {
     final iconLower = link.icon.toLowerCase();
     switch (iconLower) {

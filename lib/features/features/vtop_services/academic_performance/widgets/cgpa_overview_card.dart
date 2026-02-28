@@ -225,8 +225,8 @@ class CGPAOverviewCard extends StatelessWidget {
                               (cgpaSummary.creditsEarned + totalAddedCredits) >
                                       totalCreditsRequired
                                   ? Colors.red.shade400.withValues(alpha: 0.4)
-                                  : cgpaColor.withOpacity(
-                                    0.4,
+                                  : cgpaColor.withValues(
+                                    alpha: 0.4,
                                   ), // Use marks color
                           borderRadius: BorderRadius.circular(4),
                         ),

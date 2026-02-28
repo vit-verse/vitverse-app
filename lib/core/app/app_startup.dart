@@ -1,3 +1,5 @@
+import 'package:firebase_app_check/firebase_app_check.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 import '../utils/logger.dart';
@@ -9,11 +11,14 @@ import '../services/notification_service.dart';
 import '../../firebase/core/firebase_initializer.dart';
 import '../../features/profile/widget_customization/data/widget_preferences_service.dart';
 import '../../features/profile/widget_customization/data/calendar_home_service.dart';
-import '../../features/authentication/core/auth_service.dart';
+import '../../supabase/core/supabase_client.dart';
+import '../../supabase/core/supabase_events_client.dart';
 
-/// App startup initialization service
 class AppStartup {
   static bool _initialized = false;
+  static SharedPreferences? _sharedPreferences;
+
+  static SharedPreferences? get sharedPreferences => _sharedPreferences;
 
   static Future<void> initializeCritical() async {
     if (_initialized) return;
@@ -21,6 +26,9 @@ class AppStartup {
     try {
       await Future.wait([
         AppVersion.initialize(),
+        SharedPreferences.getInstance().then((prefs) {
+          _sharedPreferences = prefs;
+        }),
         Future(() {
           tz.initializeTimeZones();
           tz.setLocalLocation(tz.getLocation('Asia/Kolkata'));
@@ -49,19 +57,65 @@ class AppStartup {
 
     Future.microtask(() async {
       try {
+        final startTime = DateTime.now();
+
         await Future.wait([
+          FirebaseInitializer.initializeCore(),
           _initializeDatabase(),
           _initializeWidgetPreferences(),
+          _initializeCalendarServices(),
         ]);
 
-        await _initializeApiServices();
-        await _initializeCalendarServices();
-        await _initializeNotifications();
-        _initializeFirebaseLazy();
+        await Future.wait([
+          _initializeSupabase(),
+          _initializeSupabaseEvents(),
+          _activateAppCheck(),
+          _initializeNotifications(),
+        ]);
+
+        _initializeFirebaseServices();
+
+        final duration = DateTime.now().difference(startTime).inMilliseconds;
+        Logger.success(
+          'AppStartup',
+          'Background init complete in ${duration}ms',
+        );
       } catch (e) {
         Logger.e('AppStartup', 'Background init failed', e);
       }
     });
+  }
+
+  static Future<void> _initializeSupabase() async {
+    try {
+      if (SupabaseClientService.isConfigured) {
+        await SupabaseClientService.initialize();
+      }
+    } catch (e) {
+      Logger.e('AppStartup', 'Supabase init failed', e);
+    }
+  }
+
+  static Future<void> _initializeSupabaseEvents() async {
+    try {
+      if (SupabaseEventsClient.isConfigured) {
+        await SupabaseEventsClient.initialize();
+      }
+    } catch (e) {
+      Logger.e('AppStartup', 'Supabase Events init failed', e);
+    }
+  }
+
+  static Future<void> _activateAppCheck() async {
+    try {
+      await FirebaseAppCheck.instance.activate(
+        androidProvider: AndroidProvider.playIntegrity,
+        appleProvider: AppleProvider.deviceCheck,
+      );
+      Logger.success('AppStartup', 'Firebase App Check activated');
+    } catch (e) {
+      Logger.e('AppStartup', 'App Check activation failed', e);
+    }
   }
 
   static Future<void> _initializeNotifications() async {
@@ -69,27 +123,17 @@ class AppStartup {
       final notificationService = NotificationService();
       await notificationService.initialize();
       await notificationService.scheduleTodayClassNotifications();
-      Logger.d('AppStartup', 'Notification service initialized');
     } catch (e) {
       Logger.e('AppStartup', 'Notification init failed', e);
     }
   }
 
-  static Future<void> initializeAuthService() async {
-    try {
-      final authService = VTOPAuthService.instance;
-      await authService.initialize();
-    } catch (e) {
-      Logger.e('AppStartup', 'Auth service init failed', e);
-    }
-  }
-
-  static void _initializeFirebaseLazy() {
-    Future.delayed(const Duration(milliseconds: 500), () async {
+  static void _initializeFirebaseServices() {
+    Future.delayed(const Duration(milliseconds: 300), () async {
       try {
         await FirebaseInitializer.initialize();
       } catch (e) {
-        Logger.e('AppStartup', 'Firebase init failed', e);
+        Logger.e('AppStartup', 'Firebase services init failed', e);
       }
     });
   }
@@ -115,19 +159,9 @@ class AppStartup {
     }
   }
 
-  static Future<void> _initializeApiServices() async {
-    try {
-      // Cab Share and Faculty Rating now use Supabase directly
-      Logger.d('AppStartup', 'VITConnect services use Supabase integration');
-    } catch (e) {
-      Logger.e('AppStartup', 'API services init failed', e);
-    }
-  }
-
   static Future<void> _initializeCalendarServices() async {
     try {
       await CalendarHomeService.instance.init();
-      Logger.d('AppStartup', 'Calendar home service initialized');
     } catch (e) {
       Logger.w('AppStartup', 'Calendar home service init failed: $e');
     }

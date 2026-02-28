@@ -10,13 +10,11 @@ import 'daos/lost_found_dao.dart';
 import 'daos/cab_ride_dao.dart';
 import 'daos/custom_theme_dao.dart';
 import 'daos/events_dao.dart';
+import 'daos/marks_meta_dao.dart';
 
-/// VIT Verse Database - Separate from VTOP student data
-/// Stores calendar cache, personal events, lost & found cache, cab share cache, and app preferences
-/// Cleared on user logout
 class VitVerseDatabase {
   static const String _databaseName = 'vit_verse.db';
-  static const int _databaseVersion = 5;
+  static const int _databaseVersion = 6;
 
   static VitVerseDatabase? _instance;
   static Database? _database;
@@ -25,6 +23,7 @@ class VitVerseDatabase {
   static CabRideDao? _cabRideDao;
   static CustomThemeDao? _customThemeDao;
   static EventsDao? _eventsDao;
+  static MarksMetaDao? _marksMetaDao;
 
   VitVerseDatabase._();
 
@@ -73,7 +72,13 @@ class VitVerseDatabase {
     return _eventsDao!;
   }
 
-  /// Initialize the database
+  MarksMetaDao get marksMetaDao {
+    if (_marksMetaDao == null) {
+      throw StateError('Database not initialized. Call initialize() first.');
+    }
+    return _marksMetaDao!;
+  }
+
   Future<void> initialize() async {
     try {
       _database = await _initDatabase();
@@ -82,7 +87,8 @@ class VitVerseDatabase {
       _cabRideDao = CabRideDao(_database!);
       _customThemeDao = CustomThemeDao(_database!);
       _eventsDao = EventsDao(_database!);
-      Logger.i('VitVerseDB', 'VIT Verse database initialized successfully');
+      _marksMetaDao = MarksMetaDao(_database!);
+      Logger.i('VitVerseDB', 'Database initialized');
     } catch (e) {
       Logger.e('VitVerseDB', 'Database initialization failed', e);
       rethrow;
@@ -169,16 +175,14 @@ class VitVerseDatabase {
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    Logger.i(
-      'VitVerseDB',
-      'Upgrading database from $oldVersion to $newVersion',
-    );
-
-    // Future database migrations will be handled here
-    // For now, recreate all tables
-    if (oldVersion < newVersion) {
-      await _dropAllTables(db);
-      await _createAllTables(db);
+    Logger.i('VitVerseDB', 'Upgrading from v$oldVersion to v$newVersion');
+    if (oldVersion < 6) {
+      await db.execute(
+        'CREATE TABLE IF NOT EXISTS marks_read (signature INTEGER PRIMARY KEY, updated_at INTEGER NOT NULL)',
+      );
+      await db.execute(
+        'CREATE TABLE IF NOT EXISTS marks_avg (identity_key INTEGER PRIMARY KEY, average REAL NOT NULL, updated_at INTEGER NOT NULL)',
+      );
     }
   }
 
@@ -307,7 +311,12 @@ class VitVerseDatabase {
         cached_at INTEGER NOT NULL
       )
     ''');
-
+    await db.execute(
+      'CREATE TABLE IF NOT EXISTS marks_read (signature INTEGER PRIMARY KEY, updated_at INTEGER NOT NULL)',
+    );
+    await db.execute(
+      'CREATE TABLE IF NOT EXISTS marks_avg (identity_key INTEGER PRIMARY KEY, average REAL NOT NULL, updated_at INTEGER NOT NULL)',
+    );
     await _createIndexes(db);
   }
 
@@ -363,6 +372,7 @@ class VitVerseDatabase {
     // App preferences indexes (key is already primary key)
   }
 
+  // ignore: unused_element
   Future<void> _dropAllTables(Database db) async {
     await db.execute('DROP TABLE IF EXISTS calendar_cache');
     await db.execute('DROP TABLE IF EXISTS personal_events');
@@ -371,6 +381,8 @@ class VitVerseDatabase {
     await db.execute('DROP TABLE IF EXISTS lost_found_cache');
     await db.execute('DROP TABLE IF EXISTS cab_ride_cache');
     await db.execute('DROP TABLE IF EXISTS custom_themes');
+    await db.execute('DROP TABLE IF EXISTS marks_read');
+    await db.execute('DROP TABLE IF EXISTS marks_avg');
   }
 
   /// Check if database exists
@@ -487,14 +499,12 @@ class VitVerseDatabase {
     }
   }
 
-  /// Clear only student-specific data (currently not used in logout)
-  /// VitVerse database contains primarily app-level data
-  /// This method is provided for potential future use
   Future<void> clearStudentData() async {
     try {
-      // Currently no tables need clearing on logout
-      // personal_events and selected_calendars are now app-level data
-      Logger.i('VitVerseDB', 'No student-specific data to clear');
+      final db = await database;
+      await db.delete('marks_read');
+      await db.delete('marks_avg');
+      Logger.i('VitVerseDB', 'Student marks meta cleared');
     } catch (e) {
       Logger.e('VitVerseDB', 'Error in clearStudentData', e);
     }

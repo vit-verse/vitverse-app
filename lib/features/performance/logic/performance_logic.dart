@@ -1,8 +1,8 @@
 import '../../../core/database/daos/mark_dao.dart';
+import '../../../core/database_vitverse/database.dart';
 import '../../../core/utils/logger.dart';
 import '../models/performance_models.dart';
 
-/// Business logic for Performance feature
 class PerformanceLogic {
   static const String _tag = 'Performance';
 
@@ -71,19 +71,60 @@ class PerformanceLogic {
     }
   }
 
-  /// Update average for a specific mark (Locally)
   Future<bool> updateMarkAverage(int markId, double average) async {
     try {
-      Logger.i(_tag, 'Updating average for mark $markId to $average');
       final result = await _markDao.updateAverage(markId, average);
       if (result > 0) {
-        Logger.success(_tag, 'Average updated successfully');
+        final meta = await _markDao.getMarkWithCourse(markId);
+        if (meta != null) {
+          final courseCode = meta['course_code'] as String? ?? '';
+          final title = meta['title'] as String? ?? '';
+          final identityKey = '${courseCode}_$title'.hashCode;
+          await VitVerseDatabase.instance.marksMetaDao.saveAverage(
+            identityKey,
+            average,
+          );
+        }
         return true;
       }
       return false;
     } catch (e) {
       Logger.e(_tag, 'Error updating average: $e');
       return false;
+    }
+  }
+
+  Future<void> markAsRead(int markId) async {
+    try {
+      await _markDao.markAsRead(markId);
+      final meta = await _markDao.getMarkWithCourse(markId);
+      if (meta != null) {
+        final sig = meta['signature'] as int?;
+        if (sig != null) {
+          await VitVerseDatabase.instance.marksMetaDao.saveReadSignature(sig);
+        }
+      }
+    } catch (e) {
+      Logger.e(_tag, 'Error marking as read: $e');
+    }
+  }
+
+  Future<void> markAllRead() async {
+    try {
+      final marksWithCourses = await _markDao.getMarksWithCourses();
+      final signatures = <int>[];
+      for (final m in marksWithCourses) {
+        final sig = m['signature'] as int?;
+        if (sig != null) signatures.add(sig);
+      }
+      await _markDao.markAllAsRead();
+      if (signatures.isNotEmpty) {
+        await VitVerseDatabase.instance.marksMetaDao.saveReadSignatures(
+          signatures,
+        );
+      }
+    } catch (e) {
+      Logger.e(_tag, 'Error marking all as read: $e');
     }
   }
 }

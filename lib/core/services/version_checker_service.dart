@@ -1,35 +1,58 @@
 import 'package:http/http.dart' as http;
-import 'package:package_info_plus/package_info_plus.dart';
-import '../../../core/utils/logger.dart';
+import '../config/app_version.dart';
+import '../utils/logger.dart';
 
-/// Service to check for app updates from GitHub repository
 class VersionCheckerService {
   static const String _tag = 'VersionChecker';
 
-  // GitHub raw URL for pubspec.yaml
   static const String _pubspecUrl =
       'https://raw.githubusercontent.com/vit-verse/vitverse-app/main/pubspec.yaml';
 
-  /// Check if a new version is available
-  /// Returns a map with status and version info
+  static String get _currentVersion => AppVersion.version;
+
+  static Future<KillSwitchResult> checkKillSwitch() async {
+    try {
+      Logger.d(_tag, 'Kill switch check — current: $_currentVersion');
+
+      final pubspecContent = await _fetchPubspec();
+      if (pubspecContent == null) {
+        Logger.w(
+          _tag,
+          'Kill switch: could not fetch pubspec — allowing through',
+        );
+        return KillSwitchResult.passThrough(_currentVersion);
+      }
+
+      final minVersion = _extractField(pubspecContent, 'min_version');
+      if (minVersion == null) {
+        Logger.d(_tag, 'Kill switch: min_version not set — allowing through');
+        return KillSwitchResult.passThrough(_currentVersion);
+      }
+
+      Logger.d(_tag, 'Kill switch: min=$minVersion current=$_currentVersion');
+
+      final isBlocked = _compareVersions(_currentVersion, minVersion) < 0;
+      if (isBlocked) {
+        Logger.w(_tag, 'Kill switch TRIGGERED: $_currentVersion < $minVersion');
+        return KillSwitchResult.blocked(_currentVersion, minVersion);
+      }
+
+      return KillSwitchResult.passThrough(_currentVersion);
+    } catch (e) {
+      Logger.e(_tag, 'Kill switch check failed — allowing through', e);
+      return KillSwitchResult.passThrough(_currentVersion);
+    }
+  }
+
   static Future<VersionCheckResult> checkForUpdate() async {
     try {
       Logger.d(_tag, 'Checking for updates from GitHub...');
 
-      // Get current app version
-      final packageInfo = await PackageInfo.fromPlatform();
-      final currentVersion = packageInfo.version;
-      final currentBuildNumber = packageInfo.buildNumber;
+      final currentVersion = _currentVersion;
+      Logger.d(_tag, 'Current version: ${AppVersion.fullVersion}');
 
-      Logger.d(_tag, 'Current version: $currentVersion+$currentBuildNumber');
-
-      // Fetch latest pubspec.yaml from GitHub
-      final response = await http
-          .get(Uri.parse(_pubspecUrl))
-          .timeout(const Duration(seconds: 10));
-
-      if (response.statusCode != 200) {
-        Logger.w(_tag, 'Failed to fetch pubspec.yaml: ${response.statusCode}');
+      final pubspecContent = await _fetchPubspec();
+      if (pubspecContent == null) {
         return VersionCheckResult(
           status: UpdateStatus.error,
           currentVersion: currentVersion,
@@ -37,10 +60,7 @@ class VersionCheckerService {
         );
       }
 
-      // Parse the pubspec.yaml content
-      final pubspecContent = response.body;
-      final latestVersion = _extractVersionFromPubspec(pubspecContent);
-
+      final latestVersion = _extractField(pubspecContent, 'version');
       if (latestVersion == null) {
         Logger.w(_tag, 'Could not extract version from pubspec.yaml');
         return VersionCheckResult(
@@ -50,90 +70,84 @@ class VersionCheckerService {
         );
       }
 
-      Logger.d(_tag, 'Latest version: $latestVersion');
+      final latestClean = latestVersion.split('+').first;
+      Logger.d(_tag, 'Latest version: $latestClean');
 
-      // Compare versions
-      final comparison = _compareVersions(currentVersion, latestVersion);
-
+      final comparison = _compareVersions(currentVersion, latestClean);
       if (comparison < 0) {
-        // Current version is older
-        Logger.i(_tag, 'Update available: $currentVersion -> $latestVersion');
+        Logger.i(_tag, 'Update available: $currentVersion -> $latestClean');
         return VersionCheckResult(
           status: UpdateStatus.updateAvailable,
           currentVersion: currentVersion,
-          latestVersion: latestVersion,
+          latestVersion: latestClean,
           message: 'Update available',
         );
-      } else {
-        // Already up to date or ahead
-        Logger.i(_tag, 'App is up to date');
-        return VersionCheckResult(
-          status: UpdateStatus.upToDate,
-          currentVersion: currentVersion,
-          latestVersion: latestVersion,
-          message: 'Already updated',
-        );
       }
+
+      Logger.i(_tag, 'App is up to date');
+      return VersionCheckResult(
+        status: UpdateStatus.upToDate,
+        currentVersion: currentVersion,
+        latestVersion: latestClean,
+        message: 'Already updated',
+      );
     } catch (e, stack) {
       Logger.e(_tag, 'Error checking for updates', e, stack);
       return VersionCheckResult(
         status: UpdateStatus.error,
-        currentVersion: 'Unknown',
+        currentVersion: _currentVersion,
         message: 'Unable to check for updates',
       );
     }
   }
 
-  /// Extract version string from pubspec.yaml content
-  static String? _extractVersionFromPubspec(String content) {
+  static Future<String?> _fetchPubspec() async {
     try {
-      // Look for "version: x.x.x+x" pattern
-      final versionRegex = RegExp(r'version:\s*(\d+\.\d+\.\d+(?:\+\d+)?)');
-      final match = versionRegex.firstMatch(content);
+      final response = await http
+          .get(Uri.parse(_pubspecUrl), headers: {'Cache-Control': 'no-cache'})
+          .timeout(const Duration(seconds: 8));
 
-      if (match != null && match.groupCount >= 1) {
-        final fullVersion = match.group(1)!;
-        // Return only the version part without build number
-        return fullVersion.split('+').first;
-      }
+      if (response.statusCode == 200) return response.body;
 
+      Logger.w(_tag, 'Pubspec fetch status: ${response.statusCode}');
       return null;
     } catch (e) {
-      Logger.e(_tag, 'Error extracting version from pubspec', e);
+      Logger.w(_tag, 'Pubspec fetch failed: $e');
       return null;
     }
   }
 
-  /// Compare two semantic version strings (e.g., "1.1.0" vs "1.2.0")
-  /// Returns:
-  ///   -1 if v1 < v2
-  ///    0 if v1 == v2
-  ///    1 if v1 > v2
+  static String? _extractField(String content, String field) {
+    try {
+      final regex = RegExp('^$field:\\s*([^\\s#]+)', multiLine: true);
+      final match = regex.firstMatch(content);
+      return match?.group(1);
+    } catch (e) {
+      Logger.e(_tag, 'Error extracting field "$field"', e);
+      return null;
+    }
+  }
+
   static int _compareVersions(String v1, String v2) {
     try {
-      final v1Parts = v1.split('.').map(int.parse).toList();
-      final v2Parts = v2.split('.').map(int.parse).toList();
-
+      final p1 = v1.split('+').first.split('.').map(int.parse).toList();
+      final p2 = v2.split('+').first.split('.').map(int.parse).toList();
       for (int i = 0; i < 3; i++) {
-        final part1 = i < v1Parts.length ? v1Parts[i] : 0;
-        final part2 = i < v2Parts.length ? v2Parts[i] : 0;
-
-        if (part1 < part2) return -1;
-        if (part1 > part2) return 1;
+        final a = i < p1.length ? p1[i] : 0;
+        final b = i < p2.length ? p2[i] : 0;
+        if (a < b) return -1;
+        if (a > b) return 1;
       }
-
-      return 0; // Equal
+      return 0;
     } catch (e) {
       Logger.e(_tag, 'Error comparing versions', e);
-      return 0; // Assume equal on error
+      return 0;
     }
   }
 }
 
-/// Update status enum
 enum UpdateStatus { upToDate, updateAvailable, error }
 
-/// Result of version check
 class VersionCheckResult {
   final UpdateStatus status;
   final String currentVersion;
@@ -150,4 +164,26 @@ class VersionCheckResult {
   bool get isUpdateAvailable => status == UpdateStatus.updateAvailable;
   bool get isUpToDate => status == UpdateStatus.upToDate;
   bool get hasError => status == UpdateStatus.error;
+}
+
+class KillSwitchResult {
+  final bool isBlocked;
+  final String currentVersion;
+  final String? minVersion;
+
+  const KillSwitchResult._({
+    required this.isBlocked,
+    required this.currentVersion,
+    this.minVersion,
+  });
+
+  factory KillSwitchResult.blocked(String current, String min) =>
+      KillSwitchResult._(
+        isBlocked: true,
+        currentVersion: current,
+        minVersion: min,
+      );
+
+  factory KillSwitchResult.passThrough(String current) =>
+      KillSwitchResult._(isBlocked: false, currentVersion: current);
 }
